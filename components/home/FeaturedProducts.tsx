@@ -10,7 +10,10 @@ export function FeaturedProducts() {
 
   useEffect(() => {
     fetch('/api/products')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(data => {
         if (data.success) {
           // Show top 4 latest products
@@ -18,7 +21,10 @@ export function FeaturedProducts() {
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Error fetching products:", err);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return (

@@ -10,14 +10,20 @@ export function NewDrop() {
 
   useEffect(() => {
     fetch('/api/products/latest')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(data => {
         if (data.success) {
           setProducts(data.products);
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Error fetching latest products:", err);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return (

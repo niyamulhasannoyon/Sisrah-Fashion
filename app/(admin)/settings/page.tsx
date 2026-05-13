@@ -17,14 +17,20 @@ export default function AdminSettings() {
 
   useEffect(() => {
     fetch('/api/admin/settings')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(data => {
         if (data.success && data.settings) {
           setSettings(data.settings);
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Error fetching settings:", err);
+        setLoading(false);
+      });
   }, []);
 
   const uploadToCloudinary = async (file: File) => {

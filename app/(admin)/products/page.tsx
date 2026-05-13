@@ -20,6 +20,7 @@ export default function AdminProductsList() {
   const fetchProducts = async () => {
     try {
       const res = await fetch('/api/products');
+      if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
       if (data.success) setProducts(data.products);
     } catch (error) {

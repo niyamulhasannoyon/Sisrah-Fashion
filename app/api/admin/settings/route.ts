@@ -3,12 +3,17 @@ import dbConnect from '@/lib/dbConnect';
 import Settings from '@/models/Settings';
 
 export async function GET() {
-  await dbConnect();
-  let settings = await Settings.findOne();
-  if (!settings) {
-    settings = await Settings.create({});
+  try {
+    await dbConnect();
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({});
+    }
+    return NextResponse.json({ success: true, settings });
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    return NextResponse.json({ success: false, error: 'Failed to fetch settings' }, { status: 500 });
   }
-  return NextResponse.json({ success: true, settings });
 }
 
 export async function POST(req: Request) {
