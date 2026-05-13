@@ -9,11 +9,18 @@ export default function CustomerManagement() {
   
   useEffect(() => {
     fetch('/api/admin/customers')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(data => {
         if (data.success) {
           setCustomers(data.customers);
         }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching customers:", err);
         setLoading(false);
       });
   }, []);
