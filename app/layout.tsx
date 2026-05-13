@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`}>
+    <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans">
         {children}
       </body>
