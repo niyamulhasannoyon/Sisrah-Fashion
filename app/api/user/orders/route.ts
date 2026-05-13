@@ -5,6 +5,8 @@ import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import User from '@/models/User';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     await dbConnect();
