@@ -19,6 +19,7 @@ export interface IOrder extends Document {
   paymentMethod: string;
   paymentStatus: string;
   orderStatus: string;
+  orderId: number;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -43,6 +44,7 @@ const OrderSchema: Schema = new Schema(
     paymentMethod: { type: String, default: 'Cash on Delivery' },
     paymentStatus: { type: String, default: 'Pending' },
     orderStatus: { type: String, default: 'Processing' },
+    orderId: { type: Number, unique: true },
   },
   { timestamps: true }
 );

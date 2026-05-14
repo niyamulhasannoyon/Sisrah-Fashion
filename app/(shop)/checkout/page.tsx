@@ -68,7 +68,7 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (data.success) {
         clearCart();
-        router.push(`/order-success?id=${data.orderId}`);
+        router.push(`/order-success?id=${data.orderId}&phone=${data.phone}`);
       }
     } catch (error) {
       alert('Order failed!');

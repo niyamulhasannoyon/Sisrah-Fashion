@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const SettingsSchema = new Schema({
   logo: String,
+  favicon: String,
   whatsappNumber: String,
   heroImage: String,
   ethosImage: String,

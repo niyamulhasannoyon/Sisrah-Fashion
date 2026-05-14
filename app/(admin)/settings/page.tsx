@@ -6,6 +6,7 @@ import { Save, Loader2, UploadCloud, X, Users, Image as ImageIcon } from 'lucide
 export default function AdminSettings() {
   const [settings, setSettings] = useState<any>({
     logo: '',
+    favicon: '',
     whatsappNumber: '',
     heroImage: '',
     ethosImage: '',
@@ -14,6 +15,7 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [communityUrl, setCommunityUrl] = useState('');
 
   useEffect(() => {
     fetch('/api/admin/settings')
@@ -56,6 +58,15 @@ export default function AdminSettings() {
     } finally { 
       setUploadingImg(false); 
     }
+  };
+
+  const handleAddCommunityByUrl = () => {
+    if (!communityUrl) return;
+    setSettings({
+      ...settings,
+      communityImages: [...(settings.communityImages || []), { url: communityUrl, public_id: 'external' }]
+    });
+    setCommunityUrl('');
   };
 
   const removeCommunityImage = (indexToRemove: number) => {
@@ -136,11 +147,29 @@ export default function AdminSettings() {
                   }} />
                 </label>
               </div>
-              {settings.logo && (
-                <div className="mt-2 w-20 h-20 border rounded-lg p-1 bg-slate-50">
-                   <img src={settings.logo} className="w-full h-full object-contain" alt="logo" />
-                </div>
-              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Site Icon (Favicon)</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={settings.favicon}
+                  onChange={e => setSettings({...settings, favicon: e.target.value})}
+                  className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  placeholder="Favicon URL..."
+                />
+                <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
+                  <UploadCloud size={18} />
+                  <span className="text-[10px] font-black uppercase">Upload</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                    if (!e.target.files?.[0]) return;
+                    setSaving(true);
+                    const data = await uploadToCloudinary(e.target.files[0]);
+                    setSettings({...settings, favicon: data.secure_url});
+                    setSaving(false);
+                  }} />
+                </label>
+              </div>
             </div>
           </div>
 
@@ -197,13 +226,30 @@ export default function AdminSettings() {
         </div>
 
         {/* From The Community Images Upload */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
-            <Users size={18} className="text-slate-400" /> "From The Community" Gallery
-          </h3>
-          <p className="text-xs text-slate-500">Upload customer photos or Instagram lifestyle shots to show on the homepage.</p>
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+          <div className="flex justify-between items-center border-b pb-4">
+            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <Users size={18} className="text-slate-400" /> "From The Community" Gallery
+            </h3>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Paste Image URL..." 
+                value={communityUrl}
+                onChange={e => setCommunityUrl(e.target.value)}
+                className="p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black text-xs w-64"
+              />
+              <button 
+                type="button" 
+                onClick={handleAddCommunityByUrl}
+                className="bg-slate-800 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-black transition-all"
+              >
+                Add URL
+              </button>
+            </div>
+          </div>
           
-          <div className="flex flex-wrap gap-4 mt-6">
+          <div className="flex flex-wrap gap-4">
             {settings.communityImages?.map((img: any, idx: number) => (
               <div key={idx} className="relative w-32 h-40 border border-slate-100 rounded-xl overflow-hidden group shadow-sm">
                 <img src={img.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="community" />
@@ -214,7 +260,6 @@ export default function AdminSettings() {
                 >
                   <X size={14} />
                 </button>
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </div>
             ))}
             
@@ -223,14 +268,31 @@ export default function AdminSettings() {
                 <Loader2 size={24} className="animate-spin text-slate-400" />
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-slate-200 transition-colors">
-                    <UploadCloud size={20} className="text-slate-500" />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-black">Add Photo</span>
+                  <UploadCloud size={20} className="text-slate-500 mb-2" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-black">Upload</span>
                 </div>
               )}
               <input type="file" className="hidden" accept="image/*" onChange={handleCommunityImageUpload} />
             </label>
+          </div>
+        </div>
+
+        {/* Preview Section */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">Visual Previews</h3>
+          <div className="flex gap-12">
+            <div>
+              <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Logo Preview</p>
+              <div className="w-32 h-20 bg-slate-50 border rounded-xl flex items-center justify-center p-2">
+                {settings.logo ? <img src={settings.logo} className="max-w-full max-h-full object-contain" /> : 'No Logo'}
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Favicon Preview</p>
+              <div className="w-16 h-16 bg-slate-50 border rounded-xl flex items-center justify-center p-2">
+                {settings.favicon ? <img src={settings.favicon} className="w-8 h-8 object-contain" /> : 'No Icon'}
+              </div>
+            </div>
           </div>
         </div>
 

@@ -84,7 +84,7 @@ export default function AdminOrdersPage() {
                   orders.map((order) => (
                     <tr key={order._id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="p-4 text-sm font-medium text-[#A31F24]">
-                        #{order._id.slice(-6).toUpperCase()}
+                        #{order.orderId || order._id.slice(-6).toUpperCase()}
                       </td>
                       <td className="p-4 text-sm text-gray-500">
                         {new Date(order.createdAt).toLocaleDateString()}
@@ -136,7 +136,7 @@ export default function AdminOrdersPage() {
             <div className="p-6 border-b flex justify-between items-center bg-gray-50">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  Order Details <span className="text-gray-400 font-normal">#{selectedOrder._id.slice(-6).toUpperCase()}</span>
+                  Order Details <span className="text-gray-400 font-normal">#{selectedOrder.orderId || selectedOrder._id.slice(-6).toUpperCase()}</span>
                 </h2>
                 <p className="text-xs text-gray-500 mt-1">Placed on {new Date(selectedOrder.createdAt).toLocaleString()}</p>
               </div>

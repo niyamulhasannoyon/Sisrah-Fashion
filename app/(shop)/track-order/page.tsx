@@ -1,14 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Loader2, Search, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 
-export default function TrackOrderPage() {
+function TrackOrderContent() {
+  const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<any>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const qId = searchParams.get('id');
+    const qPhone = searchParams.get('phone');
+    if (qId && qPhone) {
+      setOrderId(qId);
+      setPhone(qPhone);
+      autoTrack(qId, qPhone);
+    }
+  }, [searchParams]);
+
+  const autoTrack = async (id: string, ph: string) => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/orders/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: id, phone: ph }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOrder(data.order);
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,10 +86,10 @@ export default function TrackOrderPage() {
         <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 mb-10">
           <form onSubmit={handleTrack} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Order ID (Last 6 digits)</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Order ID (e.g. 100001)</label>
               <input 
                 type="text" 
-                placeholder="e.g. 9305A7" 
+                placeholder="Order ID" 
                 required 
                 value={orderId}
                 onChange={e => setOrderId(e.target.value.toUpperCase())}
@@ -99,7 +133,7 @@ export default function TrackOrderPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Order ID</p>
-                  <p className="text-xl font-black text-gray-900">#{order._id.slice(-6).toUpperCase()}</p>
+                  <p className="text-xl font-black text-gray-900">#{order.orderId || order._id.slice(-6).toUpperCase()}</p>
                 </div>
               </div>
 
@@ -117,6 +151,7 @@ export default function TrackOrderPage() {
                       idx <= currentStepIndex ? 'bg-black border-white text-white shadow-xl scale-110' : 'bg-white border-gray-100 text-gray-300'
                     }`}>
                       {step === 'Processing' && <Clock size={20} />}
+                      {step === 'Send to Courier' && <Package size={20} />}
                       {step === 'Shipped' && <Truck size={20} />}
                       {step === 'Delivered' && <CheckCircle size={20} />}
                     </div>
@@ -154,5 +189,13 @@ export default function TrackOrderPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TrackOrderPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Tracking...</div>}>
+      <TrackOrderContent />
+    </Suspense>
   );
 }
