@@ -225,29 +225,54 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        {/* From The Community Images Upload */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
           <div className="flex justify-between items-center border-b pb-4">
             <h3 className="font-bold text-slate-800 flex items-center gap-2">
               <Users size={18} className="text-slate-400" /> "From The Community" Gallery
             </h3>
-            <div className="flex gap-2">
-              <input 
-                type="text" 
-                placeholder="Paste Image URL..." 
-                value={communityUrl}
-                onChange={e => setCommunityUrl(e.target.value)}
-                className="p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black text-xs w-64"
-              />
-              <button 
-                type="button" 
-                onClick={handleAddCommunityByUrl}
-                className="bg-slate-800 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-black transition-all"
-              >
-                Add URL
-              </button>
-            </div>
           </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[0, 1, 2, 3].map((idx) => (
+              <div key={idx} className="flex flex-col gap-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Gallery Image URL {idx + 1}</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="https://..." 
+                    value={settings.communityImages?.[idx]?.url || ''}
+                    onChange={e => {
+                      const newImages = [...(settings.communityImages || [])];
+                      if (newImages[idx]) {
+                        newImages[idx].url = e.target.value;
+                      } else {
+                        newImages[idx] = { url: e.target.value, public_id: 'external' };
+                      }
+                      setSettings({...settings, communityImages: newImages});
+                    }}
+                    className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black text-xs"
+                  />
+                  {settings.communityImages?.[idx] && (
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const newImages = [...settings.communityImages];
+                        newImages.splice(idx, 1);
+                        setSettings({...settings, communityImages: newImages});
+                      }}
+                      className="p-3 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
+            <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Upload via Computer</label>
+            <div className="flex flex-wrap gap-4">
           
           <div className="flex flex-wrap gap-4">
             {settings.communityImages?.map((img: any, idx: number) => (
