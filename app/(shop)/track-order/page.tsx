@@ -70,7 +70,7 @@ function TrackOrderContent() {
   };
 
   const steps = ['Processing', 'Send to Courier', 'Shipped', 'Delivered'];
-  const currentStepIndex = steps.indexOf(order?.orderStatus || '');
+  const currentStepIndex = order ? steps.indexOf(order.orderStatus) : -1;
 
   return (
     <div className="min-h-screen bg-[#FBFBFB] py-20 px-4">
@@ -142,7 +142,7 @@ function TrackOrderContent() {
                 <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 z-0" />
                 <div 
                   className="absolute top-1/2 left-0 h-1 bg-black -translate-y-1/2 z-0 transition-all duration-1000" 
-                  style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
+                  style={{ width: `${currentStepIndex >= 0 ? (currentStepIndex / (steps.length - 1)) * 100 : 0}%` }}
                 />
                 
                 {steps.map((step, idx) => (

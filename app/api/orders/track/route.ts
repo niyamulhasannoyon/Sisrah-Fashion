@@ -6,15 +6,20 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const { orderId, phone } = await req.json();
+    console.log('Tracking request:', { orderId, phone });
 
     if (!orderId || !phone) {
       return NextResponse.json({ success: false, message: "Order ID and Phone are required" }, { status: 400 });
     }
 
+    const trimmedPhone = phone.trim();
+
     const order = await Order.findOne({
       orderId: Number(orderId),
-      'shippingInfo.phone': phone
+      'shippingInfo.phone': trimmedPhone
     });
+
+    console.log('Order found:', order ? 'Yes' : 'No');
 
     if (!order) {
       return NextResponse.json({ success: false, message: "Order not found. Please check your details." }, { status: 404 });

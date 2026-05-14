@@ -16,6 +16,8 @@ export async function POST(req: Request) {
       orderId: nextOrderId
     });
 
+    console.log('New Order Created:', JSON.stringify(newOrder, null, 2));
+
     return NextResponse.json({ 
       success: true, 
       orderId: nextOrderId, 
