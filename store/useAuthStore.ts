@@ -13,6 +13,7 @@ interface AuthState {
   isAuthenticated: boolean;
   login: (userData: User) => void;
   logout: () => void;
+  checkAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -22,6 +23,19 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       login: (userData) => set({ user: userData, isAuthenticated: true }),
       logout: () => set({ user: null, isAuthenticated: false }),
+      checkAuth: async () => {
+        try {
+          const res = await fetch('/api/auth/me');
+          const data = await res.json();
+          if (data.success) {
+            set({ user: data.user, isAuthenticated: true });
+          } else {
+            set({ user: null, isAuthenticated: false });
+          }
+        } catch (error) {
+          set({ user: null, isAuthenticated: false });
+        }
+      },
     }),
     { name: 'loomra-auth' }
   )

@@ -1,12 +1,18 @@
+"use client";
+
 import Link from 'next/link';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export function LifestyleBanner() {
+  const { settings } = useSettingsStore();
+  const displayImage = settings?.ethosImage || "/images/brand-story.jpg";
+
   return (
     <section className="w-full bg-loomra-surface py-24">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 sm:px-8 md:grid-cols-2 items-center">
         <div className="overflow-hidden rounded-none">
           <img
-            src="/images/brand-story.jpg"
+            src={displayImage}
             alt="Artisans at work"
             className="w-full object-cover transition-transform duration-700 hover:scale-105"
           />

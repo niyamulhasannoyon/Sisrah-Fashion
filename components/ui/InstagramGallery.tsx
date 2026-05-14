@@ -1,12 +1,21 @@
+"use client";
+
 import { Camera } from 'lucide-react';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function InstagramGallery() {
-  const posts = [
+  const { settings } = useSettingsStore();
+
+  const defaultPosts = [
     { id: 1, image: '/ig-1.jpg', handle: '@rahim_styles' },
     { id: 2, image: '/ig-2.jpg', handle: '@nabilacreates' },
     { id: 3, image: '/ig-3.jpg', handle: '@dhaka.diaries' },
     { id: 4, image: '/ig-4.jpg', handle: '@urban_bengali' },
   ];
+
+  const galleryImages = settings?.communityImages?.length 
+    ? settings.communityImages.map((img, idx) => ({ id: idx, image: img.url, handle: '@LoomraApparel' }))
+    : defaultPosts;
 
   return (
     <section className="py-64px">
@@ -18,7 +27,7 @@ export default function InstagramGallery() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 w-full">
-        {posts.map((post) => (
+        {galleryImages.map((post) => (
           <div key={post.id} className="relative group aspect-square overflow-hidden bg-loomra-surface">
             <img src={post.image} alt={post.handle} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
             

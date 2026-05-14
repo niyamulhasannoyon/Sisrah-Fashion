@@ -1,20 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { Image as ImageIcon } from 'lucide-react';
 
 export function SocialGallery() {
-  const [images, setImages] = useState<any[]>([]);
-
-  useEffect(() => {
-    fetch('/api/admin/settings')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.settings?.communityImages) {
-          setImages(data.settings.communityImages);
-        }
-      });
-  }, []);
+  const { settings } = useSettingsStore();
+  const images = settings?.communityImages || [];
 
   if (images.length === 0) return null;
 

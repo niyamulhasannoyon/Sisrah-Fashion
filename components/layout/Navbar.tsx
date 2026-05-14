@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { ShoppingBag, User } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { useEffect } from 'react';
 
 const menu = [
   { label: 'Men', href: '/category/men' },
@@ -15,9 +17,20 @@ const menu = [
 ];
 
 export function Navbar() {
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const { toggleCart, cart } = useCartStore();
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, checkAuth } = useAuthStore();
+
+  const { settings, fetchSettings } = useSettingsStore();
+
+  useEffect(() => {
+    setMounted(true);
+    checkAuth();
+    if (!settings) {
+      fetchSettings();
+    }
+  }, [settings, fetchSettings, checkAuth]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -27,8 +40,12 @@ export function Navbar() {
   return (
     <header className="border-b border-loomra-surface bg-loomra-white/95 backdrop-blur-lg">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-8 lg:px-12">
-        <Link href="/" className="text-xl font-semibold tracking-tight text-loomra-black">
-          Loomra
+        <Link href="/" className="flex items-center">
+          {settings?.logo ? (
+            <img src={settings.logo} alt="Loomra" className="h-8 w-auto object-contain" />
+          ) : (
+            <span className="text-xl font-semibold tracking-tight text-loomra-black">Loomra</span>
+          )}
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -49,20 +66,22 @@ export function Navbar() {
             )}
           </button>
 
-          {isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <Link href="/profile" className="flex items-center justify-center w-10 h-10 border border-loomra-surface rounded-full hover:border-loomra-red transition">
-                <User size={20} />
-              </Link>
-              <button onClick={handleLogout} className="px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Button href="/login" variant="secondary">Login</Button>
-              <Button href="/login">Sign Up</Button>
-            </div>
+          {mounted && (
+            isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <Link href="/profile" className="flex items-center justify-center w-10 h-10 border border-loomra-surface rounded-full hover:border-loomra-red transition">
+                  <User size={20} />
+                </Link>
+                <button onClick={handleLogout} className="px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button href="/login" variant="secondary">Login</Button>
+                <Button href="/login">Sign Up</Button>
+              </div>
+            )
           )}
 
           <button
