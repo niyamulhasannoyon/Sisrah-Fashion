@@ -141,7 +141,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-3 cursor-pointer group">
                <div className="text-right hidden sm:block">
                  <p className="text-sm font-bold text-slate-700 leading-none">{user?.name || 'Admin User'}</p>
-                 <p className="text-[11px] font-medium text-slate-500 mt-1 uppercase tracking-wider">{user?.role || 'Administrator'}</p>
+                 <p className="text-[11px] font-medium text-slate-500 mt-1 uppercase tracking-wider">
+                   {allowedEmails.includes(user?.email || '') ? 'Administrator' : (user?.role || 'User')}
+                 </p>
                </div>
                <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-600 group-hover:ring-2 ring-slate-200 transition-all">
                  {user?.name?.charAt(0) || 'A'}
