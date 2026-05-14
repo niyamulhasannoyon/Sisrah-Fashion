@@ -115,14 +115,32 @@ export default function AdminSettings() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Brand Logo URL</label>
-              <input 
-                type="text" 
-                value={settings.logo}
-                onChange={e => setSettings({...settings, logo: e.target.value})}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
-                placeholder="https://example.com/logo.png"
-              />
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Brand Logo</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={settings.logo}
+                  onChange={e => setSettings({...settings, logo: e.target.value})}
+                  className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  placeholder="Logo URL..."
+                />
+                <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
+                  <UploadCloud size={18} />
+                  <span className="text-[10px] font-black uppercase">Upload</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                    if (!e.target.files?.[0]) return;
+                    setSaving(true);
+                    const data = await uploadToCloudinary(e.target.files[0]);
+                    setSettings({...settings, logo: data.secure_url});
+                    setSaving(false);
+                  }} />
+                </label>
+              </div>
+              {settings.logo && (
+                <div className="mt-2 w-20 h-20 border rounded-lg p-1 bg-slate-50">
+                   <img src={settings.logo} className="w-full h-full object-contain" alt="logo" />
+                </div>
+              )}
             </div>
           </div>
 
@@ -132,22 +150,48 @@ export default function AdminSettings() {
               Homepage Visuals
             </h3>
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Image URL</label>
-              <input 
-                type="text" 
-                value={settings.heroImage}
-                onChange={e => setSettings({...settings, heroImage: e.target.value})}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
-              />
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Banner Image</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={settings.heroImage}
+                  onChange={e => setSettings({...settings, heroImage: e.target.value})}
+                  className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                />
+                <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
+                  <UploadCloud size={18} />
+                  <span className="text-[10px] font-black uppercase">Upload</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                    if (!e.target.files?.[0]) return;
+                    setSaving(true);
+                    const data = await uploadToCloudinary(e.target.files[0]);
+                    setSettings({...settings, heroImage: data.secure_url});
+                    setSaving(false);
+                  }} />
+                </label>
+              </div>
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Our Ethos Image URL</label>
-              <input 
-                type="text" 
-                value={settings.ethosImage}
-                onChange={e => setSettings({...settings, ethosImage: e.target.value})}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
-              />
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Our Ethos / Brand Story Image</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={settings.ethosImage}
+                  onChange={e => setSettings({...settings, ethosImage: e.target.value})}
+                  className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                />
+                <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
+                  <UploadCloud size={18} />
+                  <span className="text-[10px] font-black uppercase">Upload</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                    if (!e.target.files?.[0]) return;
+                    setSaving(true);
+                    const data = await uploadToCloudinary(e.target.files[0]);
+                    setSettings({...settings, ethosImage: data.secure_url});
+                    setSaving(false);
+                  }} />
+                </label>
+              </div>
             </div>
           </div>
         </div>
