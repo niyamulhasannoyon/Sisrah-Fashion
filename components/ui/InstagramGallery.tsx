@@ -14,14 +14,14 @@ export default function InstagramGallery() {
   ];
 
   const galleryImages = settings?.communityImages?.length 
-    ? settings.communityImages.map((img, idx) => ({ id: idx, image: img.url, handle: '@LoomraApparel' }))
+    ? settings.communityImages.map((img, idx) => ({ id: idx, image: img.url, handle: '@AsSidrat' }))
     : defaultPosts;
 
   return (
     <section className="py-64px">
       <div className="text-center mb-40px">
         <h2 className="text-product-title font-bold flex items-center justify-center gap-8px">
-          <Camera /> @LoomraApparel
+          <Camera /> @AsSidrat
         </h2>
         <p className="text-small text-loomra-muted mt-8px">Tag us to be featured.</p>
       </div>

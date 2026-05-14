@@ -17,8 +17,8 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 export const metadata: Metadata = {
-  title: 'Loomra — Premium Fashion for Bangladesh',
-  description: 'Minimalist, climate-conscious eCommerce for Bangladesh with localized payment, delivery, and style.',
+  title: 'AS SIDRAT — Premium Fashion for Bangladesh',
+  description: 'Minimalist, climate-conscious clothing brand for Bangladesh with localized payment, delivery, and style.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

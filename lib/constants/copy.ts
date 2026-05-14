@@ -25,7 +25,7 @@ export const LOOMRA_COPY = {
   },
   brandStory: {
     title: "Crafted for the Climate. Rooted in Intent.",
-    content: `At Loomra, we believe true luxury is feeling entirely at ease in your own skin.
+    content: `At AS SIDRAT, we believe true luxury is feeling entirely at ease in your own skin.
 
 Born in Dhaka, our collections are an homage to the slow, intentional art of dressing well. For too long, modern fashion has ignored the realities of the South Asian climate, prioritizing global trends over local comfort. We exist to bridge that gap.
 

@@ -72,42 +72,63 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Revenue Analytics Chart */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-bold text-slate-900">Revenue Analytics</h3>
-          <select className="text-xs font-bold border border-slate-200 rounded-md p-2 outline-none bg-slate-50">
-            <option>Last 7 Days</option>
-            <option>Last 30 Days</option>
-          </select>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Revenue Analytics Chart */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-bold text-slate-900">Revenue Analytics</h3>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last 7 Days</span>
+          </div>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data?.chartData || []}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#A31F24" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#A31F24" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                <Tooltip 
+                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
+                  itemStyle={{fontSize: '12px', fontWeight: 'bold', color: '#A31F24'}}
+                  formatter={(value) => [`৳ ${value}`, 'Revenue']}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#A31F24" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={[
-              { name: 'Mon', sales: 4000 },
-              { name: 'Tue', sales: 3000 },
-              { name: 'Wed', sales: 5000 },
-              { name: 'Thu', sales: 2780 },
-              { name: 'Fri', sales: 1890 },
-              { name: 'Sat', sales: 2390 },
-              { name: 'Sun', sales: 3490 },
-            ]}>
-              <defs>
-                <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#A31F24" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#A31F24" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-              <Tooltip 
-                contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
-                itemStyle={{fontSize: '12px', fontWeight: 'bold', color: '#A31F24'}}
-              />
-              <Area type="monotone" dataKey="sales" stroke="#A31F24" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" />
-            </AreaChart>
-          </ResponsiveContainer>
+
+        {/* Orders Analytics Chart */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-bold text-slate-900">Orders Analytics</h3>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last 7 Days</span>
+          </div>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data?.chartData || []}>
+                <defs>
+                  <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0F172A" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#0F172A" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                <Tooltip 
+                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
+                  itemStyle={{fontSize: '12px', fontWeight: 'bold', color: '#0F172A'}}
+                  formatter={(value) => [value, 'Orders']}
+                />
+                <Area type="monotone" dataKey="orders" stroke="#0F172A" strokeWidth={3} fillOpacity={1} fill="url(#colorOrders)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 

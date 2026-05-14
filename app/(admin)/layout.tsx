@@ -33,8 +33,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="w-[260px] bg-[#0F172A] text-slate-300 flex flex-col transition-all duration-300 border-r border-slate-800 hidden md:flex shrink-0">
         <div className="h-16 flex items-center px-6 border-b border-slate-800/50">
           <Link href="/dashboard" className="text-xl font-bold tracking-widest text-white uppercase flex items-center gap-2">
-            <div className="w-6 h-6 bg-[#A31F24] rounded-sm flex items-center justify-center text-xs">L</div>
-            Loomra<span className="text-[#A31F24]">.</span>
+            <div className="w-6 h-6 bg-[#A31F24] rounded-sm flex items-center justify-center text-[10px]">AS</div>
+            AS SIDRAT<span className="text-[#A31F24]">.</span>
           </Link>
         </div>
 

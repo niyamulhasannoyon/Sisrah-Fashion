@@ -28,6 +28,7 @@ export default function AddProductPage() {
 
   // Main Images State
   const [mainImages, setMainImages] = useState<any[]>([]);
+  const [imageUrl, setImageUrl] = useState('');
 
   // Variants States
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -51,6 +52,12 @@ export default function AddProductPage() {
       body: formData,
     });
     return await res.json();
+  };
+
+  const addImageViaUrl = () => {
+    if (!imageUrl) return;
+    setMainImages([...mainImages, { url: imageUrl, public_id: `url-${Date.now()}` }]);
+    setImageUrl('');
   };
 
   const handleMainImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -215,7 +222,24 @@ export default function AddProductPage() {
                 <input type="file" className="hidden" accept="image/*" onChange={handleMainImageUpload} />
               </label>
             </div>
-            <p className="text-[10px] text-gray-400 font-medium italic">Recommended size: 1000x1250px (4:5 ratio)</p>
+            
+            <div className="flex gap-2 mt-4">
+              <input 
+                type="text" 
+                placeholder="Or paste image URL here..." 
+                value={imageUrl}
+                onChange={e => setImageUrl(e.target.value)}
+                className="flex-1 p-2 text-xs bg-slate-50 border border-slate-200 rounded outline-none focus:border-black transition-all"
+              />
+              <button 
+                type="button" 
+                onClick={addImageViaUrl}
+                className="px-4 py-2 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase rounded hover:bg-slate-200 transition-all"
+              >
+                Add Link
+              </button>
+            </div>
+            <p className="text-[10px] text-gray-400 font-medium italic mt-2">Recommended size: 1000x1250px (4:5 ratio)</p>
           </div>
 
           {/* General Info */}
@@ -292,17 +316,31 @@ export default function AddProductPage() {
                         <td className="p-3"><input type="number" value={variant.price} onChange={e => handleVariantChange(idx, 'price', Number(e.target.value))} className="w-24 p-2 bg-white border border-slate-200 rounded outline-none focus:border-black" /></td>
                         <td className="p-3"><input type="number" value={variant.stock} onChange={e => handleVariantChange(idx, 'stock', Number(e.target.value))} className="w-24 p-2 bg-white border border-slate-200 rounded outline-none focus:border-black" /></td>
                         <td className="p-3">
-                          {variant.image ? (
-                             <div className="relative w-12 h-16 border rounded overflow-hidden group shadow-sm">
-                               <img src={variant.image.url} className="w-full h-full object-cover" alt="var" />
-                               <button type="button" onClick={() => handleVariantChange(idx, 'image', null)} className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X size={14} /></button>
-                             </div>
-                          ) : (
-                             <label className="w-12 h-16 flex items-center justify-center border-2 border-dashed border-slate-200 rounded cursor-pointer hover:bg-slate-100 text-slate-400 hover:text-black transition-all">
-                               <UploadCloud size={16} />
-                               <input type="file" className="hidden" accept="image/*" onChange={(e) => { if(e.target.files) handleVariantImageUpload(idx, e.target.files[0]); }} />
-                             </label>
-                          )}
+                          <div className="flex flex-col gap-2">
+                            {variant.image ? (
+                               <div className="relative w-12 h-16 border rounded overflow-hidden group shadow-sm">
+                                 <img src={variant.image.url} className="w-full h-full object-cover" alt="var" />
+                                 <button type="button" onClick={() => handleVariantChange(idx, 'image', null)} className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X size={14} /></button>
+                               </div>
+                            ) : (
+                               <div className="flex items-center gap-2">
+                                 <label className="w-12 h-16 flex shrink-0 items-center justify-center border-2 border-dashed border-slate-200 rounded cursor-pointer hover:bg-slate-100 text-slate-400 hover:text-black transition-all">
+                                   <UploadCloud size={16} />
+                                   <input type="file" className="hidden" accept="image/*" onChange={(e) => { if(e.target.files) handleVariantImageUpload(idx, e.target.files[0]); }} />
+                                 </label>
+                                 <input 
+                                   type="text" 
+                                   placeholder="URL" 
+                                   className="w-24 p-2 text-[10px] bg-white border border-slate-200 rounded outline-none focus:border-black"
+                                   onBlur={(e) => {
+                                     if (e.target.value) {
+                                       handleVariantChange(idx, 'image', { url: e.target.value, public_id: `var-url-${Date.now()}` });
+                                     }
+                                   }}
+                                 />
+                               </div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

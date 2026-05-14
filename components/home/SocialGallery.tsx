@@ -15,7 +15,7 @@ export function SocialGallery() {
         <div className="mb-12 text-center">
           <p className="text-[10px] font-black uppercase tracking-[4px] text-loomra-red mb-2">Our Community</p>
           <h2 className="text-4xl font-black uppercase tracking-tight text-loomra-black">Everyday style in real life <span className="text-loomra-red">.</span></h2>
-          <p className="text-loomra-muted mt-2 text-sm">Tag us on Instagram <span className="font-bold text-loomra-black">@loomra_official</span> to be featured.</p>
+          <p className="text-loomra-muted mt-2 text-sm">Tag us on Instagram <span className="font-bold text-loomra-black">@as_sidrat_official</span> to be featured.</p>
         </div>
         
         {/* Horizontal Scroll Layout for better community feel */}
