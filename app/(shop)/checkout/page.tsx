@@ -8,7 +8,7 @@ import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart
 export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCartStore();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [shippingInfo, setShippingInfo] = useState({ name: '', phone: '', address: '', city: '' });
@@ -17,6 +17,10 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [couponError, setCouponError] = useState('');
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const applyCoupon = async () => {
     setCouponError('');
@@ -77,11 +81,13 @@ export default function CheckoutPage() {
     }
   };
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  if (!isClient) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <Loader2 className="animate-spin text-gray-300" size={40} />
+      </div>
+    );
+  }
 
   if (cart.length === 0) {
     return (
@@ -227,7 +233,7 @@ export default function CheckoutPage() {
                   {cart.map((item, idx) => (
                     <div key={idx} className="flex gap-4">
                       <div className="w-16 h-20 bg-white/5 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                        <img src={item.images?.[0]?.url || item.image} alt={item.title} className="w-full h-full object-cover" />
+                        <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 flex flex-col justify-center">
                         <div className="flex justify-between items-start">
