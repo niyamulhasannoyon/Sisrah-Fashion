@@ -6,16 +6,19 @@ export async function GET() {
   try {
     await dbConnect();
     
-    // First, try to find products explicitly marked as trending
+    // 1. Get products explicitly marked as trending
     let trendingProducts = await Product.find({ isTrending: true })
                                          .sort({ createdAt: -1 })
                                          .limit(8); 
     
-    // Fallback: If no products are marked as trending, just show the latest 8 products
-    if (!trendingProducts || trendingProducts.length === 0) {
-      trendingProducts = await Product.find({})
-                                       .sort({ createdAt: -1 })
-                                       .limit(8);
+    // 2. If we have fewer than 8 trending products, fill the rest with latest products
+    if (trendingProducts.length < 8) {
+      const trendingIds = trendingProducts.map(p => p._id);
+      const additionalProducts = await Product.find({ _id: { $nin: trendingIds } })
+                                               .sort({ createdAt: -1 })
+                                               .limit(8 - trendingProducts.length);
+      
+      trendingProducts = [...trendingProducts, ...additionalProducts];
     }
     
     return NextResponse.json({ success: true, products: trendingProducts }, { status: 200 });

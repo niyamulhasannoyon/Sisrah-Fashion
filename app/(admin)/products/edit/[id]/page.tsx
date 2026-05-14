@@ -17,6 +17,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
   const [offerPrice, setOfferPrice] = useState<number>(0);
   const [category, setCategory] = useState('Men');
   const [isTrending, setIsTrending] = useState(false);
+  const [isNewArrival, setIsNewArrival] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [mainImages, setMainImages] = useState<any[]>([]);
@@ -44,6 +45,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           setOfferPrice(p.offerPrice || 0);
           setCategory(p.category);
           setIsTrending(p.isTrending || false);
+          setIsNewArrival(p.isNewArrival || false);
           setTags(p.tags || []);
           setMainImages(p.images || []);
           
@@ -148,7 +150,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     e.preventDefault();
     setUpdating(true);
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    const productData = { title, slug, description, basePrice, offerPrice, category, isTrending, tags, images: mainImages, variants };
+    const productData = { title, slug, description, basePrice, offerPrice, category, isTrending, isNewArrival, tags, images: mainImages, variants };
 
     try {
       const res = await fetch(`/api/products/${params.id}`, {
@@ -312,6 +314,23 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                   className="sr-only peer" 
                   checked={isTrending} 
                   onChange={(e) => setIsTrending(e.target.checked)} 
+                />
+                <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-[#A31F24] peer-focus:ring-2 peer-focus:ring-red-100 transition-all after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+              </label>
+            </div>
+
+            {/* New Arrival Toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-lg mt-3">
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest">New Drop</h4>
+                <p className="text-[10px] text-slate-500 mt-1 leading-tight">Mark as latest drop</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={isNewArrival} 
+                  onChange={(e) => setIsNewArrival(e.target.checked)} 
                 />
                 <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-[#A31F24] peer-focus:ring-2 peer-focus:ring-red-100 transition-all after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
               </label>

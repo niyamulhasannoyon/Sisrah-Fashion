@@ -16,7 +16,9 @@ export async function GET(request: Request) {
 
     const products = await Product.find(query).sort({ createdAt: -1 });
 
-    return NextResponse.json({ success: true, products }, { status: 200 });
+    const response = NextResponse.json({ success: true, products }, { status: 200 });
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    return response;
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(

@@ -33,6 +33,7 @@ export interface IProduct extends Document {
   rating: number;
   numReviews: number;
   isTrending: boolean;
+  isNewArrival: boolean;
 }
 
 const ProductSchema: Schema = new Schema(
@@ -55,6 +56,7 @@ const ProductSchema: Schema = new Schema(
     rating: { type: Number, required: true, default: 0 },
     numReviews: { type: Number, required: true, default: 0 },
     isTrending: { type: Boolean, default: false },
+    isNewArrival: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

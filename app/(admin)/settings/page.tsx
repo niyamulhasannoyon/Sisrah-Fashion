@@ -272,10 +272,8 @@ export default function AdminSettings() {
 
           <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
             <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Upload via Computer</label>
-            <div className="flex flex-wrap gap-4">
-          
-          <div className="flex flex-wrap gap-4">
-            {settings.communityImages?.map((img: any, idx: number) => (
+            <div className="flex flex-wrap gap-4 mt-2">
+              {settings.communityImages?.map((img: any, idx: number) => (
               <div key={idx} className="relative w-32 h-40 border border-slate-100 rounded-xl overflow-hidden group shadow-sm">
                 <img src={img.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="community" />
                 <button 

@@ -19,8 +19,9 @@ export default function AddProductPage() {
   const [category, setCategory] = useState('Men');
   const [customCategory, setCustomCategory] = useState('');
   
-  // Trending State
+  // Features State
   const [isTrending, setIsTrending] = useState(false);
+  const [isNewArrival, setIsNewArrival] = useState(false);
   
   // Tags State
   const [tags, setTags] = useState<string[]>([]);
@@ -162,6 +163,7 @@ export default function AddProductPage() {
       offerPrice,
       category: finalCategory,
       isTrending,
+      isNewArrival,
       tags,
       images: mainImages,
       variants
@@ -385,6 +387,23 @@ export default function AddProductPage() {
                   className="sr-only peer" 
                   checked={isTrending} 
                   onChange={(e) => setIsTrending(e.target.checked)} 
+                />
+                <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-black peer-focus:ring-2 peer-focus:ring-gray-200 transition-all after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+              </label>
+            </div>
+
+            {/* New Arrival Toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-lg mt-3">
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest">New Drop</h4>
+                <p className="text-[10px] text-slate-500 mt-1 leading-tight">Mark as latest drop</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={isNewArrival} 
+                  onChange={(e) => setIsNewArrival(e.target.checked)} 
                 />
                 <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-black peer-focus:ring-2 peer-focus:ring-gray-200 transition-all after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
               </label>

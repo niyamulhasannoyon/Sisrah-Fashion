@@ -9,7 +9,7 @@ export function NewDrop() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/products/latest')
+    fetch('/api/products/new-drop')
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
@@ -21,7 +21,7 @@ export function NewDrop() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Error fetching latest products:", err);
+        console.error("Error fetching new drop products:", err);
         setLoading(false);
       });
   }, []);
