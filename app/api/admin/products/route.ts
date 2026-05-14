@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
-// import { jwtVerify } from 'jose';
-// Note: In production, verify the admin token here or via middleware before proceeding.
+import { isAdmin } from '@/lib/adminAuth';
 
 export async function POST(req: Request) {
   try {
+    if (!await isAdmin()) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     await dbConnect();
     const data = await req.json();
 

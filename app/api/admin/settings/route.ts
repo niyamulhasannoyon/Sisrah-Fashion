@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Settings from '@/models/Settings';
 
+import { isAdmin } from '@/lib/adminAuth';
+
 export async function GET() {
   try {
     await dbConnect();
@@ -18,6 +20,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    if (!await isAdmin()) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     await dbConnect();
     const body = await req.json();
     

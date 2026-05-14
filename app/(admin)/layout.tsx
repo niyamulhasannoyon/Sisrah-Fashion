@@ -6,23 +6,54 @@ import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut, Bell, 
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { user, logout, checkAuth } = useAuthStore();
   const router = useRouter();
   const { settings, fetchSettings } = useSettingsStore();
+  const [checking, setChecking] = useState(true);
+
+  const allowedEmails = ['niyamulhasanbd@gmail.com', 'niyamulhasan1089@gmail.com'];
 
   useEffect(() => {
-    if (!settings) fetchSettings();
-  }, [settings, fetchSettings]);
+    const verifyAccess = async () => {
+      await checkAuth();
+      if (!settings) await fetchSettings();
+      setChecking(false);
+    };
+    verifyAccess();
+  }, []);
+
+  useEffect(() => {
+    if (!checking) {
+      if (!user || !allowedEmails.includes(user.email)) {
+        router.push('/');
+      }
+    }
+  }, [checking, user, router]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     logout();
     router.push('/login');
   };
+
+  if (checking) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#0F172A] text-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-700 border-t-[#A31F24] rounded-full animate-spin"></div>
+          <p className="text-xs font-black uppercase tracking-widest text-slate-400">Verifying Admin Access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !allowedEmails.includes(user.email)) {
+    return null;
+  }
 
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
