@@ -210,6 +210,15 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
               price={displayOfferPrice > 0 ? displayOfferPrice : displayPrice} 
             />
           </div>
+
+          {product.description && (
+            <div className="mt-24px border-t border-loomra-surface pt-24px flex flex-col gap-12px">
+              <span className="text-small font-bold uppercase tracking-widest text-loomra-black">Description & Details</span>
+              <p className="text-small text-loomra-muted leading-relaxed whitespace-pre-line font-light">
+                {product.description}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
