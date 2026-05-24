@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Heart, Share2, Star } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import MobileStickyCart from '@/components/product/MobileStickyCart';
 import SizeGuideModal from '@/components/product/SizeGuideModal';
+import WhatsAppButton from '@/components/product/WhatsAppButton';
 import { formatCurrency } from '@/lib/utils';
 
 interface ProductVariant {
@@ -47,6 +48,13 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
   const [selectedColor, setSelectedColor] = useState(product.variants?.[0]?.color ?? '');
   const [selectedSize, setSelectedSize] = useState(product.variants?.[0]?.size ?? '');
   const [activeImage, setActiveImage] = useState(0);
+  const [productUrl, setProductUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setProductUrl(window.location.href);
+    }
+  }, []);
   const addToCart = useCartStore((state) => state.addToCart);
 
   const availableColors = useMemo(
@@ -193,6 +201,14 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
             <button className="px-24px border border-loomra-surface text-loomra-black hover:border-loomra-red hover:text-loomra-red transition-all flex items-center justify-center">
               <Heart size={24} />
             </button>
+          </div>
+
+          <div className="mt-8px">
+            <WhatsAppButton 
+              productName={product.title} 
+              productUrl={productUrl} 
+              price={displayOfferPrice > 0 ? displayOfferPrice : displayPrice} 
+            />
           </div>
         </div>
       </div>

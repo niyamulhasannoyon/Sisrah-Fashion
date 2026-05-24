@@ -18,3 +18,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "Failed to create coupon" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Coupon ID is required' }, { status: 400 });
+    }
+    await Coupon.findByIdAndDelete(id);
+    return NextResponse.json({ success: true, message: 'Coupon deleted successfully' });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: "Failed to delete coupon" }, { status: 500 });
+  }
+}

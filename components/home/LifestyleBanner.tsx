@@ -10,11 +10,14 @@ export function LifestyleBanner() {
   return (
     <section className="w-full bg-loomra-surface py-24">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 sm:px-8 md:grid-cols-2 items-center">
-        <div className="overflow-hidden rounded-none">
+        <div className="overflow-hidden rounded-none aspect-[4/3] bg-loomra-surface">
           <img
             src={displayImage}
             alt="Artisans at work"
-            className="w-full object-cover transition-transform duration-700 hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+            onError={(e) => {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1513829096999-4978602297f7?q=80&w=800&auto=format&fit=crop";
+            }}
           />
         </div>
         <div className="flex flex-col gap-6">

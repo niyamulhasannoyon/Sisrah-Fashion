@@ -12,13 +12,13 @@ export function Newsletter() {
               Get early access to new fabric drops, local launches, and exclusive member offers.
             </p>
           </div>
-          <form className="flex flex-col gap-4 sm:flex-row">
+          <form className="flex flex-col gap-4 sm:flex-row w-full md:w-auto">
             <input
               type="email"
               placeholder="Enter your email"
-              className="min-w-0 flex-1 rounded-none border border-loomra-white bg-black/10 px-4 py-3 text-loomra-white placeholder:text-loomra-white/50 outline-none"
+              className="w-full sm:min-w-[280px] flex-1 rounded-none border border-loomra-white bg-black/10 px-4 py-3 text-loomra-white placeholder:text-loomra-white/50 outline-none focus:border-loomra-red focus:bg-black/30 transition-all"
             />
-            <button type="submit" className="rounded-none bg-loomra-red px-6 py-3 text-small font-bold uppercase tracking-widest text-loomra-white transition-colors hover:bg-red-800">
+            <button type="submit" className="rounded-none bg-loomra-red px-6 py-3 text-small font-bold uppercase tracking-widest text-loomra-white transition-colors hover:bg-red-800 shrink-0">
               {LOOMRA_COPY.cta.newsletterSubscribe}
             </button>
           </form>

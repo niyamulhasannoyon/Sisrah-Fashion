@@ -1,6 +1,8 @@
 'use client';
 
 import { MessageCircle } from 'lucide-react';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { useEffect } from 'react';
 
 interface WhatsAppButtonProps {
   productName: string;
@@ -9,7 +11,16 @@ interface WhatsAppButtonProps {
 }
 
 export default function WhatsAppButton({ productName, productUrl, price }: WhatsAppButtonProps) {
-  const brandPhone = "8801733919156"; // Replace with actual Loomra business number
+  const { settings, fetchSettings } = useSettingsStore();
+
+  useEffect(() => {
+    if (!settings) {
+      fetchSettings();
+    }
+  }, [settings, fetchSettings]);
+
+  const rawPhone = settings?.whatsappNumber || "8801733919156";
+  const brandPhone = rawPhone.replace(/\+/g, '').replace(/\s+/g, '');
 
   const handleWhatsAppOrder = () => {
     const message = `Hello Loomra! I want to order this item:\n\n*Product:* ${productName}\n*Price:* ৳ ${price}\n*Link:* ${productUrl}\n\nPlease let me know how to proceed.`;

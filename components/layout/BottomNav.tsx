@@ -21,7 +21,7 @@ export default function BottomNav() {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 w-full bg-loomra-white/90 backdrop-blur-md border-t border-loomra-surface z-50 pb-safe">
-      <nav className="flex justify-between items-center px-24px h-[64px]">
+      <nav className="flex justify-between items-center px-6 h-[64px]">
         {navItems.map((item) => {
           const isActive = pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path));
           const Icon = item.icon;
@@ -30,7 +30,7 @@ export default function BottomNav() {
             <Link
               key={item.name}
               href={item.path}
-              className="relative flex flex-col items-center justify-center w-full h-full gap-4px"
+              className="relative flex flex-col items-center justify-center w-full h-full gap-1"
             >
               {isActive && (
                 <motion.div

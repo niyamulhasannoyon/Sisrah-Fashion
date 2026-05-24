@@ -299,9 +299,10 @@ export default function AdminSettings() {
             </label>
           </div>
         </div>
+      </div>
 
-        {/* Preview Section */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      {/* Preview Section */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">Visual Previews</h3>
           <div className="flex gap-12">
             <div>

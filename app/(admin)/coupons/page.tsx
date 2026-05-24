@@ -34,6 +34,22 @@ export default function CouponManagement() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this coupon?")) return;
+    try {
+      const res = await fetch(`/api/admin/coupons?id=${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        fetchCoupons();
+      } else {
+        alert("Failed to delete coupon");
+      }
+    } catch (error) {
+      alert("Failed to delete coupon");
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-8 animate-in fade-in">
       <div className="flex items-center justify-between">
@@ -136,7 +152,10 @@ export default function CouponManagement() {
                       {new Date(c.expiryDate).toLocaleDateString()}
                     </td>
                     <td className="p-4 text-right">
-                      <button className="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                      <button 
+                        onClick={() => handleDelete(c._id)}
+                        className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </td>
