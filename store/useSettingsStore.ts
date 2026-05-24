@@ -6,6 +6,28 @@ interface Settings {
   heroImage: string;
   ethosImage: string;
   communityImages: { url: string; public_id: string }[];
+  
+  // Custom announcements
+  announcementText?: string;
+  announcementLink?: string;
+  announcementBgColor?: string;
+  
+  // Customizable homepage copy
+  heroHeadline?: string;
+  heroSubheadline?: string;
+  ethosHeadline?: string;
+  ethosDescription?: string;
+  
+  // Footer / contact
+  contactEmail?: string;
+  contactAddress?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  
+  // E-commerce checkout constants
+  shippingInsideDhaka?: number;
+  shippingOutsideDhaka?: number;
 }
 
 interface SettingsState {

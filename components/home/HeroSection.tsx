@@ -5,9 +5,10 @@ import { LOOMRA_COPY } from '@/lib/constants/copy';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
 export function HeroSection() {
-  const { headline, subheadline } = LOOMRA_COPY.hero.primary;
   const { settings } = useSettingsStore();
 
+  const headline = settings?.heroHeadline || LOOMRA_COPY.hero.primary.headline;
+  const subheadline = settings?.heroSubheadline || LOOMRA_COPY.hero.primary.subheadline;
   const backgroundImage = settings?.heroImage || '/images/hero-model.jpg';
 
   return (
@@ -18,7 +19,7 @@ export function HeroSection() {
       />
       <div className="absolute inset-0 bg-black/25" />
       <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col items-center justify-center gap-6 px-6 text-center">
-        <span className="text-small uppercase tracking-[0.32em] text-loomra-red">Summer Essentials</span>
+        <span className="text-small uppercase tracking-[0.32em] text-loomra-red font-bold">Summer Essentials</span>
         <h1 className="max-w-3xl text-heading md:text-[4rem] font-bold uppercase tracking-tight text-loomra-white leading-tight">
           {headline}
         </h1>

@@ -23,10 +23,10 @@ export function LifestyleBanner() {
         <div className="flex flex-col gap-6">
           <span className="text-small uppercase tracking-widest text-loomra-red font-bold">Our Ethos</span>
           <h2 className="text-heading font-bold text-loomra-black leading-tight">
-            Crafted for the Climate. Rooted in Tradition.
+            {settings?.ethosHeadline || "Crafted for the Climate. Rooted in Tradition."}
           </h2>
           <p className="text-body text-loomra-muted leading-relaxed">
-            We source the finest long-staple cotton and breathable linens, combining global minimalist trends with fabrics that actually make sense for the South Asian weather.
+            {settings?.ethosDescription || "We source the finest long-staple cotton and breathable linens, combining global minimalist trends with fabrics that actually make sense for the South Asian weather."}
           </p>
           <Link
             href="/about"

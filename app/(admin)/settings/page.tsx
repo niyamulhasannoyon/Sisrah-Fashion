@@ -11,6 +11,20 @@ export default function AdminSettings() {
     heroImage: '',
     ethosImage: '',
     communityImages: [],
+    announcementText: '',
+    announcementLink: '',
+    announcementBgColor: '#A31F24',
+    contactEmail: '',
+    contactAddress: '',
+    facebookUrl: '',
+    instagramUrl: '',
+    youtubeUrl: '',
+    shippingInsideDhaka: 60,
+    shippingOutsideDhaka: 120,
+    heroHeadline: '',
+    heroSubheadline: '',
+    ethosHeadline: '',
+    ethosDescription: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -25,7 +39,29 @@ export default function AdminSettings() {
       })
       .then(data => {
         if (data.success && data.settings) {
-          setSettings(data.settings);
+          setSettings({
+            logo: '',
+            favicon: '',
+            whatsappNumber: '',
+            heroImage: '',
+            ethosImage: '',
+            communityImages: [],
+            announcementText: '',
+            announcementLink: '',
+            announcementBgColor: '#A31F24',
+            contactEmail: '',
+            contactAddress: '',
+            facebookUrl: '',
+            instagramUrl: '',
+            youtubeUrl: '',
+            shippingInsideDhaka: 60,
+            shippingOutsideDhaka: 120,
+            heroHeadline: '',
+            heroSubheadline: '',
+            ethosHeadline: '',
+            ethosDescription: '',
+            ...data.settings
+          });
         }
         setLoading(false);
       })
@@ -110,27 +146,47 @@ export default function AdminSettings() {
       <form onSubmit={handleSave} className="grid grid-cols-1 gap-8">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* General Configuration */}
+          {/* General Configuration & Contact */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
             <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
-              General Configuration
+              General Identity & Contacts
             </h3>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">WhatsApp Business Number</label>
               <input 
                 type="text" 
-                value={settings.whatsappNumber}
+                value={settings.whatsappNumber || ''}
                 onChange={e => setSettings({...settings, whatsappNumber: e.target.value})}
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
                 placeholder="e.g. +8801733919156"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Brand Logo</label>
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Support Email Address</label>
+              <input 
+                type="email" 
+                value={settings.contactEmail || ''}
+                onChange={e => setSettings({...settings, contactEmail: e.target.value})}
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                placeholder="support@brand.com"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Store Address</label>
+              <input 
+                type="text" 
+                value={settings.contactAddress || ''}
+                onChange={e => setSettings({...settings, contactAddress: e.target.value})}
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                placeholder="Gulshan-2, Dhaka, Bangladesh"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Brand Logo URL</label>
               <div className="flex gap-2">
                 <input 
                   type="text" 
-                  value={settings.logo}
+                  value={settings.logo || ''}
                   onChange={e => setSettings({...settings, logo: e.target.value})}
                   className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
                   placeholder="Logo URL..."
@@ -149,11 +205,11 @@ export default function AdminSettings() {
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Site Icon (Favicon)</label>
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Site Icon (Favicon) URL</label>
               <div className="flex gap-2">
                 <input 
                   type="text" 
-                  value={settings.favicon}
+                  value={settings.favicon || ''}
                   onChange={e => setSettings({...settings, favicon: e.target.value})}
                   className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
                   placeholder="Favicon URL..."
@@ -173,53 +229,211 @@ export default function AdminSettings() {
             </div>
           </div>
 
-          {/* Homepage Visuals */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
-            <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
-              Homepage Visuals
-            </h3>
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Banner Image</label>
-              <div className="flex gap-2">
+          {/* Marketing & Visuals */}
+          <div className="space-y-6">
+            
+            {/* Promo Announcement Bar */}
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+              <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                Promotional Announcement Bar
+              </h3>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Announcement Text</label>
                 <input 
                   type="text" 
-                  value={settings.heroImage}
-                  onChange={e => setSettings({...settings, heroImage: e.target.value})}
-                  className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  value={settings.announcementText || ''}
+                  onChange={e => setSettings({...settings, announcementText: e.target.value})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  placeholder="e.g. Free delivery on orders over ৳3,000!"
                 />
-                <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
-                  <UploadCloud size={18} />
-                  <span className="text-[10px] font-black uppercase">Upload</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                    if (!e.target.files?.[0]) return;
-                    setSaving(true);
-                    const data = await uploadToCloudinary(e.target.files[0]);
-                    setSettings({...settings, heroImage: data.secure_url});
-                    setSaving(false);
-                  }} />
-                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Action Link</label>
+                  <input 
+                    type="text" 
+                    value={settings.announcementLink || ''}
+                    onChange={e => setSettings({...settings, announcementLink: e.target.value})}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                    placeholder="e.g. /category/men"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Background Color</label>
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      type="color" 
+                      value={settings.announcementBgColor || '#A31F24'}
+                      onChange={e => setSettings({...settings, announcementBgColor: e.target.value})}
+                      className="w-12 h-11 border border-slate-200 rounded-lg cursor-pointer bg-slate-50 p-1"
+                    />
+                    <input 
+                      type="text" 
+                      value={settings.announcementBgColor || '#A31F24'}
+                      onChange={e => setSettings({...settings, announcementBgColor: e.target.value})}
+                      className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm font-mono"
+                      placeholder="#A31F24"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Our Ethos / Brand Story Image</label>
-              <div className="flex gap-2">
+
+            {/* Homepage Banner Visuals */}
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+              <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                Homepage Hero & Brand Images
+              </h3>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Banner Image URL</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={settings.heroImage || ''}
+                    onChange={e => setSettings({...settings, heroImage: e.target.value})}
+                    className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  />
+                  <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
+                    <UploadCloud size={18} />
+                    <span className="text-[10px] font-black uppercase">Upload</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                      if (!e.target.files?.[0]) return;
+                      setSaving(true);
+                      const data = await uploadToCloudinary(e.target.files[0]);
+                      setSettings({...settings, heroImage: data.secure_url});
+                      setSaving(false);
+                    }} />
+                  </label>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Banner Headline</label>
                 <input 
                   type="text" 
-                  value={settings.ethosImage}
-                  onChange={e => setSettings({...settings, ethosImage: e.target.value})}
-                  className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  value={settings.heroHeadline || ''}
+                  onChange={e => setSettings({...settings, heroHeadline: e.target.value})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  placeholder="e.g. Minimalist Fashion, Maximum Breathing Room."
                 />
-                <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
-                  <UploadCloud size={18} />
-                  <span className="text-[10px] font-black uppercase">Upload</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                    if (!e.target.files?.[0]) return;
-                    setSaving(true);
-                    const data = await uploadToCloudinary(e.target.files[0]);
-                    setSettings({...settings, ethosImage: data.secure_url});
-                    setSaving(false);
-                  }} />
-                </label>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Banner Subheadline</label>
+                <input 
+                  type="text" 
+                  value={settings.heroSubheadline || ''}
+                  onChange={e => setSettings({...settings, heroSubheadline: e.target.value})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  placeholder="e.g. We build clothing that stands up to humidity..."
+                />
+              </div>
+              <div className="flex flex-col gap-2 border-t border-slate-100 pt-4">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Our Ethos / Brand Story Image URL</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={settings.ethosImage || ''}
+                    onChange={e => setSettings({...settings, ethosImage: e.target.value})}
+                    className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  />
+                  <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
+                    <UploadCloud size={18} />
+                    <span className="text-[10px] font-black uppercase">Upload</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                      if (!e.target.files?.[0]) return;
+                      setSaving(true);
+                      const data = await uploadToCloudinary(e.target.files[0]);
+                      setSettings({...settings, ethosImage: data.secure_url});
+                      setSaving(false);
+                    }} />
+                  </label>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Brand Story Title</label>
+                <input 
+                  type="text" 
+                  value={settings.ethosHeadline || ''}
+                  onChange={e => setSettings({...settings, ethosHeadline: e.target.value})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                  placeholder="e.g. Crafted for the Climate. Rooted in Tradition."
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Brand Story Paragraph</label>
+                <textarea 
+                  value={settings.ethosDescription || ''}
+                  onChange={e => setSettings({...settings, ethosDescription: e.target.value})}
+                  rows={3}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm resize-none"
+                  placeholder="e.g. We source the finest long-staple cotton..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Shipping & E-Commerce Constants */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+            <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+              E-Commerce Shipping Configurations
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Inside Dhaka (৳)</label>
+                <input 
+                  type="number" 
+                  value={settings.shippingInsideDhaka ?? 80}
+                  onChange={e => setSettings({...settings, shippingInsideDhaka: parseInt(e.target.value) || 0})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Outside Dhaka (৳)</label>
+                <input 
+                  type="number" 
+                  value={settings.shippingOutsideDhaka ?? 150}
+                  onChange={e => setSettings({...settings, shippingOutsideDhaka: parseInt(e.target.value) || 0})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+            <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+              Social Media Accounts
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Facebook Link</label>
+                <input 
+                  type="text" 
+                  value={settings.facebookUrl || ''}
+                  onChange={e => setSettings({...settings, facebookUrl: e.target.value})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-xs"
+                  placeholder="https://facebook.com/..."
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Instagram Link</label>
+                <input 
+                  type="text" 
+                  value={settings.instagramUrl || ''}
+                  onChange={e => setSettings({...settings, instagramUrl: e.target.value})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-xs"
+                  placeholder="https://instagram.com/..."
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">YouTube Link</label>
+                <input 
+                  type="text" 
+                  value={settings.youtubeUrl || ''}
+                  onChange={e => setSettings({...settings, youtubeUrl: e.target.value})}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-xs"
+                  placeholder="https://youtube.com/..."
+                />
               </div>
             </div>
           </div>

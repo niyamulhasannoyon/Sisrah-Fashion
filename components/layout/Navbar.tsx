@@ -38,8 +38,24 @@ export function Navbar() {
   };
 
   return (
-    <header className="border-b border-loomra-surface bg-loomra-white/95 backdrop-blur-lg">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-8 lg:px-12">
+    <>
+      {settings?.announcementText && (
+        <div 
+          style={{ backgroundColor: settings.announcementBgColor || '#A31F24' }} 
+          className="w-full text-white text-center py-2 px-4 text-[10px] sm:text-xs font-bold tracking-widest uppercase transition-colors shadow-sm flex items-center justify-center"
+        >
+          {settings.announcementLink ? (
+            <Link href={settings.announcementLink} className="hover:underline flex items-center justify-center gap-1">
+              <span>{settings.announcementText}</span>
+              <span className="text-[9px] transform translate-y-[0.5px]">→</span>
+            </Link>
+          ) : (
+            <span>{settings.announcementText}</span>
+          )}
+        </div>
+      )}
+      <header className="border-b border-loomra-surface bg-loomra-white/95 backdrop-blur-lg sticky top-0 z-50">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-8 lg:px-12">
         <Link href="/" className="flex items-center">
           {settings?.logo ? (
             <img src={settings.logo} alt="AS SIDRAT" className="h-8 w-auto object-contain" />
@@ -127,5 +143,6 @@ export function Navbar() {
         </div>
       ) : null}
     </header>
+    </>
   );
 }

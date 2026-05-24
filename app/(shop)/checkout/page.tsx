@@ -1,12 +1,14 @@
 'use client';
 
 import { useCartStore } from '@/store/useCartStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart } from 'lucide-react';
 
 export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCartStore();
+  const { settings, fetchSettings } = useSettingsStore();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,10 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    if (!settings) {
+      fetchSettings();
+    }
+  }, [settings, fetchSettings]);
 
   const applyCoupon = async () => {
     setCouponError('');
@@ -51,7 +56,16 @@ export default function CheckoutPage() {
     return appliedCoupon.discountValue;
   };
 
-  const finalTotal = getCartTotal() - calculateDiscount();
+  const getShippingCost = () => {
+    if (!shippingInfo.city) return 0;
+    const isDhaka = shippingInfo.city.toLowerCase().includes('dhaka');
+    if (isDhaka) {
+      return settings?.shippingInsideDhaka ?? 60;
+    }
+    return settings?.shippingOutsideDhaka ?? 120;
+  };
+
+  const finalTotal = getCartTotal() - calculateDiscount() + getShippingCost();
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -285,7 +299,9 @@ export default function CheckoutPage() {
                   )}
                   <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-white/40">
                     <span>Shipping</span>
-                    <span className="text-green-400 italic">Free delivery</span>
+                    <span className={getShippingCost() === 0 ? "text-green-400 italic" : "text-white"}>
+                      {getShippingCost() === 0 ? "Enter city for rate" : `৳${getShippingCost().toLocaleString()}`}
+                    </span>
                   </div>
                   
                   <div className="flex justify-between items-center pt-6 mt-4 border-t border-white/10">
