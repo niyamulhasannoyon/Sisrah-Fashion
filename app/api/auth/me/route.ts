@@ -14,14 +14,27 @@ export async function GET(req: Request) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     
-    // Return data directly from JWT payload to avoid unnecessary DB hit
+    let name = payload.name;
+    let email = payload.email;
+    let role = payload.role;
+
+    if (!email || !name || !role) {
+      await dbConnect();
+      const user = await User.findById(payload.userId);
+      if (user) {
+        name = user.name;
+        email = user.email;
+        role = user.role;
+      }
+    }
+    
     return NextResponse.json({ 
       success: true, 
       user: { 
         id: payload.userId, 
-        name: payload.name, 
-        email: payload.email, 
-        role: payload.role 
+        name, 
+        email, 
+        role 
       } 
     });
   } catch (error) {
