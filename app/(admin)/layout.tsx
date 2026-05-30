@@ -15,7 +15,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { settings, fetchSettings } = useSettingsStore();
   const [checking, setChecking] = useState(true);
 
-  const allowedEmails = ['niyamulhasanbd@gmail.com', 'niyamulhasan1089@gmail.com'];
+  const allowedEmails = ['niyamulhasanbd@gmail.com', 'niyamulhasan1089@gmail.com', 'mdniyamulhasan2022@gmail.com'];
 
   useEffect(() => {
     const verifyAccess = async () => {
