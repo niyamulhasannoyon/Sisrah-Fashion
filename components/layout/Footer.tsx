@@ -17,7 +17,7 @@ export function Footer() {
           <div className="flex flex-col gap-4">
             <Link href="/" className="text-xl font-black tracking-tight text-white">
               {settings?.logo ? (
-                <img src={settings.logo} alt="AS SIDRAT" className="h-8 w-auto object-contain brightness-0 invert" />
+                <img src={settings.logo} alt="AS SIDRAT" className="h-10 md:h-12 w-auto object-contain brightness-0 invert" />
               ) : (
                 "AS SIDRAT"
               )}
