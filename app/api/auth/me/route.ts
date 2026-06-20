@@ -35,7 +35,9 @@ export async function GET(req: Request) {
         id: user._id, 
         name: user.name, 
         email: user.email, 
-        role: user.role 
+        role: user.role,
+        phone: user.phone || '',
+        address: user.address || {}
       } 
     });
   } catch (error) {

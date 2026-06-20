@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Loader2 } from 'lucide-react';
@@ -15,8 +15,23 @@ export default function LoginPage() {
   const [pendingGoogleUser, setPendingGoogleUser] = useState<{credential: string, email: string, name: string} | null>(null);
   const [googlePhone, setGooglePhone] = useState('');
 
-  const loginAction = useAuthStore((state) => state.login);
+  const { isAuthenticated, login: loginAction } = useAuthStore();
   const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('register') === 'true') {
+      setIsLogin(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const params = new URLSearchParams(window.location.search);
+      const redirectPath = params.get('redirect') || '/';
+      router.replace(redirectPath);
+    }
+  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +56,9 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.error || 'Authentication failed');
 
       loginAction(data.user);
-      router.replace('/');
+      const params = new URLSearchParams(window.location.search);
+      const redirectPath = params.get('redirect') || '/';
+      router.replace(redirectPath);
       router.refresh();
     } catch (err: any) {
       setError(err.message);
@@ -75,7 +92,9 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.error || 'Google Login failed');
 
       loginAction(data.user);
-      router.replace('/');
+      const params = new URLSearchParams(window.location.search);
+      const redirectPath = params.get('redirect') || '/';
+      router.replace(redirectPath);
       router.refresh();
     } catch (err: any) {
       setError(err.message);
@@ -99,7 +118,9 @@ export default function LoginPage() {
         if (!res.ok) throw new Error(data.error);
 
         loginAction(data.user);
-        router.replace('/');
+        const params = new URLSearchParams(window.location.search);
+        const redirectPath = params.get('redirect') || '/';
+        router.replace(redirectPath);
         router.refresh();
     } catch(err: any) {
         setError(err.message);

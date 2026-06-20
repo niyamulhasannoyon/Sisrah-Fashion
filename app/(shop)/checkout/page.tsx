@@ -2,6 +2,7 @@
 
 import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart } from 'lucide-react';
@@ -9,6 +10,7 @@ import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart
 export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCartStore();
   const { settings, fetchSettings } = useSettingsStore();
+  const { user } = useAuthStore();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,6 +28,18 @@ export default function CheckoutPage() {
       fetchSettings();
     }
   }, [settings, fetchSettings]);
+
+  useEffect(() => {
+    if (user) {
+      setShippingInfo(prev => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        phone: prev.phone || user.phone || '',
+        address: prev.address || user.address?.street || '',
+        city: prev.city || user.address?.city || '',
+      }));
+    }
+  }, [user]);
 
   const applyCoupon = async () => {
     setCouponError('');
@@ -155,29 +169,32 @@ export default function CheckoutPage() {
                     </div>
                     <MapPin className="text-gray-200" size={24} />
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Recipient Full Name</label>
                       <input type="text" placeholder="e.g. Niyamul Hasan" required 
+                        value={shippingInfo.name}
                         className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium" 
                         onChange={(e) => setShippingInfo({...shippingInfo, name: e.target.value})} />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Phone Number (Active)</label>
                       <input type="tel" placeholder="017XXXXXXXX" required 
+                        value={shippingInfo.phone}
                         className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium" 
                         onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})} />
                     </div>
                     <div className="md:col-span-2 space-y-2">
                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Complete Address</label>
                       <textarea placeholder="House #, Road #, Apartment, Area..." rows={3} required 
+                        value={shippingInfo.address}
                         className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium resize-none" 
                         onChange={(e) => setShippingInfo({...shippingInfo, address: e.target.value})} />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">City / District</label>
                       <input type="text" placeholder="e.g. Dhaka" required 
+                        value={shippingInfo.city}
                         className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium" 
                         onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})} />
                     </div>

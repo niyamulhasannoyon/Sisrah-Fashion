@@ -96,72 +96,115 @@ export function Navbar() {
             ) : (
               <div className="hidden md:flex items-center gap-2">
                 <Button href="/login" variant="secondary">Login</Button>
-                <Button href="/login">Sign Up</Button>
+                <Button href="/login?register=true">Sign Up</Button>
               </div>
             )
           )}
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-loomra-surface text-loomra-black md:hidden"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-loomra-surface text-loomra-black md:hidden focus:outline-none z-50"
             onClick={() => setOpen(state => !state)}
+            aria-label="Toggle Menu"
           >
-            ☰
+            <div className="relative w-5 h-5 flex items-center justify-center">
+              <span className={`absolute h-[2px] w-5 bg-loomra-black rounded-lg transition-all duration-300 ${open ? 'rotate-45' : '-translate-y-1.5'}`} />
+              <span className={`absolute h-[2px] w-5 bg-loomra-black rounded-lg transition-all duration-300 ${open ? 'opacity-0' : 'opacity-100'}`} />
+              <span className={`absolute h-[2px] w-5 bg-loomra-black rounded-lg transition-all duration-300 ${open ? '-rotate-45' : 'translate-y-1.5'}`} />
+            </div>
           </button>
         </div>
       </div>
 
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="border-t border-loomra-surface bg-loomra-surface px-6 py-5 md:hidden overflow-hidden"
-          >
-            <div className="space-y-4">
-              {menu.map(item => (
-                <Link 
-                  key={item.href} 
-                  href={item.href} 
-                  onClick={() => setOpen(false)} 
-                  className="block text-sm font-bold uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors"
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <div className="pt-4 border-t border-gray-200/50 space-y-4">
+          <>
+            {/* Backdrop with Blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
+            />
+            
+            {/* Right Side Slide-out Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-[280px] bg-loomra-white p-6 shadow-2xl md:hidden flex flex-col justify-between"
+            >
+              <div className="flex flex-col gap-8">
+                {/* Drawer Header */}
+                <div className="flex justify-between items-center border-b border-loomra-surface pb-4">
+                  <span className="text-xs font-black uppercase tracking-widest text-loomra-muted">Navigation</span>
+                  <button
+                    type="button"
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-loomra-surface text-loomra-black text-xs font-black hover:border-loomra-red hover:text-loomra-red transition-colors"
+                    onClick={() => setOpen(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                {/* Menu Links */}
+                <nav className="flex flex-col gap-5">
+                  {menu.map(item => (
+                    <Link 
+                      key={item.href} 
+                      href={item.href} 
+                      onClick={() => setOpen(false)} 
+                      className="text-sm font-black uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors flex items-center justify-between group"
+                    >
+                      <span>{item.label}</span>
+                      <span className="text-gray-300 group-hover:text-loomra-red transition-transform group-hover:translate-x-1 duration-300">→</span>
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+
+              {/* Drawer Bottom Actions */}
+              <div className="border-t border-loomra-surface pt-6 space-y-4">
                 {isAuthenticated ? (
                   <>
                     <Link 
                       href="/profile" 
                       onClick={() => setOpen(false)} 
-                      className="block text-sm font-bold uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors"
+                      className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors"
                     >
-                      Profile
+                      <User size={18} />
+                      Profile Details
                     </Link>
                     <button 
                       onClick={() => { handleLogout(); setOpen(false); }} 
-                      className="block text-sm font-bold uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors text-left w-full"
+                      className="w-full text-center bg-loomra-black text-white py-3.5 text-xs font-black uppercase tracking-widest hover:bg-loomra-red transition-colors rounded-lg shadow-md"
                     >
                       Logout
                     </button>
                   </>
                 ) : (
-                  <>
+                  <div className="flex flex-col gap-2.5">
                     <Link 
                       href="/login" 
                       onClick={() => setOpen(false)} 
-                      className="block text-sm font-bold uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors"
+                      className="w-full text-center border border-loomra-black py-3 text-xs font-black uppercase tracking-widest text-loomra-black hover:bg-loomra-surface transition-colors rounded-lg"
                     >
-                      Login / Sign Up
+                      Login
                     </Link>
-                  </>
+                    <Link 
+                      href="/login?register=true" 
+                      onClick={() => setOpen(false)} 
+                      className="w-full text-center bg-loomra-black text-white py-3 text-xs font-black uppercase tracking-widest hover:bg-loomra-red transition-colors rounded-lg"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
                 )}
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

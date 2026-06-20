@@ -6,6 +6,12 @@ interface User {
   name: string;
   email: string;
   role: string;
+  phone?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    division?: string;
+  };
 }
 
 interface AuthState {

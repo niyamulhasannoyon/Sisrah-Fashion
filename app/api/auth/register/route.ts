@@ -32,7 +32,14 @@ export async function POST(req: Request) {
 
     const response = NextResponse.json({ 
       success: true, 
-      user: { id: user._id, name: user.name, email: user.email, role: user.role } 
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role,
+        phone: user.phone || '',
+        address: user.address || {}
+      } 
     }, { status: 201 });
 
     response.cookies.set({

@@ -64,19 +64,14 @@ export default function MotionProductCard({ product }: MotionProductCardProps) {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         />
 
-        <motion.div
-          className="absolute bottom-0 left-0 w-full p-4"
-          initial={{ y: '100%' }}
-          whileHover={{ y: 0 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-        >
+        <div className="absolute bottom-0 left-0 w-full p-3 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300 z-10">
           <button 
             onClick={handleQuickAdd}
-            className="w-full bg-white/95 backdrop-blur-sm text-loomra-black py-2 text-xs font-bold uppercase hover:bg-loomra-red hover:text-white transition-colors shadow-sm rounded-[4px]"
+            className="w-full bg-white/95 backdrop-blur-sm text-loomra-black py-2.5 text-[11px] font-black uppercase tracking-widest hover:bg-loomra-red hover:text-white transition-colors shadow-lg rounded-lg"
           >
             Quick Add
           </button>
-        </motion.div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2 p-4">

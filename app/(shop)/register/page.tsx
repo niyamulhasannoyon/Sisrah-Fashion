@@ -7,7 +7,7 @@ export default function RegisterRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/login');
+    router.replace('/login?register=true');
   }, [router]);
 
   return (
