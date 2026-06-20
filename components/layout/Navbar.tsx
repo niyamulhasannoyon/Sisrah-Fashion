@@ -8,6 +8,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const menu = [
   { label: 'Men', href: '/category/men' },
@@ -110,38 +111,59 @@ export function Navbar() {
         </div>
       </div>
 
-      {open ? (
-        <div className="border-t border-loomra-surface bg-loomra-surface px-6 py-4 md:hidden">
-          <div className="space-y-3">
-            {menu.map(item => (
-              <Link key={item.href} href={item.href} className="block text-base font-medium text-loomra-black hover:text-loomra-red">
-                {item.label}
-              </Link>
-            ))}
-            <div className="pt-3 border-t border-loomra-surface">
-              {isAuthenticated ? (
-                <div className="space-y-2">
-                  <Link href="/profile" className="block text-base font-medium text-loomra-black hover:text-loomra-red">
-                    Profile
-                  </Link>
-                  <button onClick={handleLogout} className="block text-base font-medium text-loomra-black hover:text-loomra-red">
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Link href="/login" className="block text-base font-medium text-loomra-black hover:text-loomra-red">
-                    Login
-                  </Link>
-                  <Link href="/login" className="block text-base font-medium text-loomra-black hover:text-loomra-red">
-                    Sign Up
-                  </Link>
-                </div>
-              )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="border-t border-loomra-surface bg-loomra-surface px-6 py-5 md:hidden overflow-hidden"
+          >
+            <div className="space-y-4">
+              {menu.map(item => (
+                <Link 
+                  key={item.href} 
+                  href={item.href} 
+                  onClick={() => setOpen(false)} 
+                  className="block text-sm font-bold uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <div className="pt-4 border-t border-gray-200/50 space-y-4">
+                {isAuthenticated ? (
+                  <>
+                    <Link 
+                      href="/profile" 
+                      onClick={() => setOpen(false)} 
+                      className="block text-sm font-bold uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors"
+                    >
+                      Profile
+                    </Link>
+                    <button 
+                      onClick={() => { handleLogout(); setOpen(false); }} 
+                      className="block text-sm font-bold uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors text-left w-full"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link 
+                      href="/login" 
+                      onClick={() => setOpen(false)} 
+                      className="block text-sm font-bold uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors"
+                    >
+                      Login / Sign Up
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      ) : null}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
     </>
   );

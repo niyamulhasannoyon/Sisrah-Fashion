@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, isAuthenticated: false }),
       checkAuth: async () => {
         try {
-          const res = await fetch('/api/auth/me');
+          const res = await fetch('/api/auth/me', { cache: 'no-store' });
           const data = await res.json();
           if (data.success) {
             set({ user: data.user, isAuthenticated: true });

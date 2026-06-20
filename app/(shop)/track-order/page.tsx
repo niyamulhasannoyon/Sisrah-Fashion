@@ -137,8 +137,38 @@ function TrackOrderContent() {
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div className="relative flex justify-between items-center px-4 mb-4">
+              {/* Mobile Progress Bar (Vertical Stepper) */}
+              <div className="md:hidden flex flex-col gap-6 relative pl-6 before:absolute before:left-[21px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100 z-0">
+                {/* Active progress line */}
+                <div 
+                  className="absolute left-[21px] top-2 w-0.5 bg-black transition-all duration-1000 z-0"
+                  style={{ 
+                    height: `${currentStepIndex >= 0 ? (currentStepIndex / (steps.length - 1)) * 100 : 0}%`,
+                    maxHeight: 'calc(100% - 16px)'
+                  }}
+                />
+                
+                {steps.map((step, idx) => (
+                  <div key={step} className="flex items-center gap-4 relative z-10">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${
+                      idx <= currentStepIndex ? 'bg-black border-black text-white shadow-md' : 'bg-white border-gray-100 text-gray-300'
+                    }`}>
+                      {step === 'Processing' && <Clock size={16} />}
+                      {step === 'Send to Courier' && <Package size={16} />}
+                      {step === 'Shipped' && <Truck size={16} />}
+                      {step === 'Delivered' && <CheckCircle size={16} />}
+                    </div>
+                    <div>
+                      <span className={`text-xs font-black uppercase tracking-widest ${idx <= currentStepIndex ? 'text-black' : 'text-gray-400'}`}>
+                        {step}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Progress Bar (Horizontal Stepper) */}
+              <div className="hidden md:flex relative justify-between items-center px-4 mb-4">
                 <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 z-0" />
                 <div 
                   className="absolute top-1/2 left-0 h-1 bg-black -translate-y-1/2 z-0 transition-all duration-1000" 

@@ -4,8 +4,25 @@ import { jwtVerify } from 'jose';
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get('loomra_token')?.value;
+  const path = request.nextUrl.pathname;
 
-  if (request.nextUrl.pathname.startsWith('/profile')) {
+  // Prevent authenticated users from visiting login or register
+  if (path === '/login' || path === '/register') {
+    if (token) {
+      try {
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+        await jwtVerify(token, secret);
+        return NextResponse.redirect(new URL('/', request.url));
+      } catch (error) {
+        // Token is invalid, delete cookie and let them view the page
+        const response = NextResponse.next();
+        response.cookies.delete('loomra_token');
+        return response;
+      }
+    }
+  }
+
+  if (path.startsWith('/profile')) {
     if (!token) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
@@ -25,5 +42,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/profile/:path*'],
+  matcher: ['/profile/:path*', '/login', '/register'],
 };

@@ -71,7 +71,7 @@ export default function CartDrawer() {
               cart.map((item, index) => (
                 <div key={index} className="flex gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm relative group">
                   {/* Delete Button (Hover) */}
-                  <button onClick={() => removeFromCart(item._id, item.selectedSize, item.selectedColor)} className="absolute top-2 right-2 p-1.5 bg-white shadow rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all z-10">
+                  <button onClick={() => removeFromCart(item._id, item.selectedSize, item.selectedColor)} className="absolute top-2 right-2 p-1.5 bg-white shadow rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all z-10">
                     <Trash2 size={14} />
                   </button>
 

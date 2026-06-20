@@ -41,7 +41,8 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.error || 'Authentication failed');
 
       loginAction(data.user);
-      router.push('/profile');
+      router.replace('/');
+      router.refresh();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -74,7 +75,8 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.error || 'Google Login failed');
 
       loginAction(data.user);
-      router.push('/profile');
+      router.replace('/');
+      router.refresh();
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -97,7 +99,8 @@ export default function LoginPage() {
         if (!res.ok) throw new Error(data.error);
 
         loginAction(data.user);
-        router.push('/profile');
+        router.replace('/');
+        router.refresh();
     } catch(err: any) {
         setError(err.message);
         setLoading(false);

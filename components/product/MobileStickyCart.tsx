@@ -25,7 +25,7 @@ export default function MobileStickyCart({ product, selectedSize, selectedColor,
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="md:hidden fixed bottom-[64px] left-0 w-full bg-loomra-white border-t border-loomra-surface px-16px py-16px z-40 flex gap-16px shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
+      className="md:hidden fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] left-0 w-full bg-loomra-white border-t border-loomra-surface px-4 py-4 z-40 flex gap-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
     >
       <button className="min-w-[48px] min-h-[48px] border border-loomra-surface text-loomra-black flex items-center justify-center active:bg-loomra-surface transition-colors">
         <Heart size={20} strokeWidth={1.5} />

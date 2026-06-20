@@ -48,7 +48,7 @@ export default function ProductCard({ product }: { product: any }) {
           <Heart size={16} fill={isLiked ? "#A31F24" : "none"} color={isLiked ? "#A31F24" : "#1A1A1A"} />
         </button>
         
-        <div className="absolute bottom-0 left-0 w-full p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+        <div className="absolute bottom-0 left-0 w-full p-3 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300">
           <button 
             onClick={handleQuickAdd}
             className="w-full bg-white/95 backdrop-blur text-black py-2.5 text-[11px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors shadow-lg rounded-lg"

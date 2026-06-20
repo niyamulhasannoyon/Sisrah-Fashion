@@ -8,7 +8,7 @@ export function Footer() {
   const { settings } = useSettingsStore();
 
   return (
-    <footer className="border-t border-slate-100 bg-[#0F0F10] text-[#E4E4E7] pt-16 pb-12">
+    <footer className="border-t border-slate-100 bg-[#0F0F10] text-[#E4E4E7] pt-16 pb-32 pb-safe md:pb-12">
       <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
         {/* Core Links Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">

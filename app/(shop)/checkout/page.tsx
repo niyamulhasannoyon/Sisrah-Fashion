@@ -144,7 +144,7 @@ export default function CheckoutPage() {
               <form onSubmit={handlePlaceOrder} id="checkout-form" className="space-y-8">
                 
                 {/* Step 1: Shipping */}
-                <div className="bg-white p-8 md:p-10 rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                <div className="bg-white p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
                       <div className="bg-black text-white w-10 h-10 rounded-2xl flex items-center justify-center text-lg font-black shadow-lg">1</div>
@@ -185,7 +185,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Step 2: Payment */}
-                <div className="bg-white p-8 md:p-10 rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+                <div className="bg-white p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
                       <div className="bg-black text-white w-10 h-10 rounded-2xl flex items-center justify-center text-lg font-black shadow-lg">2</div>
@@ -232,7 +232,7 @@ export default function CheckoutPage() {
 
             {/* Right Column: Sticky Summary */}
             <div className="w-full lg:w-[38%] lg:sticky lg:top-24">
-              <div className="bg-[#1A1A1A] text-white p-10 rounded-[40px] shadow-2xl relative overflow-hidden">
+              <div className="bg-[#1A1A1A] text-white p-5 sm:p-8 md:p-10 rounded-3xl md:rounded-[40px] shadow-2xl relative overflow-hidden">
                 {/* Abstract Background Element */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl -mr-16 -mt-16"></div>
                 

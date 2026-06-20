@@ -35,7 +35,7 @@ export function CategoryGrid() {
             <Link
               key={category.href}
               href={category.href}
-              className="group relative h-[450px] overflow-hidden rounded-lg bg-loomra-surface shadow-md block"
+              className="group relative h-[280px] md:h-[450px] overflow-hidden rounded-lg bg-loomra-surface shadow-md block"
             >
               {/* Background Image with zoom on hover */}
               <img 
