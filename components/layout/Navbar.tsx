@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getDirectImageLink } from '@/lib/utils';
 
 const menu = [
   { label: 'Men', href: '/category/men' },
@@ -59,7 +60,7 @@ export function Navbar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 md:py-3 sm:px-8 lg:px-12">
         <Link href="/" className="flex items-center">
           {settings?.logo ? (
-            <img src={settings.logo} alt="AS SIDRAT" className="h-12 md:h-18 w-auto object-contain" />
+            <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-12 md:h-18 w-auto object-contain" />
           ) : (
             <span className="text-xl font-bold tracking-tight text-loomra-black">AS SIDRAT</span>
           )}

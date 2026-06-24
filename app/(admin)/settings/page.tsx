@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Loader2, UploadCloud, X, Users, Image as ImageIcon } from 'lucide-react';
+import { getDirectImageLink } from '@/lib/utils';
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState<any>({
@@ -522,13 +523,13 @@ export default function AdminSettings() {
             <div>
               <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Logo Preview</p>
               <div className="w-32 h-20 bg-slate-50 border rounded-xl flex items-center justify-center p-2">
-                {settings.logo ? <img src={settings.logo} className="max-w-full max-h-full object-contain" /> : 'No Logo'}
+                {settings.logo ? <img src={getDirectImageLink(settings.logo)} className="max-w-full max-h-full object-contain" /> : 'No Logo'}
               </div>
             </div>
             <div>
               <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Favicon Preview</p>
               <div className="w-16 h-16 bg-slate-50 border rounded-xl flex items-center justify-center p-2">
-                {settings.favicon ? <img src={settings.favicon} className="w-8 h-8 object-contain" /> : 'No Icon'}
+                {settings.favicon ? <img src={getDirectImageLink(settings.favicon)} className="w-8 h-8 object-contain" /> : 'No Icon'}
               </div>
             </div>
           </div>

@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { getDirectImageLink } from '@/lib/utils';
 
 export function LifestyleBanner() {
   const { settings } = useSettingsStore();
-  const displayImage = settings?.ethosImage || "/images/brand-story.jpg";
+  const displayImage = getDirectImageLink(settings?.ethosImage) || "/images/brand-story.jpg";
 
   return (
     <section className="w-full bg-loomra-surface py-24">

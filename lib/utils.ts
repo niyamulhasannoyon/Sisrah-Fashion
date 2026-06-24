@@ -12,3 +12,25 @@ export function formatCurrency(value: number) {
 export function estimateShippingCharge(location: 'dhaka' | 'outside') {
   return location === 'dhaka' ? 60 : 120;
 }
+
+export function getDirectImageLink(url: string | undefined | null): string {
+  if (!url) return '';
+  
+  // Extract file ID from different Google Drive link formats
+  let fileId = '';
+  const fileDMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileDMatch) {
+    fileId = fileDMatch[1];
+  } else {
+    const idParamMatch = url.match(/drive\.google\.com\/.*[?&]id=([a-zA-Z0-9_-]+)/);
+    if (idParamMatch) {
+      fileId = idParamMatch[1];
+    }
+  }
+  
+  if (fileId) {
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
+  }
+  
+  return url;
+}

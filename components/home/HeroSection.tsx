@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { LOOMRA_COPY } from '@/lib/constants/copy';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { getDirectImageLink } from '@/lib/utils';
 
 export function HeroSection() {
   const { settings } = useSettingsStore();
 
   const headline = settings?.heroHeadline || LOOMRA_COPY.hero.primary.headline;
   const subheadline = settings?.heroSubheadline || LOOMRA_COPY.hero.primary.subheadline;
-  const backgroundImage = settings?.heroImage || '/images/hero-model.jpg';
+  const backgroundImage = getDirectImageLink(settings?.heroImage) || '/images/hero-model.jpg';
 
   return (
     <section className="relative h-[calc(100vh-80px)] w-full overflow-hidden">
