@@ -1,15 +1,28 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Coupon from '@/models/Coupon';
+import { isAdmin } from '@/lib/adminAuth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  await dbConnect();
-  const coupons = await Coupon.find().sort({ createdAt: -1 });
-  return NextResponse.json({ success: true, coupons });
+  try {
+    if (!await isAdmin()) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    await dbConnect();
+    const coupons = await Coupon.find().sort({ createdAt: -1 });
+    return NextResponse.json({ success: true, coupons });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Failed to fetch coupons' }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
   try {
+    if (!await isAdmin()) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     await dbConnect();
     const body = await req.json();
     const newCoupon = await Coupon.create(body);
@@ -21,6 +34,9 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    if (!await isAdmin()) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     await dbConnect();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

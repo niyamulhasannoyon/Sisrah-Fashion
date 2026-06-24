@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+import { isAdmin } from '@/lib/adminAuth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: Request,
@@ -28,6 +31,9 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    if (!await isAdmin()) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     await dbConnect();
     const body = await request.json();
 
@@ -51,6 +57,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    if (!await isAdmin()) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     await dbConnect();
     
     const product = await Product.findByIdAndDelete(params.id);
