@@ -1,49 +1,50 @@
 export const LOOMRA_COPY = {
   hero: {
     primary: {
-      headline: "Breathable Luxury. Tailored for the Bengal Breeze.",
-      subheadline: "Uncomplicated elegance woven from pure, climate-responsive fabrics. Designed to move seamlessly with your everyday.",
+      headline: "আরামদায়ক ও প্রিমিয়াম পোশাক। বাংলার আবহাওয়ার উপযোগী।",
+      subheadline: "খাঁটি ও জলবায়ু-সহনশীল কাপড়ে বোনা ছিমছাম অভিজাত ডিজাইন। আপনার প্রতিদিনের পথচলাকে করতে স্বাচ্ছন্দ্যময় ও সহজ।",
     },
     minimal: {
-      headline: "Effortless Form. Absolute Comfort.",
-      subheadline: "Discover our latest collection of airy linens and structured cottons.",
+      headline: "স্বাচ্ছন্দ্যময় নকশা। শতভাগ আরাম।",
+      subheadline: "আরামদায়ক লিনেন এবং মার্জিত সুতি কাপড়ের নতুন কালেকশন দেখে নিন।",
     },
   },
   products: {
     linenShirt: {
-      headline: "The Definitive Summer Staple.",
-      description: "Woven from 100% premium flax, this shirt breathes instinctively with your skin. Exceptionally lightweight and naturally textured, it features a relaxed camp collar that drapes effortlessly over the collarbone. Designed to look just as refined gently rumpled as it does sharply pressed. The perfect antidote to humid afternoons.",
+      headline: "গরমে আরামের সেরা সঙ্গী।",
+      description: "১০০% প্রিমিয়াম ফ্ল্যাক্স লিনেন দিয়ে তৈরি এই শার্টটি অত্যন্ত হালকা এবং স্বাভাবিকভাবে বাতাস চলাচল করতে সাহায্য করে। এর চমৎকার ন্যাচারাল টেক্সচার এবং আরামদায়ক ক্যাম্প কলার আপনাকে দেবে ছিমছাম অথচ চমৎকার ক্যাজুয়াল লুক। গরমে আরাম ও স্বস্তিতে থাকার জন্য এটি নিখুঁত পছন্দ।",
     },
     cottonTrousers: {
-      headline: "Structure Meets Fluidity.",
-      description: "Cut from a densely woven, breathable cotton-twill blend, these trousers offer a sharp, tailored silhouette without the restriction. Featuring a single subtle pleat and a relaxed taper through the leg, they transition seamlessly from the boardroom to evening escapes. Effortless confidence, everyday.",
+      headline: "মার্জিত এবং সাবলীল বুনন।",
+      description: "উচ্চমানের ঘন সুতি কাপড়ে তৈরি এই ট্রাউজারটি একই সাথে আরামদায়ক এবং মার্জিত। এটি ক্যাজুয়াল ও অফিসিয়াল উভয় পরিবেশেই ব্যবহারের উপযোগী। এর নিখুঁত ট্যাপার্ড ফিটিং এবং হালকা ভাঁজ সারাদিনের কর্মব্যস্ততায় আপনাকে দেবে পূর্ণ আত্মবিশ্বাস ও স্বস্তি।",
     },
     fusionKurta: {
-      headline: "Tradition, Modernized.",
-      description: "A minimalist reimagining of the classic silhouette. Stripped of excess embroidery, the beauty of this kurta lies in its impeccable cut and featherweight cotton-silk blend. A concealed placket and sharp mandarin collar create a clean, architectural line. For the man who whispers, rather than shouts, his arrival.",
+      headline: "ঐতিহ্য ও আধুনিকতার মেলবন্ধন।",
+      description: "ঐতিহ্যের এক চমত্কার আধুনিক ও মিনিমালিস্ট রূপ। অতিরিক্ত ভারী নকশা বাদ দিয়ে অত্যন্ত হালকা ও প্রিমিয়াম কটন-সিল্ক কাপড়ে তৈরি এই কুর্তাটি আপনাকে দেবে ছিমছাম ও পরিপাটি লুক। এর নিখুঁত কাটিং ও ম্যান্ডারিন কলার আপনাকে ভিড়ের মাঝেও ফুটিয়ে তুলবে অনন্যভাবে।",
     },
   },
   brandStory: {
-    title: "Crafted for the Climate. Rooted in Intent.",
-    content: `At AS SIDRAT, we believe true luxury is feeling entirely at ease in your own skin.
+    title: "জলবায়ুর সাথে সামঞ্জস্যপূর্ণ বুনন। সচেতন জীবনযাত্রা।",
+    content: `AS SIDRAT-এ আমরা বিশ্বাস করি যে, নিজের পোশাকে সম্পূর্ণ স্বাচ্ছন্দ্যে থাকতে পারাই আসল আভিজাত্য।
 
-Born in Dhaka, our collections are an homage to the slow, intentional art of dressing well. For too long, modern fashion has ignored the realities of the South Asian climate, prioritizing global trends over local comfort. We exist to bridge that gap.
+ঢাকায় শুরু হওয়া আমাদের প্রতিটি কালেকশন ধীর ও সুনির্দিষ্ট বুননের চমৎকার শিল্প। দীর্ঘদিন ধরে আধুনিক ফ্যাশন আমাদের অঞ্চলের আবহাওয়াকে উপেক্ষা করে বৈশ্বিক ধারা অনুসরণ করেছে, যেখানে আরামকে অগ্রাধিকার দেওয়া হয়নি। আমরা সেই দূরত্ব ঘোচাতে এসেছি।
 
-We source the world’s finest breathable fabrics—pure linens, long-staple cottons, and featherweight blends—to engineer silhouettes that respect our weather. Every seam, every button, and every drape is designed with one purpose: to let you breathe.
+আমরা বিশ্বসেরা বাতাস চলাচলকারী কাপড়—যেমন খাঁটি লিনেন, কটন ও হালকা সুতা বেছে নিই এমন পোশাক তৈরি করতে যা আমাদের আবহাওয়াকে সম্মান করে। প্রতিটি সেলাই, বোতাম এবং ফিনিশিংয়ের উদ্দেশ্য একটাই: আপনাকে স্বাচ্ছন্দ্যে নিঃশ্বাস নিতে দেওয়া।
 
-Minimalist by design, emotional in detail. We are not just making clothes. We are crafting a modern Bengal legacy.`,
+ছিমছাম ডিজাইন, অনুভূতিপূর্ণ বিশদ। আমরা কেবল পোশাক তৈরি করছি না। আমরা বাংলার নতুন ঐতিহ্য বিনির্মাণ করছি।`,
   },
   cta: {
-    homepageHero: "Explore the Collection",
-    discoverLinen: "Discover Linen",
-    productQuickAdd: "Quick Add",
-    productViewDetails: "View Details",
-    addToWardrobe: "Add to Wardrobe",
-    addToCart: "Add to Cart",
-    secureOrder: "Secure Order",
-    completePurchase: "Complete Purchase",
-    newsletterJoin: "Join the Inner Circle",
-    newsletterSubscribe: "Subscribe to Elegance",
-    outOfStock: "Notify When Available",
+    homepageHero: "কালেকশনগুলো দেখুন",
+    discoverLinen: "লিনেন কালেকশন",
+    productQuickAdd: "ঝটপট যোগ করুন",
+    productViewDetails: "বিস্তারিত দেখুন",
+    addToWardrobe: "কার্টে যোগ করুন",
+    addToCart: "কার্টে যোগ করুন",
+    secureOrder: "নিরাপদ অর্ডার",
+    completePurchase: "অর্ডার সম্পূর্ণ করুন",
+    newsletterJoin: "আমাদের সাথে যুক্ত হন",
+    newsletterSubscribe: "সাবস্ক্রাইব করুন",
+    outOfStock: "স্টকে আসলে জানান",
   },
 };
+
