@@ -60,7 +60,7 @@ export function Navbar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 md:py-3 sm:px-8 lg:px-12">
         <Link href="/" className="flex items-center">
           {settings?.logo ? (
-            <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-12 md:h-18 w-auto object-contain" />
+            <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-16 md:h-24 w-auto object-contain" />
           ) : (
             <span className="text-xl font-bold tracking-tight text-loomra-black">AS SIDRAT</span>
           )}
