@@ -31,6 +31,9 @@ interface Settings {
   freeShippingTrigger?: string;
   freeShippingMinQuantity?: number;
   freeShippingMinAmount?: number;
+  categoryImageMen?: string;
+  categoryImageWomen?: string;
+  categoryImageFusion?: string;
 }
 
 interface SettingsState {

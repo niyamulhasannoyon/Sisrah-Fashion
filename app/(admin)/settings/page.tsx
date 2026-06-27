@@ -25,6 +25,9 @@ export default function AdminSettings() {
     freeShippingTrigger: 'none',
     freeShippingMinQuantity: 2,
     freeShippingMinAmount: 3000,
+    categoryImageMen: '',
+    categoryImageWomen: '',
+    categoryImageFusion: '',
     heroHeadline: '',
     heroSubheadline: '',
     ethosHeadline: '',
@@ -63,6 +66,9 @@ export default function AdminSettings() {
             freeShippingTrigger: 'none',
             freeShippingMinQuantity: 2,
             freeShippingMinAmount: 3000,
+            categoryImageMen: '',
+            categoryImageWomen: '',
+            categoryImageFusion: '',
             heroHeadline: '',
             heroSubheadline: '',
             ethosHeadline: '',
@@ -374,6 +380,108 @@ export default function AdminSettings() {
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm resize-none"
                   placeholder="e.g. We source the finest long-staple cotton..."
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Homepage Category Banner Images */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+          <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+            <ImageIcon size={18} className="text-slate-400" /> Homepage Category Banners
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Men's Banner */}
+            <div className="space-y-4">
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest block">Men's Category Image</label>
+              <div className="aspect-[4/5] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center relative group">
+                {settings.categoryImageMen ? (
+                  <img src={getDirectImageLink(settings.categoryImageMen)} className="w-full h-full object-cover animate-in fade-in duration-300" alt="Men's Banner" />
+                ) : (
+                  <span className="text-xs text-slate-400">Default Unsplash Image</span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={settings.categoryImageMen || ''}
+                  onChange={e => setSettings({...settings, categoryImageMen: e.target.value})}
+                  className="flex-1 p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-xs"
+                  placeholder="URL..."
+                />
+                <label className="px-3 py-2 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-1 shrink-0">
+                  <UploadCloud size={14} />
+                  <span className="text-[9px] font-black uppercase">Upload</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                    if (!e.target.files?.[0]) return;
+                    setSaving(true);
+                    const data = await uploadToCloudinary(e.target.files[0]);
+                    setSettings({...settings, categoryImageMen: data.secure_url});
+                    setSaving(false);
+                  }} />
+                </label>
+              </div>
+            </div>
+            {/* Women's Banner */}
+            <div className="space-y-4">
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest block">Women's Category Image</label>
+              <div className="aspect-[4/5] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center relative group">
+                {settings.categoryImageWomen ? (
+                  <img src={getDirectImageLink(settings.categoryImageWomen)} className="w-full h-full object-cover animate-in fade-in duration-300" alt="Women's Banner" />
+                ) : (
+                  <span className="text-xs text-slate-400">Default Unsplash Image</span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={settings.categoryImageWomen || ''}
+                  onChange={e => setSettings({...settings, categoryImageWomen: e.target.value})}
+                  className="flex-1 p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-xs"
+                  placeholder="URL..."
+                />
+                <label className="px-3 py-2 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-1 shrink-0">
+                  <UploadCloud size={14} />
+                  <span className="text-[9px] font-black uppercase">Upload</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                    if (!e.target.files?.[0]) return;
+                    setSaving(true);
+                    const data = await uploadToCloudinary(e.target.files[0]);
+                    setSettings({...settings, categoryImageWomen: data.secure_url});
+                    setSaving(false);
+                  }} />
+                </label>
+              </div>
+            </div>
+            {/* Fusion's Banner */}
+            <div className="space-y-4">
+              <label className="text-xs font-bold uppercase text-slate-500 tracking-widest block">Fusion Category Image</label>
+              <div className="aspect-[4/5] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center relative group">
+                {settings.categoryImageFusion ? (
+                  <img src={getDirectImageLink(settings.categoryImageFusion)} className="w-full h-full object-cover animate-in fade-in duration-300" alt="Fusion Banner" />
+                ) : (
+                  <span className="text-xs text-slate-400">Default Unsplash Image</span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={settings.categoryImageFusion || ''}
+                  onChange={e => setSettings({...settings, categoryImageFusion: e.target.value})}
+                  className="flex-1 p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-xs"
+                  placeholder="URL..."
+                />
+                <label className="px-3 py-2 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-1 shrink-0">
+                  <UploadCloud size={14} />
+                  <span className="text-[9px] font-black uppercase">Upload</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                    if (!e.target.files?.[0]) return;
+                    setSaving(true);
+                    const data = await uploadToCloudinary(e.target.files[0]);
+                    setSettings({...settings, categoryImageFusion: data.secure_url});
+                    setSaving(false);
+                  }} />
+                </label>
               </div>
             </div>
           </div>

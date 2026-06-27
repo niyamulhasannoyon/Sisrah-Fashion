@@ -32,6 +32,11 @@ const SettingsSchema = new Schema({
   freeShippingTrigger: { type: String, default: 'none' },
   freeShippingMinQuantity: { type: Number, default: 2 },
   freeShippingMinAmount: { type: Number, default: 3000 },
+  
+  // Dynamic category banner images
+  categoryImageMen: String,
+  categoryImageWomen: String,
+  categoryImageFusion: String,
 }, { timestamps: true });
 
 export default mongoose.models.Settings || mongoose.model('Settings', SettingsSchema);

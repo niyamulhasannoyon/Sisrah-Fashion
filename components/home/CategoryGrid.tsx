@@ -1,27 +1,39 @@
-import Link from 'next/link';
+'use client';
 
-const categories = [
-  {
-    title: 'Men',
-    subtitle: 'Tailored essentials',
-    href: '/category/men',
-    image: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=600&auto=format&fit=crop'
-  },
-  {
-    title: 'Women',
-    subtitle: 'Minimal silhouettes',
-    href: '/category/women',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop'
-  },
-  {
-    title: 'Fusion',
-    subtitle: 'Modern heritage',
-    href: '/category/fusion',
-    image: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop'
-  }
-];
+import Link from 'next/link';
+import { useEffect } from 'react';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { getDirectImageLink } from '@/lib/utils';
 
 export function CategoryGrid() {
+  const { settings, fetchSettings } = useSettingsStore();
+
+  useEffect(() => {
+    if (!settings) {
+      fetchSettings();
+    }
+  }, [settings, fetchSettings]);
+
+  const categories = [
+    {
+      title: 'Men',
+      subtitle: 'Tailored essentials',
+      href: '/category/men',
+      image: settings?.categoryImageMen ? getDirectImageLink(settings.categoryImageMen) : 'https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=600&auto=format&fit=crop'
+    },
+    {
+      title: 'Women',
+      subtitle: 'Minimal silhouettes',
+      href: '/category/women',
+      image: settings?.categoryImageWomen ? getDirectImageLink(settings.categoryImageWomen) : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop'
+    },
+    {
+      title: 'Fusion',
+      subtitle: 'Modern heritage',
+      href: '/category/fusion',
+      image: settings?.categoryImageFusion ? getDirectImageLink(settings.categoryImageFusion) : 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop'
+    }
+  ];
   return (
     <section className="bg-loomra-white py-24">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
