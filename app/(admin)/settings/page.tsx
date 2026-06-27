@@ -302,7 +302,10 @@ export default function AdminSettings() {
                 Homepage Hero & Brand Images
               </h3>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Slider Images (Backgrounds)</label>
+                <div>
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Slider Images (Backgrounds)</label>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Add as many images as you like. They will rotate automatically on the homepage hero banner.</p>
+                </div>
                 
                 {/* List of current hero images */}
                 <div className="flex flex-wrap gap-4 mb-2">
