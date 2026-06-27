@@ -40,16 +40,21 @@ interface Settings {
 interface SettingsState {
   settings: Settings | null;
   loading: boolean;
-  fetchSettings: () => Promise<void>;
+  fetchSettings: (force?: boolean) => Promise<void>;
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: null,
   loading: false,
-  fetchSettings: async () => {
+  fetchSettings: async (force = false) => {
+    // If settings are already fetched and force is not requested, skip
+    if (get().settings && !force) return;
+    // Prevent duplicate concurrent requests
+    if (get().loading) return;
+
     set({ loading: true });
     try {
-      const res = await fetch('/api/admin/settings');
+      const res = await fetch('/api/admin/settings', { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         set({ settings: data.settings, loading: false });

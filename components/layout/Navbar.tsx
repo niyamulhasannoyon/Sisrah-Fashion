@@ -128,22 +128,25 @@ export function Navbar() {
               onClick={() => setOpen(false)}
               className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
             />
-            
             {/* Right Side Slide-out Drawer */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-[280px] bg-loomra-white p-6 shadow-2xl md:hidden flex flex-col justify-between"
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-[290px] bg-white p-6 shadow-2xl md:hidden flex flex-col justify-between border-l border-slate-100"
             >
               <div className="flex flex-col gap-8">
                 {/* Drawer Header */}
-                <div className="flex justify-between items-center border-b border-loomra-surface pb-4">
-                  <span className="text-xs font-black uppercase tracking-widest text-loomra-muted">Navigation</span>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                  {settings?.logo ? (
+                    <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-8 w-auto object-contain" />
+                  ) : (
+                    <span className="text-sm font-black tracking-widest text-slate-800 uppercase">AS SIDRAT</span>
+                  )}
                   <button
                     type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-loomra-surface text-loomra-black text-xs font-black hover:border-loomra-red hover:text-loomra-red transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-black hover:text-black transition-colors text-xs font-bold"
                     onClick={() => setOpen(false)}
                   >
                     ✕
@@ -151,53 +154,55 @@ export function Navbar() {
                 </div>
                 
                 {/* Menu Links */}
-                <nav className="flex flex-col gap-5">
+                <nav className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-2 block ml-3">Collections</span>
                   {menu.map(item => (
                     <Link 
                       key={item.href} 
                       href={item.href} 
                       onClick={() => setOpen(false)} 
-                      className="text-sm font-black uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors flex items-center justify-between group"
+                      className="flex items-center justify-between px-3 py-3 rounded-lg text-xs font-bold uppercase tracking-widest text-slate-800 hover:text-[#A31F24] hover:bg-slate-50 transition-all duration-200 group"
                     >
                       <span>{item.label}</span>
-                      <span className="text-gray-300 group-hover:text-loomra-red transition-transform group-hover:translate-x-1 duration-300">→</span>
+                      <span className="text-slate-300 group-hover:text-[#A31F24] group-hover:translate-x-1 transition-all duration-300">→</span>
                     </Link>
                   ))}
                 </nav>
               </div>
-
+ 
               {/* Drawer Bottom Actions */}
-              <div className="border-t border-loomra-surface pt-6 space-y-4">
+              <div className="border-t border-slate-100 pt-6 space-y-4">
                 {isAuthenticated ? (
-                  <>
+                  <div className="space-y-3">
                     <Link 
                       href="/profile" 
                       onClick={() => setOpen(false)} 
-                      className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-loomra-black hover:text-loomra-red transition-colors"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors"
                     >
-                      <User size={18} />
+                      <User size={18} className="text-slate-500" />
                       Profile Details
                     </Link>
                     <button 
                       onClick={() => { handleLogout(); setOpen(false); }} 
-                      className="w-full text-center bg-loomra-black text-white py-3.5 text-xs font-black uppercase tracking-widest hover:bg-loomra-red transition-colors rounded-lg shadow-md"
+                      className="w-full text-center bg-black text-white py-3.5 text-xs font-black uppercase tracking-widest hover:bg-[#A31F24] transition-colors rounded-lg shadow-md"
                     >
                       Logout
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <div className="flex flex-col gap-2.5">
+                    <span className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-1 block ml-1">Account</span>
                     <Link 
                       href="/login" 
                       onClick={() => setOpen(false)} 
-                      className="w-full text-center border border-loomra-black py-3 text-xs font-black uppercase tracking-widest text-loomra-black hover:bg-loomra-surface transition-colors rounded-lg"
+                      className="w-full text-center border border-black py-3.5 text-xs font-black uppercase tracking-widest text-black hover:bg-slate-50 transition-colors rounded-lg"
                     >
                       Login
                     </Link>
                     <Link 
                       href="/login?register=true" 
                       onClick={() => setOpen(false)} 
-                      className="w-full text-center bg-loomra-black text-white py-3 text-xs font-black uppercase tracking-widest hover:bg-loomra-red transition-colors rounded-lg"
+                      className="w-full text-center bg-black text-white py-3.5 text-xs font-black uppercase tracking-widest hover:bg-[#A31F24] transition-colors rounded-lg shadow-sm"
                     >
                       Sign Up
                     </Link>

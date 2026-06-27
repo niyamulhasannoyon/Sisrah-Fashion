@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Save, Loader2, UploadCloud, X, Users, Image as ImageIcon, Sliders, Layers, Truck, Settings } from 'lucide-react';
 import { getDirectImageLink } from '@/lib/utils';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState<any>({
@@ -138,7 +139,11 @@ export default function AdminSettings() {
         body: JSON.stringify(settings),
       });
       if (res.ok) {
-        alert("Settings updated successfully!");
+        const data = await res.json();
+        if (data.success) {
+          useSettingsStore.setState({ settings: data.settings });
+          alert("Settings updated successfully!");
+        }
       }
     } catch (error) {
       alert("Failed to update settings.");

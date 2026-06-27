@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Settings from '@/models/Settings';
-
 import { isAdmin } from '@/lib/adminAuth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

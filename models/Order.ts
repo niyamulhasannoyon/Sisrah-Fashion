@@ -20,6 +20,7 @@ export interface IOrder extends Document {
   paymentStatus: string;
   orderStatus: string;
   orderId: number;
+  transactionId?: string;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -45,6 +46,7 @@ const OrderSchema: Schema = new Schema(
     paymentStatus: { type: String, default: 'Pending' },
     orderStatus: { type: String, default: 'Processing' },
     orderId: { type: Number, unique: true },
+    transactionId: { type: String },
   },
   { timestamps: true }
 );

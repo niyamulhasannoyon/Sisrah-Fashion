@@ -17,6 +17,8 @@ export default function CheckoutPage() {
 
   const [shippingInfo, setShippingInfo] = useState({ name: '', phone: '', address: '', city: '' });
   const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
+  const [txnId, setTxnId] = useState('');
+  const [txnIdError, setTxnIdError] = useState('');
 
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -103,23 +105,50 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setTxnIdError('');
 
-    if (paymentMethod !== 'Cash on Delivery') {
-      alert("Online payment is being integrated. Please use Cash on Delivery.");
-      setLoading(false);
-      return;
+    if (paymentMethod === 'Mobile Banking') {
+      if (!txnId) {
+        setTxnIdError("Please enter your Transaction ID");
+        setLoading(false);
+        return;
+      }
+      if (txnId.length <= 6) {
+        setTxnIdError("Invalid Transaction ID. It must be at least 7 characters.");
+        setLoading(false);
+        return;
+      }
+      alert("Payment Successful & Order Confirmed!");
+    } else {
+      const confirmOrder = confirm(`Confirm placing order for ৳${finalTotal.toLocaleString()} via Cash on Delivery?`);
+      if (!confirmOrder) {
+        setLoading(false);
+        return;
+      }
     }
 
     try {
+      const orderPayload = {
+        shippingInfo,
+        orderItems: cart,
+        totalAmount: finalTotal,
+        paymentMethod,
+        paymentStatus: paymentMethod === 'Mobile Banking' ? 'Paid' : 'Pending',
+        transactionId: paymentMethod === 'Mobile Banking' ? txnId : undefined,
+        couponCode: appliedCoupon?.code
+      };
+
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shippingInfo, orderItems: cart, totalAmount: finalTotal, paymentMethod, couponCode: appliedCoupon?.code }),
+        body: JSON.stringify(orderPayload),
       });
       const data = await res.json();
       if (data.success) {
         clearCart();
         router.push(`/order-success?id=${data.orderId}&phone=${data.phone}`);
+      } else {
+        alert('Order failed: ' + (data.error || 'Unknown error'));
       }
     } catch (error) {
       alert('Order failed!');
@@ -248,20 +277,64 @@ export default function CheckoutPage() {
                       <input type="radio" name="payment" value="Cash on Delivery" checked={paymentMethod === 'Cash on Delivery'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
 
-                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'SSLCommerz' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200 opacity-60'}`}>
+                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'Mobile Banking' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
                       <div className="flex items-center gap-4">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'SSLCommerz' ? 'border-black' : 'border-gray-300'}`}>
-                          {paymentMethod === 'SSLCommerz' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'Mobile Banking' ? 'border-black' : 'border-gray-300'}`}>
+                          {paymentMethod === 'Mobile Banking' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-black text-sm uppercase tracking-tight">Digital Payment</span>
-                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">bKash, Nagad, Cards</span>
+                          <span className="font-black text-sm uppercase tracking-tight">Mobile Banking</span>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Bkash, Nagad, Rocket</span>
                         </div>
                       </div>
-                      <CreditCard className={paymentMethod === 'SSLCommerz' ? 'text-black' : 'text-gray-300'} size={24} />
-                      <input type="radio" name="payment" value="SSLCommerz" checked={paymentMethod === 'SSLCommerz'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
+                      <CreditCard className={paymentMethod === 'Mobile Banking' ? 'text-black' : 'text-gray-300'} size={24} />
+                      <input type="radio" name="payment" value="Mobile Banking" checked={paymentMethod === 'Mobile Banking'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
                   </div>
+
+                  {paymentMethod === 'Cash on Delivery' ? (
+                    <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100/50">
+                      <p className="text-xs text-gray-600 leading-relaxed font-medium">
+                        You will pay a total of <span className="font-bold text-black">৳{finalTotal.toLocaleString()}</span> in cash when the delivery agent arrives at your address.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100/50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Payment Instructions</p>
+                        <p className="text-xs text-gray-600 leading-relaxed font-medium">
+                          Please Send Money of <span className="font-bold text-black">৳{finalTotal.toLocaleString()}</span> to this number:
+                        </p>
+                        <div className="bg-white p-3.5 rounded-xl border border-gray-200/60 flex justify-between items-center max-w-sm">
+                          <span className="font-mono text-sm font-bold text-black tracking-wider">
+                            {settings?.whatsappNumber || '01733919156'}
+                          </span>
+                          <span className="text-[9px] bg-gray-100 px-2 py-0.5 rounded font-black uppercase tracking-widest text-gray-500">
+                            Bkash/Nagad/Rocket
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 pt-2 border-t border-gray-200/50">
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block ml-0.5">Transaction ID (TxnID)</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. 9J88X29K" 
+                          value={txnId}
+                          onChange={(e) => {
+                            setTxnId(e.target.value.trim());
+                            if (e.target.value.trim().length > 0) setTxnIdError('');
+                          }}
+                          className={`w-full border p-3.5 rounded-xl focus:bg-white outline-none transition-all text-sm font-medium ${
+                            txnIdError ? 'border-red-500 bg-red-50/10' : 'border-gray-200 bg-white focus:border-black'
+                          }`}
+                        />
+                        {txnIdError && (
+                          <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">{txnIdError}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </form>
             </div>
@@ -359,7 +432,7 @@ export default function CheckoutPage() {
                 >
                   {loading ? <Loader2 className="animate-spin" /> : (
                     <>
-                      Place My Order <ShieldCheck size={20} className="group-hover:scale-125 transition-transform duration-500" />
+                      {paymentMethod === 'Mobile Banking' ? 'Verify & Confirm Order' : 'Place My Order'} <ShieldCheck size={20} className="group-hover:scale-125 transition-transform duration-500" />
                     </>
                   )}
                 </button>
