@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Loader2, Eye, Search, AlertTriangle, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, Eye, Search, AlertTriangle, X, Copy } from 'lucide-react';
 
 export default function AdminProductsList() {
   const [products, setProducts] = useState<any[]>([]);
@@ -49,6 +49,50 @@ export default function AdminProductsList() {
       console.error("Failed to delete", error);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+
+  const handleDuplicate = async (product: any) => {
+    const confirmDuplicate = confirm(`Are you sure you want to duplicate "${product.title}"?`);
+    if (!confirmDuplicate) return;
+
+    setDuplicatingId(product._id);
+    try {
+      const { _id, id, createdAt, updatedAt, reviews, rating, numReviews, ...rest } = product;
+      
+      // Deep copy variants to prevent references if needed, and prepare payload
+      const duplicatedData = {
+        ...rest,
+        title: `${product.title} (Copy)`,
+        slug: `${product.slug}-copy-${Date.now()}`,
+        reviews: [],
+        rating: 0,
+        numReviews: 0,
+      };
+
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(duplicatedData),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setProducts([data.product, ...products]);
+        }
+      } else {
+        alert("Failed to duplicate product.");
+      }
+    } catch (error) {
+      console.error("Duplication error:", error);
+      alert("Error duplicating product.");
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
@@ -150,6 +194,19 @@ export default function AdminProductsList() {
                           <Link href={`/products/edit/${product._id}`} title="Edit" className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors">
                             <Edit size={18} />
                           </Link>
+                          <button 
+                            type="button"
+                            onClick={() => handleDuplicate(product)} 
+                            disabled={duplicatingId !== null}
+                            title="Duplicate" 
+                            className="p-2 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors disabled:opacity-50"
+                          >
+                            {duplicatingId === product._id ? (
+                              <Loader2 className="animate-spin text-amber-600" size={18} />
+                            ) : (
+                              <Copy size={18} />
+                            )}
+                          </button>
                           <button onClick={() => confirmDelete(product)} title="Delete" className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
                             <Trash2 size={18} />
                           </button>
