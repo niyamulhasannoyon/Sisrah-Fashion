@@ -10,6 +10,7 @@ export default function AdminSettings() {
     favicon: '',
     whatsappNumber: '',
     heroImage: '',
+    heroImages: [],
     ethosImage: '',
     communityImages: [],
     announcementText: '',
@@ -37,6 +38,8 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
   const [communityUrl, setCommunityUrl] = useState('');
+  const [uploadingHero, setUploadingHero] = useState(false);
+  const [heroUrl, setHeroUrl] = useState('');
 
   useEffect(() => {
     fetch('/api/admin/settings')
@@ -51,6 +54,7 @@ export default function AdminSettings() {
             favicon: '',
             whatsappNumber: '',
             heroImage: '',
+            heroImages: [],
             ethosImage: '',
             communityImages: [],
             announcementText: '',
@@ -298,25 +302,79 @@ export default function AdminSettings() {
                 Homepage Hero & Brand Images
               </h3>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Banner Image URL</label>
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Slider Images (Backgrounds)</label>
+                
+                {/* List of current hero images */}
+                <div className="flex flex-wrap gap-4 mb-2">
+                  {settings.heroImages?.map((img: any, idx: number) => (
+                    <div key={idx} className="relative w-32 h-20 border border-slate-100 rounded-xl overflow-hidden group shadow-sm bg-slate-50">
+                      <img src={getDirectImageLink(img.url)} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="hero slider banner" />
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newImages = settings.heroImages.filter((_: any, index: number) => index !== idx);
+                          setSettings({ ...settings, heroImages: newImages });
+                        }} 
+                        className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {/* Upload new hero image */}
+                  <label className="w-32 h-20 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-black transition-all group shrink-0">
+                    {uploadingHero ? (
+                      <Loader2 size={16} className="animate-spin text-slate-400" />
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <UploadCloud size={16} className="text-slate-500 mb-1" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-black">Upload</span>
+                      </div>
+                    )}
+                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                      if (!e.target.files?.length) return;
+                      setSaving(true);
+                      setUploadingHero(true);
+                      try {
+                        const data = await uploadToCloudinary(e.target.files[0]);
+                        setSettings({
+                          ...settings,
+                          heroImages: [...(settings.heroImages || []), { url: data.secure_url, public_id: data.public_id }]
+                        });
+                      } catch (error) {
+                        alert("Upload failed!");
+                      } finally {
+                        setUploadingHero(false);
+                        setSaving(false);
+                      }
+                    }} />
+                  </label>
+                </div>
+
+                {/* Add by URL */}
                 <div className="flex gap-2">
                   <input 
                     type="text" 
-                    value={settings.heroImage || ''}
-                    onChange={e => setSettings({...settings, heroImage: e.target.value})}
-                    className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                    placeholder="Or paste image URL here..." 
+                    value={heroUrl}
+                    onChange={(e) => setHeroUrl(e.target.value)}
+                    className="flex-1 p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black text-xs"
                   />
-                  <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
-                    <UploadCloud size={18} />
-                    <span className="text-[10px] font-black uppercase">Upload</span>
-                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                      if (!e.target.files?.[0]) return;
-                      setSaving(true);
-                      const data = await uploadToCloudinary(e.target.files[0]);
-                      setSettings({...settings, heroImage: data.secure_url});
-                      setSaving(false);
-                    }} />
-                  </label>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      if (!heroUrl) return;
+                      setSettings({
+                        ...settings,
+                        heroImages: [...(settings.heroImages || []), { url: heroUrl, public_id: 'external' }]
+                      });
+                      setHeroUrl('');
+                    }}
+                    className="px-4 py-2.5 bg-black text-white text-xs font-bold uppercase rounded-lg hover:bg-slate-800 transition-all shrink-0 font-sans"
+                  >
+                    Add URL
+                  </button>
                 </div>
               </div>
               <div className="flex flex-col gap-2">

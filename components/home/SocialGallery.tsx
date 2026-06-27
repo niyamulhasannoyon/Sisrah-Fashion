@@ -1,13 +1,23 @@
 'use client';
 
+import Link from 'next/link';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { Image as ImageIcon } from 'lucide-react';
 
 export function SocialGallery() {
   const { settings } = useSettingsStore();
-  const images = settings?.communityImages || [];
 
-  if (images.length === 0) return null;
+  const defaultImages = [
+    { url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop' },
+    { url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop' },
+    { url: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=600&auto=format&fit=crop' },
+    { url: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop' },
+    { url: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=600&auto=format&fit=crop' },
+  ];
+
+  const images = settings?.communityImages && settings.communityImages.length > 0 
+    ? settings.communityImages 
+    : defaultImages;
 
   return (
     <section className="bg-white py-24 border-t border-slate-50 overflow-hidden">
@@ -34,6 +44,17 @@ export function SocialGallery() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* View Full Gallery Link */}
+        <div className="mt-8 text-center">
+          <Link 
+            href="/community" 
+            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-loomra-black border-b-2 border-loomra-black pb-1 hover:text-loomra-red hover:border-loomra-red transition-all duration-300"
+          >
+            <span>View Full Gallery</span>
+            <span>→</span>
+          </Link>
         </div>
       </div>
     </section>
