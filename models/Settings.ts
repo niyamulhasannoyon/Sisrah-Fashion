@@ -32,6 +32,7 @@ const SettingsSchema = new Schema({
   freeShippingTrigger: { type: String, default: 'none' },
   freeShippingMinQuantity: { type: Number, default: 2 },
   freeShippingMinAmount: { type: Number, default: 3000 },
+  paymentNumber: String,
   
   // Dynamic category banner images
   categoryImageMen: String,

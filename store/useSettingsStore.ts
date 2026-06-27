@@ -3,6 +3,7 @@ import { create } from 'zustand';
 interface Settings {
   logo: string;
   whatsappNumber: string;
+  paymentNumber?: string;
   heroImage: string;
   ethosImage: string;
   communityImages: { url: string; public_id: string }[];

@@ -307,7 +307,7 @@ export default function CheckoutPage() {
                         </p>
                         <div className="bg-white p-3.5 rounded-xl border border-gray-200/60 flex justify-between items-center max-w-sm">
                           <span className="font-mono text-sm font-bold text-black tracking-wider">
-                            {settings?.whatsappNumber || '01733919156'}
+                            {settings?.paymentNumber || '01733919156'}
                           </span>
                           <span className="text-[9px] bg-gray-100 px-2 py-0.5 rounded font-black uppercase tracking-widest text-gray-500">
                             Bkash/Nagad/Rocket

@@ -27,6 +27,7 @@ export default function AdminSettings() {
     freeShippingTrigger: 'none',
     freeShippingMinQuantity: 2,
     freeShippingMinAmount: 3000,
+    paymentNumber: '',
     categoryImageMen: '',
     categoryImageWomen: '',
     categoryImageFusion: '',
@@ -72,6 +73,7 @@ export default function AdminSettings() {
             freeShippingTrigger: 'none',
             freeShippingMinQuantity: 2,
             freeShippingMinAmount: 3000,
+            paymentNumber: '',
             categoryImageMen: '',
             categoryImageWomen: '',
             categoryImageFusion: '',
@@ -785,6 +787,26 @@ export default function AdminSettings() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Mobile Banking Settings */}
+                <div className="border-t border-slate-100 pt-6 space-y-4">
+                  <h4 className="font-bold text-slate-800 text-sm">
+                    Mobile Banking Settings
+                  </h4>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Payment Recipient Number</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. 01733919156"
+                      value={settings.paymentNumber || ''}
+                      onChange={e => setSettings({...settings, paymentNumber: e.target.value})}
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
+                    />
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      This number is displayed to customers at checkout under Mobile Banking instructions.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

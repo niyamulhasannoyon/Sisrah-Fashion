@@ -44,6 +44,24 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handlePaymentStatusChange = async (orderId: string, newPaymentStatus: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus: newPaymentStatus }),
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setOrders(orders.map(order => order._id === orderId ? { ...order, paymentStatus: newPaymentStatus } : order));
+        setSelectedOrder((prev: any) => prev && prev._id === orderId ? { ...prev, paymentStatus: newPaymentStatus } : prev);
+      }
+    } catch (error) {
+      alert("Failed to update payment status");
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'Processing': return 'bg-yellow-100 text-yellow-800';
@@ -167,19 +185,61 @@ export default function AdminOrdersPage() {
                       <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Method</span>
                       <span className="text-sm font-bold">{selectedOrder.paymentMethod}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Status</span>
+
+                    {selectedOrder.transactionId && (
+                      <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-between items-center">
+                        <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">TxnID</span>
+                        <span className="text-sm font-mono font-black text-[#A31F24] tracking-wider select-all">{selectedOrder.transactionId}</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
+                      <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Payment Status</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${
+                        selectedOrder.paymentStatus === 'Paid' 
+                          ? 'bg-green-50 text-green-800 border-green-200' 
+                          : 'bg-yellow-50 text-yellow-800 border-yellow-200'
+                      }`}>
+                        {selectedOrder.paymentStatus || 'Pending'}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
+                      <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Order Status</span>
                       <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider ${getStatusColor(selectedOrder.orderStatus)}`}>
                         {selectedOrder.orderStatus}
                       </span>
                     </div>
+
                     {selectedOrder.couponCode && (
-                       <div className="flex justify-between items-center">
+                       <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
                          <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Coupon</span>
                          <span className="text-sm font-bold text-green-600">{selectedOrder.couponCode}</span>
                        </div>
                     )}
                   </div>
+
+                  {/* Payment Confirmation Buttons */}
+                  {selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus !== 'Paid' ? (
+                    <button
+                      onClick={() => handlePaymentStatusChange(selectedOrder._id, 'Paid')}
+                      className="w-full bg-[#A31F24] hover:bg-red-800 text-white text-xs font-black uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      ✓ Verify & Confirm Payment (TxnID Matches)
+                    </button>
+                  ) : selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus === 'Paid' ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="p-3 bg-green-50 text-green-800 rounded-xl border border-green-100 text-center text-xs font-bold uppercase tracking-wide">
+                        ✓ Payment Confirmed
+                      </div>
+                      <button
+                        onClick={() => handlePaymentStatusChange(selectedOrder._id, 'Pending')}
+                        className="w-full text-center text-gray-400 hover:text-red-600 text-[10px] font-bold uppercase tracking-widest underline py-1"
+                      >
+                        Reset Payment Status to Pending
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
