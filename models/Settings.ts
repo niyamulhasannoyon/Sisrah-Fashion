@@ -29,6 +29,9 @@ const SettingsSchema = new Schema({
   // E-commerce checkout constants
   shippingInsideDhaka: Number,
   shippingOutsideDhaka: Number,
+  freeShippingTrigger: { type: String, default: 'none' },
+  freeShippingMinQuantity: { type: Number, default: 2 },
+  freeShippingMinAmount: { type: Number, default: 3000 },
 }, { timestamps: true });
 
 export default mongoose.models.Settings || mongoose.model('Settings', SettingsSchema);

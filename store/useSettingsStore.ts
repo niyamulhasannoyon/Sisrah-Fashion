@@ -28,6 +28,9 @@ interface Settings {
   // E-commerce checkout constants
   shippingInsideDhaka?: number;
   shippingOutsideDhaka?: number;
+  freeShippingTrigger?: string;
+  freeShippingMinQuantity?: number;
+  freeShippingMinAmount?: number;
 }
 
 interface SettingsState {

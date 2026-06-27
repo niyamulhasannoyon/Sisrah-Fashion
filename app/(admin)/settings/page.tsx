@@ -22,6 +22,9 @@ export default function AdminSettings() {
     youtubeUrl: '',
     shippingInsideDhaka: 60,
     shippingOutsideDhaka: 120,
+    freeShippingTrigger: 'none',
+    freeShippingMinQuantity: 2,
+    freeShippingMinAmount: 3000,
     heroHeadline: '',
     heroSubheadline: '',
     ethosHeadline: '',
@@ -57,6 +60,9 @@ export default function AdminSettings() {
             youtubeUrl: '',
             shippingInsideDhaka: 60,
             shippingOutsideDhaka: 120,
+            freeShippingTrigger: 'none',
+            freeShippingMinQuantity: 2,
+            freeShippingMinAmount: 3000,
             heroHeadline: '',
             heroSubheadline: '',
             ethosHeadline: '',
@@ -398,6 +404,93 @@ export default function AdminSettings() {
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
                 />
               </div>
+            </div>
+
+            {/* Free Shipping Rules Section */}
+            <div className="border-t border-slate-100 pt-6 space-y-4">
+              <h4 className="font-bold text-slate-800 text-sm">
+                Free Shipping Rules
+              </h4>
+              
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Trigger Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'none', label: 'Disabled' },
+                    { id: 'quantity', label: 'By Quantity' },
+                    { id: 'amount', label: 'By Amount' }
+                  ].map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setSettings({ ...settings, freeShippingTrigger: option.id })}
+                      className={`p-2.5 text-xs font-bold uppercase rounded-lg border transition-all text-center ${
+                        settings.freeShippingTrigger === option.id
+                          ? 'bg-black text-white border-black shadow-sm'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {settings.freeShippingTrigger === 'quantity' && (
+                <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Minimum Items Count</label>
+                  <div className="flex gap-2 items-center">
+                    {[2, 3].map((qty) => (
+                      <button
+                        key={qty}
+                        type="button"
+                        onClick={() => setSettings({ ...settings, freeShippingMinQuantity: qty })}
+                        className={`px-4 py-2.5 text-xs font-bold rounded-lg border transition-all ${
+                          settings.freeShippingMinQuantity === qty
+                            ? 'bg-[#A31F24] text-white border-[#A31F24] shadow-sm'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {qty} Items
+                      </button>
+                    ))}
+                    <div className="relative flex-1">
+                      <input 
+                        type="number"
+                        placeholder="Custom Qty..."
+                        value={![2, 3].includes(settings.freeShippingMinQuantity) ? settings.freeShippingMinQuantity : ''}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          setSettings({ ...settings, freeShippingMinQuantity: isNaN(val) ? 0 : val });
+                        }}
+                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm pl-3 pr-16"
+                      />
+                      {![2, 3].includes(settings.freeShippingMinQuantity) && (
+                        <span className="absolute right-3 top-2.5 text-[9px] font-black uppercase text-[#A31F24]">Custom</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {settings.freeShippingTrigger === 'amount' && (
+                <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Minimum Order Amount (৳)</label>
+                  <div className="relative">
+                    <input 
+                      type="number"
+                      placeholder="e.g. 3000"
+                      value={settings.freeShippingMinAmount ?? ''}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setSettings({ ...settings, freeShippingMinAmount: isNaN(val) ? 0 : val });
+                      }}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm pl-8"
+                    />
+                    <span className="absolute left-3 top-2.5 text-slate-400 text-sm">৳</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -70,7 +70,26 @@ export default function CheckoutPage() {
     return appliedCoupon.discountValue;
   };
 
+  const getCartItemsCount = () => {
+    return cart.reduce((acc, item) => acc + item.quantity, 0);
+  };
+
+  const isShippingFree = () => {
+    if (!settings) return false;
+    const trigger = settings.freeShippingTrigger;
+    if (trigger === 'quantity') {
+      const minQty = settings.freeShippingMinQuantity ?? 2;
+      return getCartItemsCount() >= minQty;
+    }
+    if (trigger === 'amount') {
+      const minAmount = settings.freeShippingMinAmount ?? 3000;
+      return getCartTotal() >= minAmount;
+    }
+    return false;
+  };
+
   const getShippingCost = () => {
+    if (isShippingFree()) return 0;
     if (!shippingInfo.city) return 0;
     const isDhaka = shippingInfo.city.toLowerCase().includes('dhaka');
     if (isDhaka) {
@@ -316,8 +335,8 @@ export default function CheckoutPage() {
                   )}
                   <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-white/40">
                     <span>Shipping</span>
-                    <span className={getShippingCost() === 0 ? "text-green-400 italic" : "text-white"}>
-                      {getShippingCost() === 0 ? "Enter city for rate" : `৳${getShippingCost().toLocaleString()}`}
+                    <span className={isShippingFree() || (getShippingCost() === 0 && !shippingInfo.city) ? "text-green-400 italic font-bold" : "text-white"}>
+                      {isShippingFree() ? "FREE" : !shippingInfo.city ? "Enter city for rate" : `৳${getShippingCost().toLocaleString()}`}
                     </span>
                   </div>
                   
