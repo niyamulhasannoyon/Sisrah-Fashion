@@ -46,7 +46,7 @@ export function HeroSection() {
       {/* Content */}
       <div className="relative z-10 mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-80px)] max-w-6xl gap-5 sm:gap-7 px-4 py-16 text-center">
         <span className="text-[10px] sm:text-xs uppercase tracking-[0.32em] text-[#A31F24] font-black">Summer Essentials</span>
-        <h1 className="max-w-4xl text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-[1.3] sm:leading-[1.35] md:leading-[1.4] font-bengali px-2 sm:px-4 uppercase tracking-normal">
+        <h1 className="max-w-4xl text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.3] sm:leading-[1.35] md:leading-[1.4] font-bengali px-2 sm:px-4 tracking-normal">
           {headline}
         </h1>
         <p className="max-w-2xl text-xs sm:text-sm md:text-base lg:text-lg font-normal text-white/90 font-bengali px-4 leading-relaxed mt-2">
@@ -54,9 +54,10 @@ export function HeroSection() {
         </p>
         <Link
           href="/shop"
-          className="mt-4 sm:mt-6 inline-flex rounded-xl bg-[#A31F24] px-8 py-3.5 sm:px-10 sm:py-4.5 text-xs sm:text-sm font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-red-800 hover:scale-[1.02] shadow-md"
+          className="group mt-6 sm:mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-xs sm:text-sm font-bold uppercase tracking-widest text-black shadow-lg transition-all duration-300 hover:bg-[#A31F24] hover:text-white hover:scale-[1.03] active:scale-95"
         >
-          {LOOMRA_COPY.cta.homepageHero}
+          <span>{LOOMRA_COPY.cta.homepageHero}</span>
+          <span className="text-sm transition-transform duration-300 group-hover:translate-x-1.5">→</span>
         </Link>
       </div>
 

@@ -43,7 +43,7 @@ export function WhyChooseUs() {
             </span>
             
             {/* Foreground Title */}
-            <h2 className="relative text-2xl sm:text-3xl font-black text-loomra-black uppercase font-bengali z-10 leading-relaxed py-2">
+            <h2 className="relative text-2xl sm:text-3xl font-bold text-loomra-black font-bengali z-10 leading-relaxed py-2">
               কেন আমাদের বেছে নেবেন?
             </h2>
           </div>
