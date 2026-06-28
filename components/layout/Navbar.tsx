@@ -155,107 +155,107 @@ export function Navbar() {
           </button>
         </div>
       </div>
+    </header>
 
-      <AnimatePresence>
-        {open && (
-          <>
-            {/* Backdrop with Blur */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
-              className="fixed inset-0 z-[105] bg-slate-950/60 backdrop-blur-lg md:hidden"
-            />
-            {/* Right Side Slide-out Drawer */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
-              style={{ backgroundColor: '#FFFFFF' }}
-              className="fixed inset-y-0 right-0 z-[110] w-full bg-white p-6 shadow-2xl md:hidden flex flex-col justify-between border-l border-slate-100"
-            >
-              <div className="flex flex-col gap-8">
-                {/* Drawer Header */}
-                <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-                  {settings?.logo ? (
-                    <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-8 w-auto object-contain" />
-                  ) : (
-                    <span className="text-sm font-black tracking-widest text-slate-800 uppercase">AS SIDRAT</span>
-                  )}
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-black hover:text-black transition-colors text-xs font-bold"
-                    onClick={() => setOpen(false)}
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop with Blur */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 z-[105] bg-slate-950/60 backdrop-blur-lg md:hidden"
+          />
+          {/* Right Side Slide-out Drawer */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
+            style={{ backgroundColor: '#FFFFFF' }}
+            className="fixed inset-y-0 right-0 z-[110] w-full bg-white p-6 shadow-2xl md:hidden flex flex-col justify-between border-l border-slate-100"
+          >
+            <div className="flex flex-col gap-8">
+              {/* Drawer Header */}
+              <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                {settings?.logo ? (
+                  <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-8 w-auto object-contain" />
+                ) : (
+                  <span className="text-sm font-black tracking-widest text-slate-800 uppercase">AS SIDRAT</span>
+                )}
+                <button
+                  type="button"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-black hover:text-black transition-colors text-xs font-bold"
+                  onClick={() => setOpen(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              {/* Menu Links */}
+              <nav className="flex flex-col gap-3">
+                <span className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-2 block ml-4">Collections</span>
+                {menu.map(item => (
+                  <Link 
+                    key={item.href} 
+                    href={item.href} 
+                    onClick={() => setOpen(false)} 
+                    className="flex items-center justify-between px-4 py-4 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-800 hover:text-[#A31F24] hover:bg-slate-50 transition-all duration-200 group"
                   >
-                    ✕
+                    <span>{item.label}</span>
+                    <span className="text-slate-300 group-hover:text-[#A31F24] group-hover:translate-x-1.5 transition-transform duration-300">→</span>
+                  </Link>
+                ))}
+              </nav>
+            </div>
+
+            {/* Drawer Bottom Actions */}
+            <div className="border-t border-slate-100 pt-6 mt-auto">
+              {isAuthenticated ? (
+                <div className="space-y-3">
+                  <Link 
+                    href="/profile" 
+                    onClick={() => setOpen(false)} 
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-[0.15em] text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    <User size={18} className="text-slate-400" />
+                    <span>My Profile</span>
+                  </Link>
+                  <button 
+                    onClick={() => { handleLogout(); setOpen(false); }} 
+                    className="w-full text-center bg-black text-white py-4 text-xs font-black uppercase tracking-widest hover:bg-[#A31F24] transition-colors rounded-xl shadow-md"
+                  >
+                    Logout
                   </button>
                 </div>
-                
-                {/* Menu Links */}
-                <nav className="flex flex-col gap-3">
-                  <span className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-2 block ml-4">Collections</span>
-                  {menu.map(item => (
+              ) : (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-1 block ml-4">Account</span>
+                  <div className="grid grid-cols-2 gap-3">
                     <Link 
-                      key={item.href} 
-                      href={item.href} 
+                      href="/login" 
                       onClick={() => setOpen(false)} 
-                      className="flex items-center justify-between px-4 py-4 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-800 hover:text-[#A31F24] hover:bg-slate-50 transition-all duration-200 group"
+                      className="text-center border border-slate-200 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-slate-800 hover:bg-slate-50 hover:border-slate-850 transition-all duration-300 rounded-xl"
                     >
-                      <span>{item.label}</span>
-                      <span className="text-slate-300 group-hover:text-[#A31F24] group-hover:translate-x-1.5 transition-transform duration-300">→</span>
+                      Login
                     </Link>
-                  ))}
-                </nav>
-              </div>
- 
-              {/* Drawer Bottom Actions */}
-              <div className="border-t border-slate-100 pt-6 mt-auto">
-                {isAuthenticated ? (
-                  <div className="space-y-3">
                     <Link 
-                      href="/profile" 
+                      href="/login?register=true" 
                       onClick={() => setOpen(false)} 
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-[0.15em] text-slate-700 hover:bg-slate-50 transition-colors"
+                      className="text-center bg-[#1A1A1A] text-white py-3.5 text-xs font-black uppercase tracking-[0.15em] hover:bg-[#A31F24] transition-all duration-300 rounded-xl shadow-sm"
                     >
-                      <User size={18} className="text-slate-400" />
-                      <span>My Profile</span>
+                      Sign Up
                     </Link>
-                    <button 
-                      onClick={() => { handleLogout(); setOpen(false); }} 
-                      className="w-full text-center bg-black text-white py-4 text-xs font-black uppercase tracking-widest hover:bg-[#A31F24] transition-colors rounded-xl shadow-md"
-                    >
-                      Logout
-                    </button>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    <span className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-1 block ml-4">Account</span>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Link 
-                        href="/login" 
-                        onClick={() => setOpen(false)} 
-                        className="text-center border border-slate-200 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-slate-800 hover:bg-slate-50 hover:border-slate-850 transition-all duration-300 rounded-xl"
-                      >
-                        Login
-                      </Link>
-                      <Link 
-                        href="/login?register=true" 
-                        onClick={() => setOpen(false)} 
-                        className="text-center bg-[#1A1A1A] text-white py-3.5 text-xs font-black uppercase tracking-[0.15em] hover:bg-[#A31F24] transition-all duration-300 rounded-xl shadow-sm"
-                      >
-                        Sign Up
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </header>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
     </>
   );
 }
