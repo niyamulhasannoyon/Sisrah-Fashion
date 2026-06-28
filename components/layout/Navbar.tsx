@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { ShoppingBag, User } from 'lucide-react';
@@ -23,6 +24,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const { toggleCart, cart } = useCartStore();
   const { isAuthenticated, logout, checkAuth } = useAuthStore();
+  const pathname = usePathname();
 
   const { settings, fetchSettings } = useSettingsStore();
 
@@ -175,7 +177,7 @@ export function Navbar() {
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
             style={{ backgroundColor: '#FFFFFF' }}
-            className="fixed inset-y-0 right-0 z-[110] w-full bg-white p-6 shadow-2xl md:hidden flex flex-col justify-between border-l border-slate-100"
+            className="fixed inset-y-0 right-0 z-[110] w-full bg-white p-6 shadow-2xl md:hidden flex flex-col justify-between border-l border-slate-100 overflow-y-auto"
           >
             <div className="flex flex-col gap-8">
               {/* Drawer Header */}
@@ -187,7 +189,7 @@ export function Navbar() {
                 )}
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-black hover:text-black transition-colors text-xs font-bold"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-800 hover:border-black hover:text-black transition-colors text-xs font-bold"
                   onClick={() => setOpen(false)}
                 >
                   ✕
@@ -196,18 +198,29 @@ export function Navbar() {
               
               {/* Menu Links */}
               <nav className="flex flex-col gap-3">
-                <span className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-2 block ml-4">Collections</span>
-                {menu.map(item => (
-                  <Link 
-                    key={item.href} 
-                    href={item.href} 
-                    onClick={() => setOpen(false)} 
-                    className="flex items-center justify-between px-4 py-4 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-800 hover:text-[#A31F24] hover:bg-slate-50 transition-all duration-200 group"
-                  >
-                    <span>{item.label}</span>
-                    <span className="text-slate-300 group-hover:text-[#A31F24] group-hover:translate-x-1.5 transition-transform duration-300">→</span>
-                  </Link>
-                ))}
+                <span className="text-[10px] font-bold uppercase tracking-[3px] text-slate-500 mb-2 block ml-4">Collections</span>
+                {menu.map(item => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link 
+                      key={item.href} 
+                      href={item.href} 
+                      onClick={() => setOpen(false)} 
+                      className={`flex items-center justify-between px-4 py-4 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200 group ${
+                        isActive 
+                          ? 'text-[#A31F24] bg-slate-50' 
+                          : 'text-slate-900 hover:text-[#A31F24] hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <span className={`transition-transform duration-300 ${
+                        isActive 
+                          ? 'text-[#A31F24] translate-x-1.5' 
+                          : 'text-slate-300 group-hover:text-[#A31F24] group-hover:translate-x-1.5'
+                      }`}>→</span>
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
 
@@ -232,7 +245,7 @@ export function Navbar() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <span className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-1 block ml-4">Account</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[3px] text-slate-500 mb-1 block ml-4">Account</span>
                   <div className="grid grid-cols-2 gap-3">
                     <Link 
                       href="/login" 
