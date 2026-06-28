@@ -29,6 +29,31 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[#1A1A1A] border border-white/10 text-white rounded-xl p-4 shadow-xl backdrop-blur-md">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{label}</p>
+        <div className="flex flex-col gap-1.5">
+          {payload.map((item: any, index: number) => (
+            <div key={index} className="flex items-center gap-3 justify-between">
+              <div className="flex items-center gap-1.5">
+                <div 
+                  className="w-2 h-2 rounded-full" 
+                  style={{ backgroundColor: item.stroke }} 
+                />
+                <span className="text-xs text-gray-300 font-medium">{item.name}</span>
+              </div>
+              <span className="text-xs font-bold text-white">{item.value.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function AdminAnalytics() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -181,24 +206,20 @@ export default function AdminAnalytics() {
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#A31F24" stopOpacity={0.15}/>
+                  <stop offset="5%" stopColor="#A31F24" stopOpacity={0.25}/>
                   <stop offset="95%" stopColor="#A31F24" stopOpacity={0}/>
                 </linearGradient>
                 <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0F172A" stopOpacity={0.15}/>
-                  <stop offset="95%" stopColor="#0F172A" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.25}/>
+                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize: 11, fill: '#94a3b8'}} dy={10} />
               <YAxis axisLine={false} tickLine={false} tick={{fontSize: 11, fill: '#94a3b8'}} />
-              <ChartTooltip 
-                contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
-                labelStyle={{fontWeight: 'bold', color: '#64748b', fontSize: '11px'}}
-                itemStyle={{fontSize: '12px', fontWeight: 'bold'}}
-              />
+              <ChartTooltip content={<CustomTooltip />} />
               <Area type="monotone" name="Page Views" dataKey="pageviews" stroke="#A31F24" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" />
-              <Area type="monotone" name="Clicks" dataKey="clicks" stroke="#0F172A" strokeWidth={3} fillOpacity={1} fill="url(#colorClicks)" />
+              <Area type="monotone" name="Clicks" dataKey="clicks" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorClicks)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
