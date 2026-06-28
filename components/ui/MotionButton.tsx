@@ -18,7 +18,13 @@ export default function MotionButton({
   className = '',
   type = 'button'
 }: ButtonProps) {
-  const baseStyles = 'px-32px py-16px text-small font-bold uppercase tracking-widest flex items-center justify-center transition-colors';
+  // Detect if children contains Bengali characters to prevent text distortion and letter-spacing breaks
+  const hasBengali = typeof children === 'string' && /[\u0980-\u09FF]/.test(children);
+
+  const baseStyles = `
+    px-32px py-16px text-small flex items-center justify-center transition-colors
+    ${hasBengali ? 'font-bengali font-bold tracking-normal' : 'font-bold uppercase tracking-widest'}
+  `;
 
   const variants = {
     primary: 'bg-loomra-red text-loomra-white hover:bg-red-800',
