@@ -6,7 +6,7 @@ import User from '@/models/User';
 const ALLOWED_EMAILS = ['niyamulhasanbd@gmail.com', 'niyamulhasan1089@gmail.com'];
 
 export async function isAdmin() {
-  const token = cookies().get('loomra_token')?.value;
+  const token = (await cookies()).get('loomra_token')?.value;
 
   if (!token) return false;
 

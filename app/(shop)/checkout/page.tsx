@@ -151,13 +151,6 @@ export default function CheckoutPage() {
         return;
       }
       parsedPaidAmount = amt;
-      alert("Payment Info Submitted & Order Confirmed! Awaiting Admin Verification.");
-    } else {
-      const confirmOrder = confirm(`Confirm placing order for ৳${finalTotal.toLocaleString()} via Cash on Delivery?`);
-      if (!confirmOrder) {
-        setLoading(false);
-        return;
-      }
     }
 
     try {
