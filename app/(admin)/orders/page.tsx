@@ -13,13 +13,19 @@ export default function AdminOrdersPage() {
 
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [verificationInput, setVerificationInput] = useState('');
+  const [verifyAmountInput, setVerifyAmountInput] = useState('');
 
   useEffect(() => {
     setVerificationInput('');
+    setVerifyAmountInput('');
   }, [selectedOrder]);
 
   const isTxnIdMatched = selectedOrder && selectedOrder.transactionId 
     ? verificationInput.trim().toUpperCase() === selectedOrder.transactionId.trim().toUpperCase() 
+    : false;
+
+  const isAmountMatched = selectedOrder 
+    ? parseFloat(verifyAmountInput) === (selectedOrder.paidAmount !== undefined ? selectedOrder.paidAmount : selectedOrder.totalAmount)
     : false;
 
   const fetchOrders = async () => {
@@ -71,19 +77,23 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleVerifyConfirmPayment = async (orderId: string) => {
+  const handleVerifyConfirmPayment = async (order: any) => {
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
+      const targetPaid = order.paidAmount !== undefined ? order.paidAmount : order.totalAmount;
+      const targetPaymentStatus = targetPaid < order.totalAmount ? 'Partially Paid' : 'Paid';
+
+      const res = await fetch(`/api/orders/${order._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderStatus: 'Confirmed', paymentStatus: 'Paid' }),
+        body: JSON.stringify({ orderStatus: 'Confirmed', paymentStatus: targetPaymentStatus }),
       });
       const data = await res.json();
       
       if (data.success) {
-        setOrders(orders.map(order => order._id === orderId ? { ...order, orderStatus: 'Confirmed', paymentStatus: 'Paid' } : order));
-        setSelectedOrder((prev: any) => prev && prev._id === orderId ? { ...prev, orderStatus: 'Confirmed', paymentStatus: 'Paid' } : prev);
+        setOrders(orders.map(o => o._id === order._id ? { ...o, orderStatus: 'Confirmed', paymentStatus: targetPaymentStatus } : o));
+        setSelectedOrder((prev: any) => prev && prev._id === order._id ? { ...prev, orderStatus: 'Confirmed', paymentStatus: targetPaymentStatus } : prev);
         setVerificationInput('');
+        setVerifyAmountInput('');
       }
     } catch (error) {
       alert("Failed to confirm order and payment");
@@ -217,34 +227,83 @@ export default function AdminOrdersPage() {
                     </div>
 
                     {selectedOrder.transactionId && (
-                      <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-between items-center">
-                        <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">TxnID</span>
-                        <span className="text-sm font-mono font-black text-[#A31F24] tracking-wider select-all">{selectedOrder.transactionId}</span>
+                      <div className="space-y-2">
+                        <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-between items-center">
+                          <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">TxnID</span>
+                          <span className="text-sm font-mono font-black text-[#A31F24] tracking-wider select-all">{selectedOrder.transactionId}</span>
+                        </div>
+                        
+                        {/* Payment Breakdown */}
+                        <div className="bg-white p-3 rounded-lg border border-slate-200 space-y-2 text-xs font-semibold text-gray-700">
+                          <div className="flex justify-between">
+                            <span>Total Bill:</span>
+                            <span className="font-bold">৳{selectedOrder.totalAmount.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Amount Paid by Customer:</span>
+                            <span className="font-bold text-emerald-600">
+                              ৳{(selectedOrder.paidAmount !== undefined ? selectedOrder.paidAmount : selectedOrder.totalAmount).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between border-t pt-1.5 border-dashed">
+                            <span>Due Amount:</span>
+                            <span className="font-bold text-rose-600">
+                              ৳{Math.max(0, selectedOrder.totalAmount - (selectedOrder.paidAmount !== undefined ? selectedOrder.paidAmount : selectedOrder.totalAmount)).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     )}
 
-                    {selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus !== 'Paid' && (
-                      <div className="space-y-1.5 pt-2 border-t border-gray-200/50">
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block ml-0.5">Verify Transaction ID</label>
-                        <input
-                          type="text"
-                          placeholder="Enter received TxnID to verify..."
-                          value={verificationInput}
-                          onChange={(e) => setVerificationInput(e.target.value)}
-                          className={`w-full border p-3 rounded-xl focus:bg-white outline-none transition-all text-xs font-medium ${
-                            verificationInput && !isTxnIdMatched 
-                              ? 'border-red-500 bg-red-50/10' 
-                              : isTxnIdMatched 
-                              ? 'border-emerald-500 bg-emerald-50/10 focus:border-emerald-500' 
-                              : 'border-slate-200 bg-white focus:border-black'
-                          }`}
-                        />
-                        {verificationInput && !isTxnIdMatched && (
-                          <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">Transaction ID does not match</p>
-                        )}
-                        {isTxnIdMatched && (
-                          <p className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest ml-1">✓ Transaction ID matches exactly</p>
-                        )}
+                    {selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus !== 'Paid' && selectedOrder.paymentStatus !== 'Partially Paid' && (
+                      <div className="space-y-3 pt-2 border-t border-gray-200/50">
+                        {/* TxnID Verification Input */}
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block ml-0.5">Verify Transaction ID</label>
+                          <input
+                            type="text"
+                            placeholder="Enter received TxnID to verify..."
+                            value={verificationInput}
+                            onChange={(e) => setVerificationInput(e.target.value)}
+                            className={`w-full border p-3 rounded-xl focus:bg-white outline-none transition-all text-xs font-medium ${
+                              verificationInput && !isTxnIdMatched 
+                                ? 'border-red-500 bg-red-50/10' 
+                                : isTxnIdMatched 
+                                ? 'border-emerald-500 bg-emerald-50/10 focus:border-emerald-500' 
+                                : 'border-slate-200 bg-white focus:border-black'
+                            }`}
+                          />
+                          {verificationInput && !isTxnIdMatched && (
+                            <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">Transaction ID does not match</p>
+                          )}
+                          {isTxnIdMatched && (
+                            <p className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest ml-1">✓ Transaction ID matches exactly</p>
+                          )}
+                        </div>
+
+                        {/* Amount Verification Input */}
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block ml-0.5">Amount Transferred (৳)</label>
+                          <input
+                            type="number"
+                            placeholder="Enter received amount to verify..."
+                            value={verifyAmountInput}
+                            onChange={(e) => setVerifyAmountInput(e.target.value)}
+                            className={`w-full border p-3 rounded-xl focus:bg-white outline-none transition-all text-xs font-medium ${
+                              verifyAmountInput && !isAmountMatched 
+                                ? 'border-red-500 bg-red-50/10' 
+                                : isAmountMatched 
+                                ? 'border-emerald-500 bg-emerald-50/10 focus:border-emerald-500' 
+                                : 'border-slate-200 bg-white focus:border-black'
+                            }`}
+                          />
+                          {verifyAmountInput && !isAmountMatched && (
+                            <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">Received Amount does not match</p>
+                          )}
+                          {isAmountMatched && (
+                            <p className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest ml-1">✓ Amount matches exactly</p>
+                          )}
+                        </div>
                       </div>
                     )}
 
@@ -253,6 +312,8 @@ export default function AdminOrdersPage() {
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${
                         selectedOrder.paymentStatus === 'Paid' 
                           ? 'bg-green-50 text-green-800 border-green-200' 
+                          : selectedOrder.paymentStatus === 'Partially Paid'
+                          ? 'bg-orange-50 text-orange-850 border-orange-200'
                           : 'bg-yellow-50 text-yellow-800 border-yellow-200'
                       }`}>
                         {selectedOrder.paymentStatus || 'Pending'}
@@ -275,22 +336,26 @@ export default function AdminOrdersPage() {
                   </div>
 
                   {/* Payment Confirmation Buttons */}
-                  {selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus !== 'Paid' ? (
+                  {selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus !== 'Paid' && selectedOrder.paymentStatus !== 'Partially Paid' ? (
                     <button
-                      onClick={() => handleVerifyConfirmPayment(selectedOrder._id)}
-                      disabled={!isTxnIdMatched}
+                      onClick={() => handleVerifyConfirmPayment(selectedOrder)}
+                      disabled={!(isTxnIdMatched && isAmountMatched)}
                       className={`w-full text-xs font-black uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 ${
-                        isTxnIdMatched 
+                        isTxnIdMatched && isAmountMatched 
                           ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer' 
                           : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
                       }`}
                     >
-                      {isTxnIdMatched ? '✓ Confirm Payment & Order' : 'Verify to Confirm'}
+                      {isTxnIdMatched && isAmountMatched ? '✓ Confirm Payment & Order' : 'Verify to Confirm'}
                     </button>
-                  ) : selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus === 'Paid' ? (
+                  ) : selectedOrder.paymentMethod === 'Mobile Banking' && (selectedOrder.paymentStatus === 'Paid' || selectedOrder.paymentStatus === 'Partially Paid') ? (
                     <div className="flex flex-col gap-2">
-                      <div className="p-3 bg-green-50 text-green-800 rounded-xl border border-green-100 text-center text-xs font-bold uppercase tracking-wide">
-                        ✓ Payment Confirmed
+                      <div className={`p-3 rounded-xl border text-center text-xs font-bold uppercase tracking-wide ${
+                        selectedOrder.paymentStatus === 'Paid'
+                          ? 'bg-green-50 text-green-800 border-green-100'
+                          : 'bg-orange-50 text-orange-800 border-orange-100'
+                      }`}>
+                        ✓ {selectedOrder.paymentStatus === 'Paid' ? 'Payment Confirmed' : 'Partially Paid Confirmed'}
                       </div>
                       <button
                         onClick={() => handlePaymentStatusChange(selectedOrder._id, 'Pending')}

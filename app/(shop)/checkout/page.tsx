@@ -102,10 +102,25 @@ export default function CheckoutPage() {
 
   const finalTotal = getCartTotal() - calculateDiscount() + getShippingCost();
 
+  const [paymentAmountType, setPaymentAmountType] = useState('Full');
+  const [paidAmount, setPaidAmount] = useState('');
+  const [paidAmountError, setPaidAmountError] = useState('');
+
+  // Sync paidAmount if Full Payment is selected
+  useEffect(() => {
+    if (paymentAmountType === 'Full') {
+      setPaidAmount(finalTotal.toString());
+      setPaidAmountError('');
+    }
+  }, [paymentAmountType, finalTotal]);
+
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setTxnIdError('');
+    setPaidAmountError('');
+
+    let parsedPaidAmount = finalTotal;
 
     if (paymentMethod === 'Mobile Banking') {
       if (!txnId) {
@@ -118,7 +133,25 @@ export default function CheckoutPage() {
         setLoading(false);
         return;
       }
-      alert("Payment Successful & Order Confirmed!");
+
+      const amt = parseFloat(paidAmount);
+      if (isNaN(amt) || amt <= 0) {
+        setPaidAmountError("Please enter a valid amount");
+        setLoading(false);
+        return;
+      }
+      if (amt < 200) {
+        setPaidAmountError("Minimum advance payment is ৳200");
+        setLoading(false);
+        return;
+      }
+      if (amt > finalTotal) {
+        setPaidAmountError("Paid amount cannot exceed the total bill");
+        setLoading(false);
+        return;
+      }
+      parsedPaidAmount = amt;
+      alert("Payment Info Submitted & Order Confirmed! Awaiting Admin Verification.");
     } else {
       const confirmOrder = confirm(`Confirm placing order for ৳${finalTotal.toLocaleString()} via Cash on Delivery?`);
       if (!confirmOrder) {
@@ -133,8 +166,9 @@ export default function CheckoutPage() {
         orderItems: cart,
         totalAmount: finalTotal,
         paymentMethod,
-        paymentStatus: paymentMethod === 'Mobile Banking' ? 'Paid' : 'Pending',
+        paymentStatus: 'Pending',
         transactionId: paymentMethod === 'Mobile Banking' ? txnId : undefined,
+        paidAmount: paymentMethod === 'Mobile Banking' ? parsedPaidAmount : undefined,
         couponCode: appliedCoupon?.code
       };
 
@@ -313,6 +347,65 @@ export default function CheckoutPage() {
                             Bkash/Nagad/Rocket
                           </span>
                         </div>
+                      </div>
+
+                      {/* Payment Amount Type Selection */}
+                      <div className="space-y-2 pt-2 border-t border-gray-200/50">
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block ml-0.5">Payment Option</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setPaymentAmountType('Full')}
+                            className={`p-3.5 rounded-xl border text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all ${
+                              paymentAmountType === 'Full'
+                                ? 'border-black bg-black text-white shadow-sm'
+                                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-350'
+                            }`}
+                          >
+                            Pay Full Amount
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentAmountType('Partial')}
+                            className={`p-3.5 rounded-xl border text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all ${
+                              paymentAmountType === 'Partial'
+                                ? 'border-black bg-black text-white shadow-sm'
+                                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-350'
+                            }`}
+                          >
+                            Partial Payment
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Paid Amount Input Field */}
+                      <div className="space-y-2 pt-2 border-t border-gray-200/50">
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block ml-0.5">
+                          Amount Paid (৳)
+                        </label>
+                        <input
+                          type="number"
+                          readOnly={paymentAmountType === 'Full'}
+                          placeholder="Enter the amount you sent (min ৳200)..."
+                          value={paidAmount}
+                          onChange={(e) => {
+                            setPaidAmount(e.target.value);
+                            if (e.target.value) setPaidAmountError('');
+                          }}
+                          className={`w-full border p-3.5 rounded-xl outline-none transition-all text-sm font-medium ${
+                            paymentAmountType === 'Full' 
+                              ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' 
+                              : 'bg-white focus:border-black ' + (paidAmountError ? 'border-red-500 bg-red-50/10' : 'border-gray-200')
+                          }`}
+                        />
+                        {paymentAmountType === 'Partial' && (
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider ml-1">
+                            * Minimum advance payment is ৳200
+                          </p>
+                        )}
+                        {paidAmountError && (
+                          <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">{paidAmountError}</p>
+                        )}
                       </div>
 
                       <div className="space-y-2 pt-2 border-t border-gray-200/50">

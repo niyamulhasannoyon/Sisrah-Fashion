@@ -21,6 +21,7 @@ export interface IOrder extends Document {
   orderStatus: string;
   orderId: number;
   transactionId?: string;
+  paidAmount?: number;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -47,6 +48,7 @@ const OrderSchema: Schema = new Schema(
     orderStatus: { type: String, default: 'Processing' },
     orderId: { type: Number, unique: true },
     transactionId: { type: String },
+    paidAmount: { type: Number },
   },
   { timestamps: true }
 );

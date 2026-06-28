@@ -58,11 +58,13 @@ export function Navbar() {
       )}
       <header className="border-b border-loomra-surface bg-loomra-white/95 backdrop-blur-lg sticky top-0 z-[100]">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 md:py-3 sm:px-8 lg:px-12">
-        <Link href="/" className="flex items-center">
-          {settings?.logo ? (
-            <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-8 md:h-12 w-auto object-contain" />
+        <Link href="/" className="flex items-center min-w-[120px] md:min-w-[150px] h-8 md:h-12">
+          {!mounted ? (
+            <span className="text-xl font-bold tracking-tight text-loomra-black transition-opacity duration-300 opacity-50 animate-pulse">AS SIDRAT</span>
+          ) : settings?.logo ? (
+            <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-8 md:h-12 w-auto object-contain transition-opacity duration-300" />
           ) : (
-            <span className="text-xl font-bold tracking-tight text-loomra-black">AS SIDRAT</span>
+            <span className="text-xl font-bold tracking-tight text-loomra-black transition-opacity duration-300">AS SIDRAT</span>
           )}
         </Link>
 
@@ -84,23 +86,44 @@ export function Navbar() {
             )}
           </button>
 
-          {mounted && (
-            isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                <Link href="/profile" className="flex items-center justify-center w-10 h-10 border border-loomra-surface rounded-full hover:border-loomra-red transition">
-                  <User size={20} />
-                </Link>
-                <button onClick={handleLogout} className="hidden md:block px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
-                  Logout
-                </button>
-              </div>
+          {/* Auth Section with reserved layout space & fade-in transition */}
+          <div className="flex items-center gap-2">
+            {!mounted ? (
+              // Initial Mounting Skeleton to prevent CLS & Mismatches
+              <>
+                {/* Desktop buttons skeleton */}
+                <div className="hidden md:flex items-center gap-2">
+                  <div className="h-9 w-20 bg-slate-100 rounded-lg animate-pulse" />
+                  <div className="h-9 w-24 bg-slate-100 rounded-lg animate-pulse" />
+                </div>
+                {/* Mobile skeleton */}
+                <div className="flex md:hidden h-10 w-10 bg-slate-100 rounded-full animate-pulse" />
+              </>
             ) : (
-              <div className="hidden md:flex items-center gap-2">
-                <Button href="/login" variant="secondary">Login</Button>
-                <Button href="/login?register=true">Sign Up</Button>
+              <div className="flex items-center gap-2 transition-opacity duration-300 opacity-100">
+                {isAuthenticated ? (
+                  <>
+                    <Link href="/profile" className="flex items-center justify-center w-10 h-10 border border-loomra-surface rounded-full hover:border-loomra-red transition">
+                      <User size={20} />
+                    </Link>
+                    <button onClick={handleLogout} className="hidden md:block px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="hidden md:flex items-center gap-2">
+                      <Button href="/login" variant="secondary">Login</Button>
+                      <Button href="/login?register=true">Sign Up</Button>
+                    </div>
+                    <Link href="/login" className="flex md:hidden items-center justify-center w-10 h-10 border border-loomra-surface rounded-full hover:border-loomra-red transition">
+                      <User size={20} />
+                    </Link>
+                  </>
+                )}
               </div>
-            )
-          )}
+            )}
+          </div>
 
           <button
             type="button"
