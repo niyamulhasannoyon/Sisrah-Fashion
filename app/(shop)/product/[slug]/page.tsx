@@ -1,14 +1,44 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import Review from '@/models/Review';
 import ProductDetailsClient from '@/components/product/ProductDetailsClient';
+import { generateProductMetadata } from '@/lib/metadata/productMetadata';
 
 interface ProductPageProps {
   params: { slug: string };
 }
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  await dbConnect();
+
+  const product = (await Product.findOne({ slug: params.slug }).lean()) as any;
+
+  if (!product) {
+    return {
+      title: 'Product Not Found - AS SIDRAT',
+      description: 'The product you are looking for is not available.',
+    };
+  }
+
+  // Use the reusable metadata generator
+  return generateProductMetadata({
+    title: product.title,
+    description: product.description,
+    slug: product.slug,
+    basePrice: product.basePrice,
+    offerPrice: product.offerPrice,
+    images: product.images,
+    category: product.category,
+    tags: product.tags,
+    rating: product.rating,
+    numReviews: product.numReviews,
+    variants: product.variants,
+  });
+}
 
 export default async function ProductPage({ params }: ProductPageProps) {
   await dbConnect();
