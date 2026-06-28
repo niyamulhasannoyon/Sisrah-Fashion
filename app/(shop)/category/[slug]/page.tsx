@@ -30,7 +30,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </p>
       </header>
 
-      <ProductListing products={safeProducts} />
+      <ProductListing products={safeProducts} categoryName={category} />
     </div>
   );
 }

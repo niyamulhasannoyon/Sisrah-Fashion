@@ -16,9 +16,10 @@ interface MotionProductCardProps {
     images?: { url: string }[];
     variants?: any[];
   };
+  aspectRatio?: 'portrait' | 'square';
 }
 
-export default function MotionProductCard({ product }: MotionProductCardProps) {
+export default function MotionProductCard({ product, aspectRatio = 'portrait' }: MotionProductCardProps) {
   const addToCart = useCartStore((state) => state.addToCart);
 
   const primaryImage = product.images?.[0]?.url ?? '/images/linen-shirt.jpg';
@@ -45,7 +46,9 @@ export default function MotionProductCard({ product }: MotionProductCardProps) {
 
   return (
     <Link href={`/product/${product.slug}`} className="group flex flex-col gap-4 cursor-pointer overflow-hidden rounded-none border border-loomra-surface bg-loomra-white transition-colors hover:border-loomra-red">
-      <div className="relative aspect-[3/4] bg-loomra-surface overflow-hidden">
+      <div className={`relative bg-loomra-surface overflow-hidden ${
+        aspectRatio === 'square' ? 'aspect-square' : 'aspect-[3/4]'
+      }`}>
         <motion.img
           src={primaryImage}
           alt={product.title}
