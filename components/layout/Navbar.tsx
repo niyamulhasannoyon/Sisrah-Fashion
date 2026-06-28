@@ -56,16 +56,32 @@ export function Navbar() {
           )}
         </div>
       )}
-      <header className="border-b border-loomra-surface bg-loomra-white/95 backdrop-blur-lg sticky top-0 z-[100]">
+      <header className="sticky top-0 z-[100] w-full border-b border-slate-100/80 bg-white/75 backdrop-blur-md transition-all duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 md:py-3 sm:px-8 lg:px-12">
-        <Link href="/" className="flex items-center min-w-[120px] md:min-w-[150px] h-8 md:h-12">
-          {!mounted ? (
-            <span className="text-xl font-bold tracking-tight text-loomra-black transition-opacity duration-300 opacity-50 animate-pulse">AS SIDRAT</span>
-          ) : settings?.logo ? (
-            <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-8 md:h-12 w-auto object-contain transition-opacity duration-300" />
-          ) : (
-            <span className="text-xl font-bold tracking-tight text-loomra-black transition-opacity duration-300">AS SIDRAT</span>
-          )}
+        <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+          {/* Brand Logo Icon Container */}
+          <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0 flex items-center justify-center overflow-hidden">
+            {!mounted ? (
+              // Faint skeleton circle that doesn't cause shift
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-100 animate-pulse" />
+            ) : settings?.logo ? (
+              <img 
+                src={getDirectImageLink(settings.logo)} 
+                alt="AS SIDRAT" 
+                className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105" 
+              />
+            ) : (
+              // Fallback letter placeholder
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-xs font-bold text-slate-400 select-none">
+                S
+              </div>
+            )}
+          </div>
+          
+          {/* Brand Name Text */}
+          <span className="text-sm md:text-base font-bold tracking-[0.25em] text-[#1A1A1A] uppercase select-none transition-all duration-300 group-hover:text-[#A31F24]">
+            AS SIDRAT
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
