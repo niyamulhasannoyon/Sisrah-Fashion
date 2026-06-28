@@ -7,13 +7,13 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
-    
+    const { id } = await params;
     const product = await Product.findOne({
-      $or: [{ _id: params.id.match(/^[0-9a-fA-F]{24}$/) ? params.id : null }, { slug: params.id }]
+      $or: [{ _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : null }, { slug: id }]
     });
 
     if (!product) {
@@ -28,16 +28,17 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!await isAdmin()) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();
+    const { id } = await params;
     const body = await request.json();
 
-    const product = await Product.findByIdAndUpdate(params.id, body, {
+    const product = await Product.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
@@ -54,15 +55,15 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!await isAdmin()) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();
-    
-    const product = await Product.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });

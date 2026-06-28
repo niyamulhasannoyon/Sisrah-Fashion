@@ -4,18 +4,19 @@ import Product from '@/models/Product';
 import { cookies } from 'next/headers';
 import * as jose from 'jose';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
     const { rating, comment } = await req.json();
 
-    const token = cookies().get('loomra_token')?.value;
+    const token = (await cookies()).get('loomra_token')?.value;
     if (!token) return NextResponse.json({ error: 'Please login to review' }, { status: 401 });
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your_jwt_secret');
     const { payload } = await jose.jwtVerify(token, secret);
 
-    const product = await Product.findById(params.id);
+    const { id } = await params;
+    const product = await Product.findById(id);
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });

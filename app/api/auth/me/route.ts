@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
-    const token = cookies().get('loomra_token')?.value;
+    const token = (await cookies()).get('loomra_token')?.value;
     
     if (!token) {
       return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });

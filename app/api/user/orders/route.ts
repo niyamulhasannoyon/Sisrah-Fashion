@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   try {
     await dbConnect();
     
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('loomra_token')?.value;
 
     if (!token) {
