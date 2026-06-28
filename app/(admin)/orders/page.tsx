@@ -13,19 +13,13 @@ export default function AdminOrdersPage() {
 
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [verificationInput, setVerificationInput] = useState('');
-  const [verifyAmountInput, setVerifyAmountInput] = useState('');
 
   useEffect(() => {
     setVerificationInput('');
-    setVerifyAmountInput('');
   }, [selectedOrder]);
 
   const isTxnIdMatched = selectedOrder && selectedOrder.transactionId 
     ? verificationInput.trim().toUpperCase() === selectedOrder.transactionId.trim().toUpperCase() 
-    : false;
-
-  const isAmountMatched = selectedOrder 
-    ? parseFloat(verifyAmountInput) === (selectedOrder.paidAmount !== undefined ? selectedOrder.paidAmount : selectedOrder.totalAmount)
     : false;
 
   const fetchOrders = async () => {
@@ -93,7 +87,6 @@ export default function AdminOrdersPage() {
         setOrders(orders.map(o => o._id === order._id ? { ...o, orderStatus: 'Confirmed', paymentStatus: targetPaymentStatus } : o));
         setSelectedOrder((prev: any) => prev && prev._id === order._id ? { ...prev, orderStatus: 'Confirmed', paymentStatus: targetPaymentStatus } : prev);
         setVerificationInput('');
-        setVerifyAmountInput('');
       }
     } catch (error) {
       alert("Failed to confirm order and payment");
@@ -280,30 +273,6 @@ export default function AdminOrdersPage() {
                             <p className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest ml-1">✓ Transaction ID matches exactly</p>
                           )}
                         </div>
-
-                        {/* Amount Verification Input */}
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block ml-0.5">Amount Transferred (৳)</label>
-                          <input
-                            type="number"
-                            placeholder="Enter received amount to verify..."
-                            value={verifyAmountInput}
-                            onChange={(e) => setVerifyAmountInput(e.target.value)}
-                            className={`w-full border p-3 rounded-xl focus:bg-white outline-none transition-all text-xs font-medium ${
-                              verifyAmountInput && !isAmountMatched 
-                                ? 'border-red-500 bg-red-50/10' 
-                                : isAmountMatched 
-                                ? 'border-emerald-500 bg-emerald-50/10 focus:border-emerald-500' 
-                                : 'border-slate-200 bg-white focus:border-black'
-                            }`}
-                          />
-                          {verifyAmountInput && !isAmountMatched && (
-                            <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">Received Amount does not match</p>
-                          )}
-                          {isAmountMatched && (
-                            <p className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest ml-1">✓ Amount matches exactly</p>
-                          )}
-                        </div>
                       </div>
                     )}
 
@@ -339,14 +308,14 @@ export default function AdminOrdersPage() {
                   {selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus !== 'Paid' && selectedOrder.paymentStatus !== 'Partially Paid' ? (
                     <button
                       onClick={() => handleVerifyConfirmPayment(selectedOrder)}
-                      disabled={!(isTxnIdMatched && isAmountMatched)}
+                      disabled={!isTxnIdMatched}
                       className={`w-full text-xs font-black uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 ${
-                        isTxnIdMatched && isAmountMatched 
+                        isTxnIdMatched 
                           ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer' 
                           : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
                       }`}
                     >
-                      {isTxnIdMatched && isAmountMatched ? '✓ Confirm Payment & Order' : 'Verify to Confirm'}
+                      {isTxnIdMatched ? '✓ Confirm Payment & Order' : 'Verify to Confirm'}
                     </button>
                   ) : selectedOrder.paymentMethod === 'Mobile Banking' && (selectedOrder.paymentStatus === 'Paid' || selectedOrder.paymentStatus === 'Partially Paid') ? (
                     <div className="flex flex-col gap-2">
