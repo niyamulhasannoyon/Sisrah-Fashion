@@ -20,6 +20,12 @@ import dbConnect from '@/lib/dbConnect';
 import Settings from '@/models/Settings';
 import { getDirectImageLink } from '@/lib/utils';
 
+const BASE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  'https://assidrat.com';
+
 export async function generateMetadata(): Promise<Metadata> {
   let faviconUrl = '/favicon.png';
   try {
@@ -37,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: 'Shop premium, minimalist clothing crafted for South Asian weather. Breathable linen shirts, organic cotton t-shirts, tailored trousers, and modern fusion wear with local cash on delivery.',
     keywords: ['AS SIDRAT', 'Fashion Bangladesh', 'Linen Shirts Dhaka', 'Premium Clothing Bangladesh', 'Minimalist Fashion', 'Fusion Wear Dhaka', 'AS SIDRAT Clothing'],
     authors: [{ name: 'AS SIDRAT' }],
-    metadataBase: new URL('https://assidrat.com'),
+    metadataBase: new URL(BASE_URL),
     icons: {
       icon: faviconUrl,
       shortcut: faviconUrl,
@@ -46,7 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: 'AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh',
       description: 'Shop premium, minimalist clothing crafted for South Asian weather. Breathable linen shirts, organic cotton t-shirts, tailored trousers, and modern fusion wear.',
-      url: 'https://assidrat.com',
+      url: BASE_URL,
       siteName: 'AS SIDRAT',
       images: [
         {

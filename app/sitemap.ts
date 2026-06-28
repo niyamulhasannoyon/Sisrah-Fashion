@@ -19,7 +19,11 @@ import Product from '@/models/Product';
 import Settings from '@/models/Settings';
 
 // Base URL configuration
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://assidrat.com';
+const BASE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  'https://assidrat.com';
 
 /**
  * Product Category Configuration
@@ -68,30 +72,6 @@ const STATIC_PAGES = [
     priority: 0.95,
     changefreq: 'daily' as const,
     lastModDaysAgo: 1,
-  },
-  {
-    url: '/category/men',
-    priority: 0.9,
-    changefreq: 'weekly' as const,
-    lastModDaysAgo: 7,
-  },
-  {
-    url: '/category/women',
-    priority: 0.9,
-    changefreq: 'weekly' as const,
-    lastModDaysAgo: 7,
-  },
-  {
-    url: '/category/fusion',
-    priority: 0.9,
-    changefreq: 'weekly' as const,
-    lastModDaysAgo: 7,
-  },
-  {
-    url: '/category/accessories',
-    priority: 0.8,
-    changefreq: 'weekly' as const,
-    lastModDaysAgo: 7,
   },
   {
     url: '/community',
