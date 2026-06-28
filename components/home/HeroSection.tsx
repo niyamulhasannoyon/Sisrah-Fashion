@@ -44,17 +44,17 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-black/25 z-0" />
       
       {/* Content */}
-      <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col items-center justify-center gap-6 px-6 text-center">
-        <span className="text-small uppercase tracking-[0.32em] text-loomra-red font-bold">Summer Essentials</span>
-        <h1 className="max-w-3xl text-heading md:text-[4rem] font-bold uppercase tracking-tight text-loomra-white leading-tight">
+      <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col items-center justify-center gap-4 sm:gap-6 px-4 text-center">
+        <span className="text-[10px] sm:text-xs uppercase tracking-[0.32em] text-[#A31F24] font-black">Summer Essentials</span>
+        <h1 className="max-w-3xl text-xl sm:text-2xl md:text-4xl lg:text-[4.5rem] font-black uppercase tracking-normal text-white leading-snug font-bengali px-2 sm:px-4">
           {headline}
         </h1>
-        <p className="max-w-xl text-body font-light text-loomra-white/90">
+        <p className="max-w-xl text-xs sm:text-sm md:text-base font-normal text-white/90 font-bengali px-4 leading-relaxed">
           {subheadline}
         </p>
         <Link
           href="/shop"
-          className="mt-4 inline-flex rounded bg-loomra-red px-10 py-4 text-small font-bold uppercase tracking-widest text-loomra-white transition-colors hover:bg-red-800"
+          className="mt-2 sm:mt-4 inline-flex rounded-xl bg-[#A31F24] px-8 py-3 sm:px-10 sm:py-4 text-xs sm:text-sm font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-red-800 hover:scale-[1.02] shadow-md"
         >
           {LOOMRA_COPY.cta.homepageHero}
         </Link>

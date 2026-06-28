@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const token = jwt.sign(
       { userId: user._id, name: user.name, email: user.email, role: user.role },
       process.env.JWT_SECRET!,
-      { expiresIn: '7d' }
+      { expiresIn: '90d' }
     );
 
     const response = NextResponse.json({ 
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 90 * 24 * 60 * 60,
     });
 
     return response;

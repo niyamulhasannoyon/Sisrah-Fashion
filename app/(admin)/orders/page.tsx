@@ -12,6 +12,15 @@ export default function AdminOrdersPage() {
   }, []);
 
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [verificationInput, setVerificationInput] = useState('');
+
+  useEffect(() => {
+    setVerificationInput('');
+  }, [selectedOrder]);
+
+  const isTxnIdMatched = selectedOrder && selectedOrder.transactionId 
+    ? verificationInput.trim().toUpperCase() === selectedOrder.transactionId.trim().toUpperCase() 
+    : false;
 
   const fetchOrders = async () => {
     try {
@@ -62,8 +71,28 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleVerifyConfirmPayment = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderStatus: 'Confirmed', paymentStatus: 'Paid' }),
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setOrders(orders.map(order => order._id === orderId ? { ...order, orderStatus: 'Confirmed', paymentStatus: 'Paid' } : order));
+        setSelectedOrder((prev: any) => prev && prev._id === orderId ? { ...prev, orderStatus: 'Confirmed', paymentStatus: 'Paid' } : prev);
+        setVerificationInput('');
+      }
+    } catch (error) {
+      alert("Failed to confirm order and payment");
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch(status) {
+      case 'Confirmed': return 'bg-emerald-100 text-emerald-800';
       case 'Processing': return 'bg-yellow-100 text-yellow-800';
       case 'Send to Courier': return 'bg-purple-100 text-purple-800';
       case 'Shipped': return 'bg-blue-100 text-blue-800';
@@ -122,6 +151,7 @@ export default function AdminOrdersPage() {
                           onChange={(e) => handleStatusChange(order._id, e.target.value)}
                           className={`text-xs font-bold px-2 py-1 rounded outline-none cursor-pointer border-none ${getStatusColor(order.orderStatus)}`}
                         >
+                          <option value="Confirmed">Confirmed</option>
                           <option value="Processing">Processing</option>
                           <option value="Send to Courier">Send to Courier</option>
                           <option value="Shipped">Shipped</option>
@@ -193,6 +223,31 @@ export default function AdminOrdersPage() {
                       </div>
                     )}
 
+                    {selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus !== 'Paid' && (
+                      <div className="space-y-1.5 pt-2 border-t border-gray-200/50">
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block ml-0.5">Verify Transaction ID</label>
+                        <input
+                          type="text"
+                          placeholder="Enter received TxnID to verify..."
+                          value={verificationInput}
+                          onChange={(e) => setVerificationInput(e.target.value)}
+                          className={`w-full border p-3 rounded-xl focus:bg-white outline-none transition-all text-xs font-medium ${
+                            verificationInput && !isTxnIdMatched 
+                              ? 'border-red-500 bg-red-50/10' 
+                              : isTxnIdMatched 
+                              ? 'border-emerald-500 bg-emerald-50/10 focus:border-emerald-500' 
+                              : 'border-slate-200 bg-white focus:border-black'
+                          }`}
+                        />
+                        {verificationInput && !isTxnIdMatched && (
+                          <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">Transaction ID does not match</p>
+                        )}
+                        {isTxnIdMatched && (
+                          <p className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest ml-1">✓ Transaction ID matches exactly</p>
+                        )}
+                      </div>
+                    )}
+
                     <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
                       <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Payment Status</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${
@@ -222,10 +277,15 @@ export default function AdminOrdersPage() {
                   {/* Payment Confirmation Buttons */}
                   {selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus !== 'Paid' ? (
                     <button
-                      onClick={() => handlePaymentStatusChange(selectedOrder._id, 'Paid')}
-                      className="w-full bg-[#A31F24] hover:bg-red-800 text-white text-xs font-black uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+                      onClick={() => handleVerifyConfirmPayment(selectedOrder._id)}
+                      disabled={!isTxnIdMatched}
+                      className={`w-full text-xs font-black uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 ${
+                        isTxnIdMatched 
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer' 
+                          : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                      }`}
                     >
-                      ✓ Verify & Confirm Payment (TxnID Matches)
+                      {isTxnIdMatched ? '✓ Confirm Payment & Order' : 'Verify to Confirm'}
                     </button>
                   ) : selectedOrder.paymentMethod === 'Mobile Banking' && selectedOrder.paymentStatus === 'Paid' ? (
                     <div className="flex flex-col gap-2">
