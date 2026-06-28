@@ -54,10 +54,9 @@ export function HeroSection() {
         </p>
         <Link
           href="/shop"
-          className="group mt-6 sm:mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-xs sm:text-sm font-bold uppercase tracking-widest text-black shadow-lg transition-all duration-300 hover:bg-[#A31F24] hover:text-white hover:scale-[1.03] active:scale-95"
+          className="mt-6 sm:mt-8 inline-flex items-center justify-center border border-white/50 bg-transparent text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] px-8 py-4 rounded-none transition-all duration-300 hover:bg-white hover:text-black active:scale-95 shadow-sm"
         >
-          <span>{LOOMRA_COPY.cta.homepageHero}</span>
-          <span className="text-sm transition-transform duration-300 group-hover:translate-x-1.5">→</span>
+          VIEW COLLECTIONS
         </Link>
       </div>
 
