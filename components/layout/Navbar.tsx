@@ -165,7 +165,7 @@ export function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className="fixed inset-0 z-[105] bg-black/40 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-[105] bg-slate-950/60 backdrop-blur-lg md:hidden"
             />
             {/* Right Side Slide-out Drawer */}
             <motion.div
@@ -174,7 +174,7 @@ export function Navbar() {
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
               style={{ backgroundColor: '#FFFFFF' }}
-              className="fixed inset-y-0 right-0 z-[110] w-full max-w-[300px] bg-white p-6 shadow-2xl md:hidden flex flex-col justify-between border-l border-slate-100"
+              className="fixed inset-y-0 right-0 z-[110] w-full bg-white p-6 shadow-2xl md:hidden flex flex-col justify-between border-l border-slate-100"
             >
               <div className="flex flex-col gap-8">
                 {/* Drawer Header */}
