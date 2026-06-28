@@ -142,7 +142,48 @@ export default function AdvancedProfilePage() {
             <h2 className="text-xl font-bold uppercase tracking-widest text-[#1A1A1A] border-b pb-4 mb-6">Order History</h2>
             
             {loading ? (
-              <div className="flex justify-center py-12"><Loader2 className="animate-spin text-gray-400" size={32} /></div>
+              <div className="flex flex-col gap-8 animate-pulse">
+                {[1, 2].map((i) => (
+                  <div key={i} className="border border-gray-200 rounded-lg p-6">
+                    {/* Header skeleton */}
+                    <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
+                      <div className="space-y-2">
+                        <div className="h-3 w-20 bg-slate-100 rounded" />
+                        <div className="h-5 w-32 bg-slate-100 rounded" />
+                        <div className="h-4 w-24 bg-slate-100 rounded" />
+                      </div>
+                      <div className="text-right space-y-2 flex flex-col items-end">
+                        <div className="h-3 w-20 bg-slate-100 rounded" />
+                        <div className="h-6 w-28 bg-slate-100 rounded" />
+                        <div className="h-4 w-24 bg-slate-100 rounded" />
+                      </div>
+                    </div>
+
+                    {/* Order items block skeleton */}
+                    <div className="bg-[#F9F9F9] rounded p-4 flex flex-col gap-3 mb-6 border border-gray-100">
+                      {[1, 2].map((j) => (
+                        <div key={j} className="flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded" />
+                            <div className="h-4 w-36 bg-slate-100 rounded" />
+                          </div>
+                          <div className="h-3 w-16 bg-slate-100 rounded" />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Timeline stepper skeleton (desktop) */}
+                    <div className="hidden sm:flex items-center justify-between mt-6 relative before:absolute before:left-0 before:right-0 before:top-1/2 before:h-0.5 before:w-full before:-translate-y-1/2 before:bg-slate-100 z-0">
+                      {[1, 2, 3].map((step) => (
+                        <div key={step} className="relative z-10 flex flex-col items-center gap-2 bg-white px-2">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200" />
+                          <div className="h-3 w-16 bg-slate-100 rounded" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : orders.length === 0 ? (
               <div className="text-center py-12 text-gray-500 bg-[#F9F9F9] rounded">
                 <Package size={48} className="mx-auto mb-4 opacity-50" />
