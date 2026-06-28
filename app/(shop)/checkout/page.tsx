@@ -408,23 +408,36 @@ export default function CheckoutPage() {
                         )}
                       </div>
 
-                      <div className="space-y-2 pt-2 border-t border-gray-200/50">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block ml-0.5">Transaction ID (TxnID)</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g. 9J88X29K" 
-                          value={txnId}
-                          onChange={(e) => {
-                            setTxnId(e.target.value.trim());
-                            if (e.target.value.trim().length > 0) setTxnIdError('');
-                          }}
-                          className={`w-full border p-3.5 rounded-xl focus:bg-white outline-none transition-all text-sm font-medium ${
-                            txnIdError ? 'border-red-500 bg-red-50/10' : 'border-gray-200 bg-white focus:border-black'
-                          }`}
-                        />
-                        {txnIdError && (
-                          <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">{txnIdError}</p>
-                        )}
+                      {/* Transaction ID Section with High-Converting Separation */}
+                      <div className="space-y-2 pt-5 mt-3 border-t border-gray-200/50">
+                        <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/[0.06] p-4.5 rounded-2xl space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-black uppercase text-slate-800 tracking-wider block">
+                              Transaction ID (TxnID)
+                            </label>
+                            <span className="text-[9px] bg-[#A31F24]/10 text-[#A31F24] px-2 py-0.5 rounded font-black uppercase tracking-widest">
+                              Required
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 leading-relaxed">
+                            Tip: After sending the money, copy the Transaction ID (TxnID) from the confirmation SMS you received from bKash/Nagad/Rocket (e.g. 9J88X29K).
+                          </p>
+                          <input 
+                            type="text" 
+                            placeholder="Enter the 8-10 digit TxnID here..." 
+                            value={txnId}
+                            onChange={(e) => {
+                              setTxnId(e.target.value.trim());
+                              if (e.target.value.trim().length > 0) setTxnIdError('');
+                            }}
+                            className={`w-full border p-3.5 rounded-xl focus:bg-white outline-none transition-all text-sm font-medium ${
+                              txnIdError ? 'border-red-500 bg-red-50/10' : 'border-gray-200 bg-white focus:border-black'
+                            }`}
+                          />
+                          {txnIdError && (
+                            <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">{txnIdError}</p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
