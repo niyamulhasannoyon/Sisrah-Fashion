@@ -411,7 +411,7 @@ export function validateAltText(altText: string): AltTextValidationResult {
   });
 
   const overusedWords = Object.entries(wordFreq)
-    .filter(([, count]) => count > 3 && ![
+    .filter(([word, count]) => count > 3 && ![
       'and',
       'the',
       'a',

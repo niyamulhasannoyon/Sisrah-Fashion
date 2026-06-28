@@ -12,12 +12,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import {
   generateSlug,
   generateImageAltText,
   generateSEOContent,
   validateSlug,
   validateAltText,
+  generateImageAltTextVariants,
 } from '@/lib/seo/slugAndAltText';
 
 /**
@@ -188,9 +190,6 @@ export async function batchGenerateSlugs(products: Array<{
 
 'use client';
 
-import Image from 'next/image';
-import { generateImageAltTextVariants } from '@/lib/seo/slugAndAltText';
-
 interface ProductGalleryProps {
   product: {
     title: string;
@@ -251,14 +250,6 @@ export function ProductGalleryExample({ product }: ProductGalleryProps) {
 // ============================================================================
 
 'use client';
-
-import { useState, useEffect } from 'react';
-import {
-  generateSlug,
-  generateImageAltText,
-  validateSlug,
-  validateAltText,
-} from '@/lib/seo/slugAndAltText';
 
 /**
  * SEOScoreDisplay - Shows real-time SEO quality score
@@ -370,7 +361,7 @@ export function SEOScoreDisplayExample() {
 // EXAMPLE 5: Integration with Next.js Image Component
 // ============================================================================
 
-import { generateImageAltText } from '@/lib/seo/slugAndAltText';
+// Already imported at top of file
 
 interface OptimizedProductImageProps {
   src: string;
@@ -463,7 +454,7 @@ export default Product;
 // EXAMPLE 7: SEO Metadata Generation Helper
 // ============================================================================
 
-import { generateSlug, generateImageAltText } from '@/lib/seo/slugAndAltText';
+// Already imported at top of file
 
 /**
  * Helper to generate all SEO metadata for a product in one call

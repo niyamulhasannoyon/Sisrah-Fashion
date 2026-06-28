@@ -16,7 +16,7 @@ export async function testSitemapGeneration() {
 
   try {
     // Import the sitemap function
-    const { default: sitemapFunction } = await import('@/app/sitemap');
+    const { default: sitemapFunction } = await import('../../app/sitemap');
 
     // Generate sitemap
     const sitemap = await sitemapFunction();

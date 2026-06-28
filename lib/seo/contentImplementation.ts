@@ -742,7 +742,6 @@ export const MONITORING_GUIDE = {
     'SEMrush or Ahrefs: Keyword tracking',
   ],
 };
-`;
 
 // ============================================================================
 // EXPORT ALL IMPLEMENTATIONS

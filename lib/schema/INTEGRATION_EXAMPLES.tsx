@@ -94,8 +94,6 @@ export function ProductDetailsClientExample2({ product }: any) {
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import ProductSchemaMarkup from '@/components/seo/ProductSchemaMarkup';
-import { useProductSchema } from '@/lib/schema/useProductSchema';
 import { useCartStore } from '@/store/useCartStore';
 
 interface CompleteProductDetailsProps {
@@ -274,13 +272,12 @@ export function CompleteProductDetailsExample({
             <button
               onClick={() =>
                 addToCart({
-                  id: product._id,
+                  _id: product._id,
                   title: product.title,
                   price: displayOfferPrice,
                   image: product.images?.[0]?.url || '/placeholder.jpg',
-                  color: selectedColor,
-                  size: selectedSize,
-                  quantity: 1,
+                  selectedColor: selectedColor,
+                  selectedSize: selectedSize,
                 })
               }
               disabled={!isInStock}

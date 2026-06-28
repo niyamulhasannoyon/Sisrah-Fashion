@@ -94,7 +94,7 @@ export function generateProductMetadata(product: ProductMetadataInput, baseUrl: 
       title: `${productTitle} - AS SIDRAT`,
       description: productDescription,
       url: productUrl,
-      type: 'product',
+      type: 'product' as any,
       images: [
         {
           url: productImage,

@@ -450,6 +450,7 @@ export const SEO_CONFIG = {
 
 // Usage:
 const config = SEO_CONFIG[process.env.NODE_ENV as keyof typeof SEO_CONFIG];
+const productTitle = 'Classic Linen Shirt';
 const slug = generateSlug(productTitle, config.slugMaxLength);
 
 // ============================================================================
