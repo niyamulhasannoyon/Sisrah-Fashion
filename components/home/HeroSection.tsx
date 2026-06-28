@@ -41,15 +41,15 @@ export function HeroSection() {
       ))}
       
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/25 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/35 to-black/60 z-0" />
       
       {/* Content */}
       <div className="relative z-10 mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-80px)] max-w-6xl gap-5 sm:gap-7 px-4 py-16 text-center">
-        <span className="text-[10px] sm:text-xs uppercase tracking-[0.32em] text-[#A31F24] font-black">Summer Essentials</span>
-        <h1 className="max-w-4xl text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.3] sm:leading-[1.35] md:leading-[1.4] font-bengali px-2 sm:px-4 tracking-normal">
+        <span className="text-[10px] sm:text-xs uppercase tracking-[0.32em] text-[#A31F24] font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">Summer Essentials</span>
+        <h1 className="max-w-4xl text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.3] sm:leading-[1.35] md:leading-[1.4] font-bengali px-2 sm:px-4 tracking-normal drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
           {headline}
         </h1>
-        <p className="max-w-2xl text-xs sm:text-sm md:text-base lg:text-lg font-normal text-white/90 font-bengali px-4 leading-relaxed mt-2">
+        <p className="max-w-2xl text-xs sm:text-sm md:text-base lg:text-lg font-normal text-white/90 font-bengali px-4 leading-relaxed mt-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
           {subheadline}
         </p>
         <Link
