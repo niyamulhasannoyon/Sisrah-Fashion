@@ -70,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
     },
     verification: {
-      google: '16z_MlsuMU5FOJingVudFNXNiUKqkOsBFvYjs',
+      google: '16z_MlsuMU5FOJingVudFNXNiUKqkOsBFvYjsZ9Ik8s',
     },
   };
 }
