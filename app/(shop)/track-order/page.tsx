@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Loader2, Search, Package, Truck, CheckCircle, Clock } from 'lucide-react';
+import { Loader2, Search, Package, Truck, CheckCircle, Clock, ShoppingBag } from 'lucide-react';
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
@@ -69,7 +69,7 @@ function TrackOrderContent() {
     }
   };
 
-  const steps = ['Processing', 'Send to Courier', 'Shipped', 'Delivered'];
+  const steps = ['Confirmed', 'Processing', 'Send to Courier', 'Shipped', 'Delivered'];
   const currentStepIndex = order ? steps.indexOf(order.orderStatus) : -1;
 
   return (
@@ -141,7 +141,7 @@ function TrackOrderContent() {
               <div className="md:hidden flex flex-col gap-6 relative pl-6 before:absolute before:left-[21px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100 z-0">
                 {/* Active progress line */}
                 <div 
-                  className="absolute left-[21px] top-2 w-0.5 bg-black transition-all duration-1000 z-0"
+                  className="absolute left-[21px] top-2 w-0.5 bg-emerald-500 transition-all duration-1000 z-0"
                   style={{ 
                     height: `${currentStepIndex >= 0 ? (currentStepIndex / (steps.length - 1)) * 100 : 0}%`,
                     maxHeight: 'calc(100% - 16px)'
@@ -151,15 +151,16 @@ function TrackOrderContent() {
                 {steps.map((step, idx) => (
                   <div key={step} className="flex items-center gap-4 relative z-10">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${
-                      idx <= currentStepIndex ? 'bg-black border-black text-white shadow-md' : 'bg-white border-gray-100 text-gray-300'
+                      idx <= currentStepIndex ? 'bg-emerald-500 border-emerald-500 text-white shadow-md' : 'bg-white border-gray-100 text-gray-300'
                     }`}>
+                      {step === 'Confirmed' && <ShoppingBag size={16} />}
                       {step === 'Processing' && <Clock size={16} />}
                       {step === 'Send to Courier' && <Package size={16} />}
                       {step === 'Shipped' && <Truck size={16} />}
                       {step === 'Delivered' && <CheckCircle size={16} />}
                     </div>
                     <div>
-                      <span className={`text-xs font-black uppercase tracking-widest ${idx <= currentStepIndex ? 'text-black' : 'text-gray-400'}`}>
+                      <span className={`text-xs font-black uppercase tracking-widest ${idx <= currentStepIndex ? 'text-emerald-600' : 'text-gray-400'}`}>
                         {step}
                       </span>
                     </div>
@@ -171,21 +172,22 @@ function TrackOrderContent() {
               <div className="hidden md:flex relative justify-between items-center px-4 mb-4">
                 <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 z-0" />
                 <div 
-                  className="absolute top-1/2 left-0 h-1 bg-black -translate-y-1/2 z-0 transition-all duration-1000" 
+                  className="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-1000" 
                   style={{ width: `${currentStepIndex >= 0 ? (currentStepIndex / (steps.length - 1)) * 100 : 0}%` }}
                 />
                 
                 {steps.map((step, idx) => (
                   <div key={step} className="relative z-10 flex flex-col items-center">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-4 transition-all duration-500 ${
-                      idx <= currentStepIndex ? 'bg-black border-white text-white shadow-xl scale-110' : 'bg-white border-gray-100 text-gray-300'
+                      idx <= currentStepIndex ? 'bg-emerald-500 border-white text-white shadow-xl scale-110' : 'bg-white border-gray-100 text-gray-300'
                     }`}>
+                      {step === 'Confirmed' && <ShoppingBag size={20} />}
                       {step === 'Processing' && <Clock size={20} />}
                       {step === 'Send to Courier' && <Package size={20} />}
                       {step === 'Shipped' && <Truck size={20} />}
                       {step === 'Delivered' && <CheckCircle size={20} />}
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest mt-4 ${idx <= currentStepIndex ? 'text-black' : 'text-gray-300'}`}>
+                    <span className={`text-[10px] font-black uppercase tracking-widest mt-4 ${idx <= currentStepIndex ? 'text-emerald-600' : 'text-gray-300'}`}>
                       {step}
                     </span>
                   </div>

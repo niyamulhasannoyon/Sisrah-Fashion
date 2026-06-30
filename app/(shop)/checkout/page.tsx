@@ -7,6 +7,15 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart } from 'lucide-react';
 
+const districts = [
+  'Dhaka', 'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra', 'Brahmanbaria', 'Chandpur', 'Chapainawabganj', 'Chittagong', 'Chuadanga', 'Comilla', "Cox's Bazar", 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jessore', 'Jhalokati', 'Jhenaidah', 'Joypurhat', 'Khagrachari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Maulvibazar', 'Meherpur', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet', 'Tangail', 'Thakurgaon'
+];
+
+const isValidBDPhone = (phone: string) => {
+  const bdPhoneRegex = /^(?:\+88)?01[3-9]\d{8}$/;
+  return bdPhoneRegex.test(phone.trim());
+};
+
 export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCartStore();
   const { settings, fetchSettings } = useSettingsStore();
@@ -19,6 +28,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
   const [txnId, setTxnId] = useState('');
   const [txnIdError, setTxnIdError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -117,8 +127,15 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setPhoneError('');
     setTxnIdError('');
     setPaidAmountError('');
+
+    if (!isValidBDPhone(shippingInfo.phone)) {
+      setPhoneError("Please enter a valid 11-digit phone number (e.g. 017XXXXXXXX)");
+      setLoading(false);
+      return;
+    }
 
     let parsedPaidAmount = finalTotal;
 
@@ -256,8 +273,16 @@ export default function CheckoutPage() {
                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Phone Number (Active)</label>
                       <input type="tel" placeholder="017XXXXXXXX" required 
                         value={shippingInfo.phone}
-                        className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium" 
-                        onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})} />
+                        className={`w-full border p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium ${
+                          phoneError ? 'border-red-500 bg-red-50/10 focus:border-red-500' : 'border-gray-100'
+                        }`} 
+                        onChange={(e) => {
+                          setShippingInfo({...shippingInfo, phone: e.target.value});
+                          if (phoneError) setPhoneError('');
+                        }} />
+                      {phoneError && (
+                        <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">{phoneError}</p>
+                      )}
                     </div>
                     <div className="md:col-span-2 space-y-2">
                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Complete Address</label>
@@ -268,10 +293,16 @@ export default function CheckoutPage() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">City / District</label>
-                      <input type="text" placeholder="e.g. Dhaka" required 
+                      <select required 
                         value={shippingInfo.city}
-                        className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium" 
-                        onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})} />
+                        className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium cursor-pointer" 
+                        onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
+                      >
+                        <option value="" disabled>Select City / District</option>
+                        {districts.map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>

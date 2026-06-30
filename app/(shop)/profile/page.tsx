@@ -3,7 +3,7 @@
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Package, User as UserIcon, LogOut, Loader2, CheckCircle2, Clock, Truck } from 'lucide-react';
+import { Package, User as UserIcon, LogOut, Loader2, CheckCircle2, Clock, Truck, ShoppingBag } from 'lucide-react';
 
 export default function AdvancedProfilePage() {
   const { user, logout } = useAuthStore();
@@ -44,7 +44,7 @@ export default function AdvancedProfilePage() {
   if (!user) return null;
 
   const OrderTimeline = ({ status }: { status: string }) => {
-    const steps = ['Processing', 'Shipped', 'Delivered'];
+    const steps = ['Confirmed', 'Processing', 'Send to Courier', 'Shipped', 'Delivered'];
     const currentIndex = steps.indexOf(status);
     const isCancelled = status === 'Cancelled';
 
@@ -57,7 +57,7 @@ export default function AdvancedProfilePage() {
         {/* Mobile vertical stepper */}
         <div className="sm:hidden flex flex-col gap-4 relative pl-5 mt-6 before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-200 z-0">
           <div 
-            className="absolute left-[17px] top-2 w-0.5 bg-green-500 transition-all duration-1000 z-0"
+            className="absolute left-[17px] top-2 w-0.5 bg-emerald-500 transition-all duration-1000 z-0"
             style={{ 
               height: `${currentIndex >= 0 ? (currentIndex / (steps.length - 1)) * 100 : 0}%`,
               maxHeight: 'calc(100% - 16px)'
@@ -67,10 +67,16 @@ export default function AdvancedProfilePage() {
             const isCompleted = index <= currentIndex;
             return (
               <div key={step} className="flex items-center gap-3 relative z-10">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors ${isCompleted ? 'border-green-500 bg-green-500 text-white' : 'border-gray-300 bg-white text-gray-400'}`}>
-                  {step === 'Processing' ? <Clock size={14} /> : step === 'Shipped' ? <Truck size={14} /> : <CheckCircle2 size={14} />}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors ${
+                  isCompleted ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 bg-white text-gray-400'
+                }`}>
+                  {step === 'Confirmed' ? <ShoppingBag size={14} /> :
+                   step === 'Processing' ? <Clock size={14} /> :
+                   step === 'Send to Courier' ? <Package size={14} /> :
+                   step === 'Shipped' ? <Truck size={14} /> :
+                   <CheckCircle2 size={14} />}
                 </div>
-                <span className={`text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-[#1A1A1A]' : 'text-gray-400'}`}>{step}</span>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-emerald-600' : 'text-gray-400'}`}>{step}</span>
               </div>
             );
           })}
@@ -82,10 +88,16 @@ export default function AdvancedProfilePage() {
             const isCompleted = index <= currentIndex;
             return (
               <div key={step} className="relative z-10 flex flex-col items-center gap-2 bg-white px-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors ${isCompleted ? 'border-green-500 bg-green-500 text-white' : 'border-gray-300 bg-white text-gray-400'}`}>
-                  {step === 'Processing' ? <Clock size={14} /> : step === 'Shipped' ? <Truck size={14} /> : <CheckCircle2 size={14} />}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors ${
+                  isCompleted ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 bg-white text-gray-400'
+                }`}>
+                  {step === 'Confirmed' ? <ShoppingBag size={14} /> :
+                   step === 'Processing' ? <Clock size={14} /> :
+                   step === 'Send to Courier' ? <Package size={14} /> :
+                   step === 'Shipped' ? <Truck size={14} /> :
+                   <CheckCircle2 size={14} />}
                 </div>
-                <span className={`text-xs font-bold uppercase ${isCompleted ? 'text-[#1A1A1A]' : 'text-gray-400'}`}>{step}</span>
+                <span className={`text-xs font-bold uppercase ${isCompleted ? 'text-emerald-600' : 'text-gray-400'}`}>{step}</span>
               </div>
             );
           })}
