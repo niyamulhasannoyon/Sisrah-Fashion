@@ -7,7 +7,7 @@ import ProductDetailsClient from '@/components/product/ProductDetailsClient';
 import { generateProductMetadata } from '@/lib/metadata/productMetadata';
 
 interface ProductPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,8 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   await dbConnect();
 
-  const product = (await Product.findOne({ slug: params.slug }).lean()) as any;
+  const { slug } = await params;
+  const product = (await Product.findOne({ slug }).lean()) as any;
 
   if (!product) {
     return {
@@ -43,7 +44,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 export default async function ProductPage({ params }: ProductPageProps) {
   await dbConnect();
 
-  const product = (await Product.findOne({ slug: params.slug }).lean()) as any;
+  const { slug } = await params;
+  const product = (await Product.findOne({ slug }).lean()) as any;
 
   if (!product) {
     notFound();

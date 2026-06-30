@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, X, Save, UploadCloud, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 
-export default function EditProductPage({ params }: { params: { id: string } }) {
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -34,7 +35,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
 
   // ডাটাবেস থেকে প্রোডাক্ট লোড করা
   useEffect(() => {
-    fetch(`/api/products/${params.id}`)
+    fetch(`/api/products/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -63,7 +64,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
         }
         setLoading(false);
       });
-  }, [params.id]);
+  }, [id]);
 
   // Cloudinary Upload Logic
   const uploadToCloudinary = async (file: File) => {
@@ -153,7 +154,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     const productData = { title, slug, description, basePrice, offerPrice, category, isTrending, isNewArrival, tags, images: mainImages, variants };
 
     try {
-      const res = await fetch(`/api/products/${params.id}`, {
+      const res = await fetch(`/api/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData),

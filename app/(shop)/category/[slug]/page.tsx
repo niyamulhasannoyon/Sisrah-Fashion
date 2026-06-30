@@ -3,7 +3,7 @@ import Product from '@/models/Product';
 import ProductListing from '@/components/product/ProductListing';
 
 interface CategoryPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 function normalizeCategory(slug: string) {
@@ -16,7 +16,8 @@ export const dynamic = 'force-dynamic';
 export default async function CategoryPage({ params }: CategoryPageProps) {
   await dbConnect();
 
-  const category = normalizeCategory(params.slug);
+  const { slug } = await params;
+  const category = normalizeCategory(slug);
   const products = await Product.find({ category }).lean();
   const safeProducts = JSON.parse(JSON.stringify(products));
 
