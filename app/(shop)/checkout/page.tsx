@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const districts = [
   'Dhaka', 'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra', 'Brahmanbaria', 'Chandpur', 'Chapainawabganj', 'Chittagong', 'Chuadanga', 'Comilla', "Cox's Bazar", 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jessore', 'Jhalokati', 'Jhenaidah', 'Joypurhat', 'Khagrachari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Maulvibazar', 'Meherpur', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet', 'Tangail', 'Thakurgaon'
@@ -33,6 +34,7 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [couponError, setCouponError] = useState('');
+  const [showMobileSummary, setShowMobileSummary] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -240,6 +242,118 @@ export default function CheckoutPage() {
               </h1>
               <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Secure Transaction & Express Delivery</p>
             </div>
+          </div>
+
+          {/* Mobile Collapsible Order Summary Accordion (Shopify Style) */}
+          <div className="lg:hidden w-full bg-[#1A1A1A] text-white p-4.5 rounded-2xl mb-8 flex flex-col gap-4 shadow-md transition-all">
+            <button 
+              type="button"
+              onClick={() => setShowMobileSummary(!showMobileSummary)}
+              className="flex justify-between items-center w-full font-bold text-xs uppercase tracking-wider focus:outline-none"
+            >
+              <div className="flex items-center gap-2 text-white/90">
+                <ShoppingCart size={16} />
+                <span>{showMobileSummary ? 'Hide Order Summary' : 'Show Order Summary'}</span>
+                <span className="text-[10px] bg-white/10 px-2.5 py-0.5 rounded-full font-black ml-1 text-white">
+                  {cart.reduce((acc, item) => acc + item.quantity, 0)} items
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-white">
+                <span className="text-sm font-black">৳ {finalTotal.toLocaleString()}</span>
+                <span className="text-xs transition-transform duration-300 transform inline-block" style={{ transform: showMobileSummary ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  ▼
+                </span>
+              </div>
+            </button>
+
+            <AnimatePresence>
+              {showMobileSummary && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden border-t border-white/10 pt-5 mt-2 flex flex-col gap-6"
+                >
+                  {/* Cart Items List */}
+                  <div className="space-y-4 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar-white">
+                    {cart.map((item, idx) => (
+                      <div key={idx} className="flex gap-4">
+                        <div className="w-12 h-16 bg-white/5 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                          <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-center">
+                          <div className="flex justify-between items-start">
+                            <h4 className="text-xs font-bold text-white/90 line-clamp-1 pr-2">{item.title}</h4>
+                            <span className="text-xs font-black">৳ {(item.price * item.quantity).toLocaleString()}</span>
+                          </div>
+                          <p className="text-[9px] uppercase text-white/40 font-black tracking-widest mt-1">
+                            {item.selectedSize} / {item.selectedColor} — Qty: {item.quantity}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Coupon Code Interface */}
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="ENTER PROMO CODE" 
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="flex-1 bg-white/5 border border-white/10 p-3 rounded-lg text-[10px] font-bold outline-none focus:border-white/40 uppercase transition-all placeholder:text-white/20 text-white"
+                      />
+                      <button 
+                        type="button" 
+                        onClick={applyCoupon} 
+                        className="bg-white text-black px-4 py-3 text-[10px] font-black rounded-lg hover:bg-[#A31F24] hover:text-white transition-all shadow-sm active:scale-95"
+                      >
+                        APPLY
+                      </button>
+                    </div>
+                    {couponError && <p className="text-red-400 text-[9px] mt-2 font-bold uppercase tracking-widest text-center">{couponError}</p>}
+                    {appliedCoupon && (
+                       <div className="flex justify-between items-center mt-2.5 px-1">
+                         <p className="text-green-400 text-[9px] font-black italic uppercase tracking-widest">SAVED ৳{calculateDiscount().toLocaleString()}</p>
+                         <button onClick={() => setAppliedCoupon(null)} className="text-[9px] text-white/30 hover:text-white underline font-bold uppercase">Remove</button>
+                       </div>
+                    )}
+                  </div>
+
+                  {/* Price Totals */}
+                  <div className="space-y-3.5 border-t border-white/10 pt-5">
+                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/40">
+                      <span>Subtotal</span>
+                      <span className="text-white">৳ {getCartTotal().toLocaleString()}</span>
+                    </div>
+                    {appliedCoupon && (
+                       <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-green-400">
+                         <span>Discount</span>
+                         <span>- ৳ {calculateDiscount().toLocaleString()}</span>
+                       </div>
+                    )}
+                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/40">
+                      <span>Shipping</span>
+                      <span className={isShippingFree() || (getShippingCost() === 0 && !shippingInfo.city) ? "text-green-400 italic font-bold" : "text-white"}>
+                        {isShippingFree() ? "FREE" : !shippingInfo.city ? "Enter city for rate" : `৳ ${getShippingCost().toLocaleString()}`}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center pt-5 mt-2 border-t border-white/10">
+                      <div>
+                        <span className="text-lg font-black uppercase tracking-tighter leading-none block">Total</span>
+                        <span className="text-[9px] text-white/30 font-bold uppercase tracking-[3px]">Vat Included</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-black text-white tracking-tighter block">৳ {finalTotal.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-12 items-start">
@@ -466,11 +580,27 @@ export default function CheckoutPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Mobile-only checkout CTA */}
+                <div className="lg:hidden mt-8">
+                  <button 
+                    form="checkout-form"
+                    type="submit" 
+                    disabled={loading} 
+                    className="w-full bg-black text-white py-5 text-sm font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-[#A31F24] transition-all flex justify-center items-center gap-3 active:scale-[0.98] shadow-lg"
+                  >
+                    {loading ? <Loader2 className="animate-spin" /> : (
+                      <>
+                        {paymentMethod === 'Mobile Banking' ? 'Verify & Confirm Order' : 'Place My Order'} <ShieldCheck size={20} />
+                      </>
+                    )}
+                  </button>
+                </div>
               </form>
             </div>
 
-            {/* Right Column: Sticky Summary */}
-            <div className="w-full lg:w-[38%] lg:sticky lg:top-24">
+            {/* Right Column: Sticky Summary (Hidden on Mobile) */}
+            <div className="hidden lg:block w-full lg:w-[38%] lg:sticky lg:top-24">
               <div className="bg-[#1A1A1A] text-white p-5 sm:p-8 md:p-10 rounded-3xl md:rounded-[40px] shadow-2xl relative overflow-hidden">
                 {/* Abstract Background Element */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl -mr-16 -mt-16"></div>

@@ -97,7 +97,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans">
+      <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans" suppressHydrationWarning>
         <StoreInitializer settings={settings} />
         {children}
       </body>

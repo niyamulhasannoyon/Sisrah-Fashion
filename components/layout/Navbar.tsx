@@ -110,7 +110,7 @@ export function Navbar() {
             Track Order
           </Link>
 
-          <button onClick={toggleCart} aria-label="Open Cart" className="relative flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
+          <button onClick={toggleCart} aria-label="Open Cart" className="relative hidden md:flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
             <ShoppingBag size={20} />
             {cart.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-loomra-red text-loomra-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -120,18 +120,13 @@ export function Navbar() {
           </button>
 
           {/* Auth Section with reserved layout space & fade-in transition */}
-          <div className="flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
             {!mounted ? (
               // Initial Mounting Skeleton to prevent CLS & Mismatches
-              <>
-                {/* Desktop buttons skeleton */}
-                <div className="hidden md:flex items-center gap-2">
-                  <div className="h-9 w-20 bg-slate-100 rounded-lg animate-pulse" />
-                  <div className="h-9 w-24 bg-slate-100 rounded-lg animate-pulse" />
-                </div>
-                {/* Mobile skeleton */}
-                <div className="flex md:hidden h-10 w-10 bg-slate-100 rounded-full animate-pulse" />
-              </>
+              <div className="flex items-center gap-2">
+                <div className="h-9 w-20 bg-slate-100 rounded-lg animate-pulse" />
+                <div className="h-9 w-24 bg-slate-100 rounded-lg animate-pulse" />
+              </div>
             ) : (
               <div className="flex items-center gap-2 transition-opacity duration-300 opacity-100">
                 {isAuthenticated ? (
@@ -139,19 +134,14 @@ export function Navbar() {
                     <Link href="/profile" aria-label="View Profile" className="flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
                       <User size={20} />
                     </Link>
-                    <button onClick={handleLogout} className="hidden md:block px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
+                    <button onClick={handleLogout} className="px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
                       Logout
                     </button>
                   </>
                 ) : (
                   <>
-                    <div className="hidden md:flex items-center gap-2">
-                      <Button href="/login" variant="secondary">Login</Button>
-                      <Button href="/login?register=true">Sign Up</Button>
-                    </div>
-                    <Link href="/login" aria-label="Login / Sign Up" className="flex md:hidden items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
-                      <User size={20} />
-                    </Link>
+                    <Button href="/login" variant="secondary">Login</Button>
+                    <Button href="/login?register=true">Sign Up</Button>
                   </>
                 )}
               </div>

@@ -27,7 +27,7 @@ export function LifestyleBanner() {
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover transition-transform duration-700 hover:scale-105"
             onError={() => {
-              setImgSrc("https://images.unsplash.com/photo-1513829096999-4978602297f7?q=80&w=800&auto=format&fit=crop");
+              setImgSrc("https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=800&auto=format&fit=crop");
             }}
             loading="lazy"
           />

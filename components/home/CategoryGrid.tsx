@@ -43,12 +43,14 @@ export function CategoryGrid() {
           <h2 className="text-4xl font-black uppercase tracking-tight text-loomra-black">Shop by category</h2>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {categories.map(category => (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {categories.map((category, index) => (
             <Link
               key={category.href}
               href={category.href}
-              className="group relative h-[280px] md:h-[450px] overflow-hidden rounded-lg bg-loomra-surface shadow-md block"
+              className={`group relative h-[220px] md:h-[450px] overflow-hidden rounded-2xl bg-loomra-surface shadow-sm hover:shadow-md transition-all duration-305 block ${
+                index === 2 ? 'col-span-2 md:col-span-1 h-[180px] md:h-[450px]' : 'col-span-1'
+              }`}
             >
               {/* Background Image with zoom on hover */}
               <Image 
@@ -60,16 +62,16 @@ export function CategoryGrid() {
                 loading="lazy"
               />
               {/* Dark Overlay for contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 transition-opacity duration-300 group-hover:from-black/90" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 transition-opacity duration-300 group-hover:from-black/90" />
               
               {/* Content */}
-              <div className="absolute inset-0 flex flex-col justify-between p-8 text-white z-10">
+              <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-8 text-white z-10">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-loomra-red font-bold">{category.title}</p>
-                  <h3 className="mt-2 text-2xl font-black uppercase tracking-wide leading-tight">{category.subtitle}</h3>
+                  <p className="text-[10px] md:text-xs uppercase tracking-[0.24em] text-loomra-red font-black">{category.title}</p>
+                  <h3 className="mt-1 md:mt-2 text-base md:text-2xl font-black uppercase tracking-wide leading-tight">{category.subtitle}</h3>
                 </div>
                 
-                <div className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-white border-b border-white/40 pb-1 self-start group-hover:border-loomra-red group-hover:text-loomra-red transition-all duration-300">
+                <div className="flex items-center gap-1.5 text-[10px] md:text-xs uppercase tracking-widest font-bold text-white border-b border-white/40 pb-1 self-start group-hover:border-loomra-red group-hover:text-loomra-red transition-all duration-300">
                   <span>Shop {category.title}</span>
                   <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform">→</span>
                 </div>
