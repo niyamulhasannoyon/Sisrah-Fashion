@@ -3,6 +3,7 @@
 import { useCartStore } from '@/store/useCartStore';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 export default function CartDrawer() {
@@ -51,7 +52,7 @@ export default function CartDrawer() {
           <h2 className="text-lg font-black uppercase tracking-widest text-[#1A1A1A] flex items-center gap-2">
             <ShoppingBag size={20} /> Your Cart <span className="bg-[#A31F24] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full ml-1">{cart.length}</span>
           </h2>
-          <button onClick={toggleCart} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <button onClick={toggleCart} aria-label="Close Cart" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <X size={20} className="text-[#1A1A1A]" />
           </button>
         </div>
@@ -71,12 +72,19 @@ export default function CartDrawer() {
               cart.map((item, index) => (
                 <div key={index} className="flex gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm relative group">
                   {/* Delete Button (Hover) */}
-                  <button onClick={() => removeFromCart(item._id, item.selectedSize, item.selectedColor)} className="absolute top-2 right-2 p-1.5 bg-white shadow rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all z-10">
+                  <button onClick={() => removeFromCart(item._id, item.selectedSize, item.selectedColor)} aria-label="Remove item from cart" className="absolute top-2 right-2 p-1.5 bg-white shadow rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all z-10">
                     <Trash2 size={14} />
                   </button>
 
-                  <div className="w-20 h-24 bg-[#F9F9F9] rounded-xl overflow-hidden shrink-0 border border-gray-50">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                  <div className="w-20 h-24 bg-[#F9F9F9] rounded-xl overflow-hidden shrink-0 border border-gray-50 relative">
+                    <Image 
+                      src={item.image || '/placeholder.jpg'} 
+                      alt={item.title} 
+                      fill 
+                      sizes="80px"
+                      className="object-cover" 
+                      loading="lazy"
+                    />
                   </div>
                   
                   <div className="flex-1 flex flex-col justify-between py-1">
@@ -105,9 +113,9 @@ export default function CartDrawer() {
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm font-black text-[#A31F24]">৳ {item.price.toLocaleString()}</span>
                       <div className="flex items-center border border-gray-200 rounded-xl bg-white overflow-hidden">
-                        <button onClick={() => updateQuantity(item._id, item.selectedSize, item.selectedColor, item.quantity - 1)} className="p-2 hover:bg-gray-100 text-gray-500 transition-colors"><Minus size={12} strokeWidth={3} /></button>
+                        <button onClick={() => updateQuantity(item._id, item.selectedSize, item.selectedColor, item.quantity - 1)} aria-label="Decrease quantity" className="p-2 hover:bg-gray-100 text-gray-500 transition-colors"><Minus size={12} strokeWidth={3} /></button>
                         <span className="w-8 text-center text-xs font-black text-[#1A1A1A]">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item._id, item.selectedSize, item.selectedColor, item.quantity + 1)} className="p-2 hover:bg-gray-100 text-gray-500 transition-colors"><Plus size={12} strokeWidth={3} /></button>
+                        <button onClick={() => updateQuantity(item._id, item.selectedSize, item.selectedColor, item.quantity + 1)} aria-label="Increase quantity" className="p-2 hover:bg-gray-100 text-gray-500 transition-colors"><Plus size={12} strokeWidth={3} /></button>
                       </div>
                     </div>
                   </div>
@@ -124,12 +132,19 @@ export default function CartDrawer() {
                 {recommended.map(product => (
                   <div key={product._id} className="w-[160px] shrink-0 snap-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden mb-3 bg-[#F9F9F9]">
-                      <img src={product.images[0]?.url} className="absolute inset-0 w-full h-full object-cover" alt={product.title}/>
+                      <Image 
+                        src={product.images[0]?.url || '/placeholder.jpg'} 
+                        alt={product.title} 
+                        fill 
+                        sizes="160px"
+                        className="object-cover" 
+                        loading="lazy"
+                      />
                     </div>
                     <h4 className="text-[11px] font-bold text-gray-800 line-clamp-1">{product.title}</h4>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-xs font-black text-[#A31F24]">৳ {(product.offerPrice || product.basePrice).toLocaleString()}</span>
-                      <button onClick={() => handleQuickAdd(product)} className="w-7 h-7 bg-black text-white rounded-lg flex items-center justify-center hover:bg-[#A31F24] transition-colors shadow-lg"><Plus size={16}/></button>
+                      <button onClick={() => handleQuickAdd(product)} aria-label="Quick add item to cart" className="w-7 h-7 bg-black text-white rounded-lg flex items-center justify-center hover:bg-[#A31F24] transition-colors shadow-lg"><Plus size={16}/></button>
                     </div>
                   </div>
                 ))}

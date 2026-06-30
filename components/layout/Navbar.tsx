@@ -99,7 +99,7 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button onClick={toggleCart} className="relative flex items-center justify-center w-10 h-10 border border-loomra-surface rounded-full hover:border-loomra-red transition">
+          <button onClick={toggleCart} aria-label="Open Cart" className="relative flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
             <ShoppingBag size={20} />
             {cart.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-loomra-red text-loomra-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -125,7 +125,7 @@ export function Navbar() {
               <div className="flex items-center gap-2 transition-opacity duration-300 opacity-100">
                 {isAuthenticated ? (
                   <>
-                    <Link href="/profile" className="flex items-center justify-center w-10 h-10 border border-loomra-surface rounded-full hover:border-loomra-red transition">
+                    <Link href="/profile" aria-label="View Profile" className="flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
                       <User size={20} />
                     </Link>
                     <button onClick={handleLogout} className="hidden md:block px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
@@ -138,7 +138,7 @@ export function Navbar() {
                       <Button href="/login" variant="secondary">Login</Button>
                       <Button href="/login?register=true">Sign Up</Button>
                     </div>
-                    <Link href="/login" className="flex md:hidden items-center justify-center w-10 h-10 border border-loomra-surface rounded-full hover:border-loomra-red transition">
+                    <Link href="/login" aria-label="Login / Sign Up" className="flex md:hidden items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
                       <User size={20} />
                     </Link>
                   </>
@@ -149,7 +149,7 @@ export function Navbar() {
 
           <button
             type="button"
-            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-loomra-surface text-loomra-black md:hidden focus:outline-none z-50"
+            className="relative flex h-12 w-12 items-center justify-center rounded-full border border-loomra-surface text-loomra-black md:hidden focus:outline-none z-50"
             onClick={() => setOpen(state => !state)}
             aria-label="Toggle Menu"
           >
@@ -193,7 +193,8 @@ export function Navbar() {
                 )}
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-800 hover:border-black hover:text-black transition-colors text-xs font-bold"
+                  aria-label="Close menu"
+                  className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-300 text-slate-800 hover:border-black hover:text-black transition-colors text-xs font-bold"
                   onClick={() => setOpen(false)}
                 >
                   ✕

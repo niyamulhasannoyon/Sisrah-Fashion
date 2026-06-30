@@ -46,6 +46,7 @@ export default function ProductCard({ product }: { product: any }) {
             e.preventDefault();
             toggleWishlist(product);
           }}
+          aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
           className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-transform z-10"
         >
           <Heart size={16} fill={isLiked ? "#A31F24" : "none"} color={isLiked ? "#A31F24" : "#1A1A1A"} />
