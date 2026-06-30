@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect } from 'react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
@@ -50,10 +51,12 @@ export function CategoryGrid() {
               className="group relative h-[280px] md:h-[450px] overflow-hidden rounded-lg bg-loomra-surface shadow-md block"
             >
               {/* Background Image with zoom on hover */}
-              <img 
+              <Image 
                 src={category.image} 
                 alt={category.title} 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 loading="lazy"
               />
               {/* Dark Overlay for contrast */}

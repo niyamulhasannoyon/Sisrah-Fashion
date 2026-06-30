@@ -1,6 +1,8 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
 
@@ -8,17 +10,26 @@ export function LifestyleBanner() {
   const { settings } = useSettingsStore();
   const displayImage = getDirectImageLink(settings?.ethosImage) || "/images/brand-story.jpg";
 
+  const [imgSrc, setImgSrc] = useState(displayImage);
+
+  useEffect(() => {
+    setImgSrc(displayImage);
+  }, [displayImage]);
+
   return (
     <section className="w-full bg-loomra-surface py-24">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 sm:px-8 md:grid-cols-2 items-center">
-        <div className="overflow-hidden rounded-none aspect-[4/3] bg-loomra-surface">
-          <img
-            src={displayImage}
+        <div className="relative overflow-hidden rounded-none aspect-[4/3] bg-loomra-surface">
+          <Image
+            src={imgSrc}
             alt="Artisans at work"
-            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-            onError={(e) => {
-              e.currentTarget.src = "https://images.unsplash.com/photo-1513829096999-4978602297f7?q=80&w=800&auto=format&fit=crop";
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover transition-transform duration-700 hover:scale-105"
+            onError={() => {
+              setImgSrc("https://images.unsplash.com/photo-1513829096999-4978602297f7?q=80&w=800&auto=format&fit=crop");
             }}
+            loading="lazy"
           />
         </div>
         <div className="flex flex-col gap-6">

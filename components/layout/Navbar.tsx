@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
@@ -67,10 +68,13 @@ export function Navbar() {
               // Faint skeleton circle that doesn't cause shift
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-100 animate-pulse" />
             ) : settings?.logo ? (
-              <img 
+              <Image 
                 src={getDirectImageLink(settings.logo)} 
                 alt="AS SIDRAT" 
-                className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105" 
+                fill
+                sizes="(max-width: 768px) 32px, 40px"
+                priority
+                className="object-contain transition-all duration-300 group-hover:scale-105" 
               />
             ) : (
               // Fallback letter placeholder

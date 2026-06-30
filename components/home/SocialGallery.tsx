@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { Image as ImageIcon } from 'lucide-react';
 
@@ -32,10 +33,13 @@ export function SocialGallery() {
         <div className="flex overflow-x-auto gap-4 pb-8 px-4 -mx-10 custom-scrollbar snap-x">
           {images.map((img, idx) => (
             <div key={idx} className="relative w-64 md:w-80 aspect-[4/5] shrink-0 snap-center rounded-2xl overflow-hidden group cursor-pointer shadow-md">
-              <img 
+              <Image 
                 src={img.url} 
                 alt="Community Style" 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                fill
+                sizes="(max-width: 768px) 256px, 320px"
+                className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                loading="lazy"
               />
               {/* Hover Overlay */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">

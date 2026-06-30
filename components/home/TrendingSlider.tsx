@@ -4,11 +4,15 @@ import { useEffect, useState } from 'react';
 import ProductCard from '@/components/product/ProductCard';
 import { Loader2 } from 'lucide-react';
 
-export function TrendingSlider() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export function TrendingSlider({ initialProducts }: { initialProducts?: any[] }) {
+  const [products, setProducts] = useState<any[]>(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts);
 
   useEffect(() => {
+    if (initialProducts && initialProducts.length > 0) {
+      return;
+    }
+
     fetch('/api/products/trending')
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
@@ -24,7 +28,7 @@ export function TrendingSlider() {
         console.error("Error fetching trending products:", err);
         setLoading(false);
       });
-  }, []);
+  }, [initialProducts]);
 
   if (loading) return (
     <div className="py-20 flex justify-center items-center">

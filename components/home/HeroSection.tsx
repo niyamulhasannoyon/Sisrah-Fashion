@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { LOOMRA_COPY } from '@/lib/constants/copy';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -33,11 +34,20 @@ export function HeroSection() {
       {slides.map((slide, index) => (
         <div 
           key={index}
-          className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-[1500ms] ease-in-out ${
+          className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${
             index === activeSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
           }`}
-          style={{ backgroundImage: `url('${getDirectImageLink(slide.url)}')` }}
-        />
+        >
+          <Image
+            src={getDirectImageLink(slide.url)}
+            alt={headline || "AS SIDRAT Hero Banner"}
+            fill
+            sizes="100vw"
+            priority={index === 0}
+            className="object-cover object-center"
+            quality={90}
+          />
+        </div>
       ))}
       
       {/* Dark overlay */}

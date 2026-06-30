@@ -81,10 +81,24 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import StoreInitializer from '@/components/layout/StoreInitializer';
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  let settings = null;
+  try {
+    await dbConnect();
+    const settingsDoc = await Settings.findOne();
+    if (settingsDoc) {
+      settings = JSON.parse(JSON.stringify(settingsDoc));
+    }
+  } catch (error) {
+    console.error('Error loading settings in RootLayout:', error);
+  }
+
   return (
     <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans">
+        <StoreInitializer settings={settings} />
         {children}
       </body>
     </html>

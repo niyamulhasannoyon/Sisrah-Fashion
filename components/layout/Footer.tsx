@@ -2,6 +2,7 @@
 
 import { useSettingsStore } from '@/store/useSettingsStore';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { getDirectImageLink } from '@/lib/utils';
 
@@ -16,9 +17,18 @@ export function Footer() {
           
           {/* Brand Info */}
           <div className="flex flex-col gap-4">
-            <Link href="/" className="text-xl font-black tracking-tight text-white">
+            <Link href="/" className="text-xl font-black tracking-tight text-white block">
               {settings?.logo ? (
-                <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-12 md:h-16 w-auto object-contain brightness-0 invert" />
+                <div className="relative h-12 md:h-16 w-32 md:w-44">
+                  <Image 
+                    src={getDirectImageLink(settings.logo)} 
+                    alt="AS SIDRAT" 
+                    fill 
+                    sizes="(max-width: 768px) 128px, 176px"
+                    className="object-contain brightness-0 invert" 
+                    loading="lazy" 
+                  />
+                </div>
               ) : (
                 "AS SIDRAT"
               )}

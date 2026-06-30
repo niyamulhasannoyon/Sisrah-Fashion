@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
@@ -30,11 +31,13 @@ export default function ProductCard({ product }: { product: any }) {
 
   return (
     <div className="group flex flex-col gap-3 cursor-pointer">
-      <Link href={`/product/${product.slug}`} className="relative aspect-[4/5] bg-[#F9F9F9] rounded-xl overflow-hidden border border-gray-100">
-        <img 
+      <Link href={`/product/${product.slug}`} className="relative aspect-[4/5] bg-[#F9F9F9] rounded-xl overflow-hidden border border-gray-100 block">
+        <Image 
           src={product.images[0]?.url || '/placeholder.jpg'} 
           alt={product.title} 
-          className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105" 
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover object-top transition-transform duration-700 group-hover:scale-105" 
           loading="lazy"
         />
 
