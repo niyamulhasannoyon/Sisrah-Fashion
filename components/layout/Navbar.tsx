@@ -99,6 +99,17 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <Link 
+            href="/track-order" 
+            className="hidden sm:flex items-center gap-2.5 px-4 h-12 border border-loomra-surface hover:border-loomra-red rounded-full text-xs font-bold uppercase tracking-widest text-[#1A1A1A] hover:text-[#A31F24] transition-all"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            Track Order
+          </Link>
+
           <button onClick={toggleCart} aria-label="Open Cart" className="relative flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
             <ShoppingBag size={20} />
             {cart.length > 0 && (
@@ -226,6 +237,22 @@ export function Navbar() {
                     </Link>
                   );
                 })}
+                <div className="border-t border-slate-100/80 my-2 pt-2">
+                  <Link 
+                    href="/track-order" 
+                    onClick={() => setOpen(false)} 
+                    className="flex items-center justify-between px-4 py-4 rounded-xl text-sm font-bold uppercase tracking-wider text-slate-900 bg-slate-50 hover:text-[#A31F24] hover:bg-slate-100 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                      </span>
+                      <span>Track Order</span>
+                    </div>
+                    <span className="text-slate-400">→</span>
+                  </Link>
+                </div>
               </nav>
             </div>
 
