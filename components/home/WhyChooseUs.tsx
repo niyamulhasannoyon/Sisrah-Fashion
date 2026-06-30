@@ -38,7 +38,7 @@ export function WhyChooseUs() {
           {/* Watermark and Foreground Title Container */}
           <div className="relative w-full flex items-center justify-center min-h-[80px]">
             {/* Background Watermark */}
-            <span className="absolute text-[2.2rem] xs:text-[2.6rem] sm:text-[5rem] lg:text-[6.5rem] font-black uppercase tracking-[0.05em] text-gray-50/70 select-none pointer-events-none font-sans z-0 leading-none text-center whitespace-nowrap">
+            <span aria-hidden="true" className="absolute text-[2.2rem] xs:text-[2.6rem] sm:text-[5rem] lg:text-[6.5rem] font-black uppercase tracking-[0.05em] text-gray-50/70 select-none pointer-events-none font-sans z-0 leading-none text-center whitespace-nowrap">
               WHY CHOOSE US
             </span>
             
