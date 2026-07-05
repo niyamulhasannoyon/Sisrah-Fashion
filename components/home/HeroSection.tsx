@@ -40,7 +40,7 @@ export function HeroSection() {
         >
           <Image
             src={getDirectImageLink(slide.url)}
-            alt={headline || "AS SIDRAT Hero Banner"}
+            alt="AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh"
             fill
             sizes="100vw"
             priority={index === 0}

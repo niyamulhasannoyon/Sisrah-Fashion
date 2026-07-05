@@ -1,5 +1,5 @@
 const reviews = [
-  '“Loomra makes summer dressing feel effortless and upscale.”',
+  '“AS SIDRAT makes summer dressing feel effortless and upscale.”',
   '“The fabrics are so breathable — perfect for Dhaka humidity.”',
   '“I love the simple silhouettes and the red accent details.”',
   '“This feels like premium fashion without the pretension.”'

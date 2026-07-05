@@ -75,9 +75,9 @@ export function Footer() {
             <h4 className="text-sm font-bold uppercase tracking-wider text-white">Customer Care</h4>
             <ul className="flex flex-col gap-2.5 text-xs text-[#A1A1AA]">
               <li><Link href="/track-order" className="hover:text-white transition-colors">Track Your Order</Link></li>
-              <li><Link href="/track-order" className="hover:text-white transition-colors">Shipping & Returns</Link></li>
-              <li><Link href="/track-order" className="hover:text-white transition-colors">FAQ & Support</Link></li>
-              <li><Link href="/track-order" className="hover:text-white transition-colors">Size Guide</Link></li>
+              <li><Link href="/shipping-returns" className="hover:text-white transition-colors">Shipping & Returns</Link></li>
+              <li><Link href="/faq" className="hover:text-white transition-colors">FAQ & Support</Link></li>
+              <li><Link href="/size-guide" className="hover:text-white transition-colors">Size Guide</Link></li>
             </ul>
           </div>
 
@@ -109,12 +109,12 @@ export function Footer() {
                 <li className="flex gap-2 items-center">
                   <Phone size={16} className="text-loomra-red shrink-0" />
                   <a 
-                    href="https://wa.me/8801700000000" 
+                    href="https://wa.me/8801712345678" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="hover:text-white hover:underline transition-colors font-semibold"
                   >
-                    WhatsApp: +880 1700-000000
+                    WhatsApp: +880 1712-345678
                   </a>
                 </li>
               )}
@@ -132,9 +132,9 @@ export function Footer() {
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <span>Payments: <b>bKash, Nagad, Cards, SSLCommerz-ready</b></span>
             <div className="flex gap-3 text-gray-400">
-              <Link href="/track-order" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
               <span>•</span>
-              <Link href="/track-order" className="hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>
