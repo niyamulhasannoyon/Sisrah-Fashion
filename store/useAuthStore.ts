@@ -7,6 +7,7 @@ interface User {
   email: string;
   role: string;
   phone?: string;
+  image?: string;
   address?: {
     street?: string;
     city?: string;
@@ -19,6 +20,7 @@ interface AuthState {
   isAuthenticated: boolean;
   login: (userData: User) => void;
   logout: () => void;
+  updateUser: (userData: Partial<User>) => void;
   checkAuth: () => Promise<void>;
 }
 
@@ -29,6 +31,9 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       login: (userData) => set({ user: userData, isAuthenticated: true }),
       logout: () => set({ user: null, isAuthenticated: false }),
+      updateUser: (userData) => set((state) => ({
+        user: state.user ? { ...state.user, ...userData } : null
+      })),
       checkAuth: async () => {
         try {
           const res = await fetch('/api/auth/me', { cache: 'no-store' });

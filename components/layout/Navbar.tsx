@@ -131,8 +131,12 @@ export function Navbar() {
               <div className="flex items-center gap-2 transition-opacity duration-300 opacity-100">
                 {isAuthenticated ? (
                   <>
-                    <Link href="/profile" aria-label="View Profile" className="flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
-                      <User size={20} />
+                    <Link href="/profile" aria-label="View Profile" className="flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition overflow-hidden">
+                      {user?.image ? (
+                        <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={20} />
+                      )}
                     </Link>
                     <button onClick={handleLogout} className="px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
                       Logout
@@ -255,7 +259,11 @@ export function Navbar() {
                     onClick={() => setOpen(false)} 
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-[0.15em] text-slate-700 hover:bg-slate-50 transition-colors"
                   >
-                    <User size={18} className="text-slate-400" />
+                    {user?.image ? (
+                      <img src={user.image} alt={user.name} className="w-[18px] h-[18px] rounded-full object-cover shrink-0" />
+                    ) : (
+                      <User size={18} className="text-slate-400" />
+                    )}
                     <span>My Profile</span>
                   </Link>
                   <button 

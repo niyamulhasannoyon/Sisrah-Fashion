@@ -5,10 +5,12 @@ import { usePathname } from 'next/navigation';
 import { Home, Search, ShoppingBag, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function BottomNav() {
   const pathname = usePathname();
   const cartItems = useCartStore((state) => state.cart);
+  const { user } = useAuthStore();
 
   if (pathname === '/checkout') return null;
 
@@ -39,11 +41,19 @@ export default function BottomNav() {
                 />
               )}
               <div className="relative">
-                <Icon
-                  size={24}
-                  strokeWidth={isActive ? 2.5 : 1.5}
-                  className={isActive ? 'text-loomra-black' : 'text-loomra-muted'}
-                />
+                {item.name === 'Profile' && user?.image ? (
+                  <img 
+                    src={user.image} 
+                    alt="Profile" 
+                    className={`w-6 h-6 rounded-full object-cover border ${isActive ? 'border-loomra-black' : 'border-transparent'}`} 
+                  />
+                ) : (
+                  <Icon
+                    size={24}
+                    strokeWidth={isActive ? 2.5 : 1.5}
+                    className={isActive ? 'text-loomra-black' : 'text-loomra-muted'}
+                  />
+                )}
                 {item.badge !== undefined && item.badge > 0 && (
                   <span className="absolute -top-2 -right-2 bg-loomra-red text-loomra-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
                     {item.badge}

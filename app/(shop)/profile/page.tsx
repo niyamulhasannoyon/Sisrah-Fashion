@@ -6,12 +6,23 @@ import { useEffect, useState } from 'react';
 import { Package, User as UserIcon, LogOut, Loader2, CheckCircle2, Clock, Truck, ShoppingBag } from 'lucide-react';
 
 export default function AdvancedProfilePage() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, updateUser } = useAuthStore();
   const router = useRouter();
   
   const [activeTab, setActiveTab] = useState<'profile' | 'orders'>('orders');
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Profile fields state
+  const [formName, setFormName] = useState('');
+  const [formPhone, setFormPhone] = useState('');
+  const [formStreet, setFormStreet] = useState('');
+  const [formCity, setFormCity] = useState('');
+  const [formDivision, setFormDivision] = useState('');
+  
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -19,6 +30,13 @@ export default function AdvancedProfilePage() {
       return;
     }
     fetchMyOrders();
+    
+    // Set form fields
+    setFormName(user.name || '');
+    setFormPhone(user.phone || '');
+    setFormStreet(user.address?.street || '');
+    setFormCity(user.address?.city || '');
+    setFormDivision(user.address?.division || '');
   }, [user, router]);
 
   const fetchMyOrders = async () => {
@@ -39,6 +57,89 @@ export default function AdvancedProfilePage() {
     await fetch('/api/auth/logout', { method: 'POST' });
     logout();
     router.push('/login');
+  };
+
+  const uploadToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'loomra_preset'); 
+    const CLOUD_NAME = 'dj3uym3gv'; 
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+    return await res.json();
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length || !user) return;
+    setUploading(true);
+    try {
+      const data = await uploadToCloudinary(e.target.files[0]);
+      if (data.secure_url) {
+        const res = await fetch('/api/user/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formName || user.name,
+            phone: formPhone || user.phone,
+            image: data.secure_url,
+            address: {
+              street: formStreet || user.address?.street,
+              city: formCity || user.address?.city,
+              division: formDivision || user.address?.division,
+            }
+          })
+        });
+        const result = await res.json();
+        if (result.success) {
+          updateUser({ image: data.secure_url });
+        } else {
+          alert(result.error || "Failed to update profile picture.");
+        }
+      } else {
+        alert("Upload failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Image upload error:", error);
+      alert("Error uploading image.");
+    } finally {
+      setUploading(true); // Wait, setting uploading back to true or false? Should be false. We will make it false in finally.
+      setUploading(false);
+    }
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setSaving(true);
+    setSaveSuccess(false);
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formName,
+          phone: formPhone,
+          image: user.image,
+          address: {
+            street: formStreet,
+            city: formCity,
+            division: formDivision,
+          }
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        updateUser(result.user);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        alert(result.error || "Failed to save profile.");
+      }
+    } catch (error) {
+      console.error("Profile save error:", error);
+      alert("Error saving profile details.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!user) return null;
@@ -109,12 +210,27 @@ export default function AdvancedProfilePage() {
   return (
     <div className="container mx-auto px-4 py-12 lg:py-24 flex flex-col md:flex-row gap-8">
       <div className="w-full md:w-64 flex flex-col gap-2">
-        <div className="bg-[#1A1A1A] p-6 rounded-lg mb-4 text-white">
-          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4 text-xl font-bold uppercase">
-            {user.name.charAt(0)}
+        <div className="bg-[#1A1A1A] p-6 rounded-lg mb-4 text-white flex flex-col items-center text-center">
+          <div className="relative group w-20 h-20 mb-4">
+            {user.image ? (
+              <img src={user.image} alt={user.name} className="w-20 h-20 rounded-full object-cover border-2 border-white/20" />
+            ) : (
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-3xl font-bold uppercase select-none">
+                {user.name.charAt(0)}
+              </div>
+            )}
+            <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              <span className="text-[10px] text-white font-bold uppercase tracking-widest">Edit</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} disabled={uploading} />
+            </label>
           </div>
           <h2 className="font-bold text-lg">{user.name}</h2>
           <p className="text-xs text-gray-400 mt-1">{user.email}</p>
+          {uploading && (
+            <div className="flex items-center gap-1.5 mt-2 text-[10px] text-gray-300 animate-pulse">
+              <Loader2 className="w-3 h-3 animate-spin" /> Uploading...
+            </div>
+          )}
         </div>
 
         <button onClick={() => setActiveTab('orders')} className={`flex items-center gap-3 px-4 py-3 rounded text-sm font-bold uppercase transition ${activeTab === 'orders' ? 'bg-[#F9F9F9] text-[#A31F24]' : 'text-gray-600 hover:bg-gray-50'}`}>
@@ -130,23 +246,102 @@ export default function AdvancedProfilePage() {
 
       <div className="flex-1 bg-white border border-gray-100 rounded-lg p-6 lg:p-10 shadow-sm min-h-[500px]">
         {activeTab === 'profile' && (
-          <div className="animate-in fade-in duration-500">
-            <h2 className="text-xl font-bold uppercase tracking-widest text-[#1A1A1A] border-b pb-4 mb-6">Account Details</h2>
+          <form onSubmit={handleSaveProfile} className="animate-in fade-in duration-500 space-y-6">
+            <div className="flex justify-between items-center border-b pb-4 mb-6">
+              <h2 className="text-xl font-bold uppercase tracking-widest text-[#1A1A1A]">Account Details</h2>
+              {saveSuccess && (
+                <span className="text-xs text-emerald-600 font-bold uppercase tracking-wider flex items-center gap-1">
+                  ✓ Profile Saved!
+                </span>
+              )}
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase">Full Name</label>
-                <p className="font-medium text-lg mt-1">{user.name}</p>
+                <input 
+                  type="text" 
+                  value={formName} 
+                  onChange={(e) => setFormName(e.target.value)} 
+                  required
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                />
               </div>
-              <div>
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase">Email Address</label>
-                <p className="font-medium text-lg mt-1">{user.email}</p>
+                <input 
+                  type="email" 
+                  value={user.email} 
+                  disabled
+                  className="w-full p-3 bg-slate-100 border border-slate-200 text-gray-500 rounded-lg outline-none cursor-not-allowed"
+                />
+                <p className="text-[10px] text-gray-400">Email address cannot be changed.</p>
               </div>
-              <div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-400 uppercase">Phone Number</label>
+                <input 
+                  type="text" 
+                  value={formPhone} 
+                  onChange={(e) => setFormPhone(e.target.value)} 
+                  required
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                />
+              </div>
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase">Account Type</label>
-                <p className="font-medium mt-1 uppercase bg-gray-100 w-fit px-3 py-1 rounded text-sm">{user.role}</p>
+                <div className="p-3 bg-slate-100 border border-slate-200 text-gray-500 rounded-lg capitalize text-sm">
+                  {user.role}
+                </div>
               </div>
             </div>
-          </div>
+
+            <div className="border-t pt-6 space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A1A1A]">Shipping Address</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-3 space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase">Street Address</label>
+                  <input 
+                    type="text" 
+                    value={formStreet} 
+                    onChange={(e) => setFormStreet(e.target.value)} 
+                    placeholder="e.g. House 12, Road 5"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase">City</label>
+                  <input 
+                    type="text" 
+                    value={formCity} 
+                    onChange={(e) => setFormCity(e.target.value)} 
+                    placeholder="e.g. Dhaka"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase">Division</label>
+                  <input 
+                    type="text" 
+                    value={formDivision} 
+                    onChange={(e) => setFormDivision(e.target.value)} 
+                    placeholder="e.g. Dhaka"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button 
+                type="submit" 
+                disabled={saving}
+                className="bg-[#1A1A1A] hover:bg-[#A31F24] text-white px-8 py-3.5 text-xs font-bold uppercase tracking-widest transition duration-300 rounded shadow-md disabled:bg-gray-400 flex items-center gap-2"
+              >
+                {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
         )}
 
         {activeTab === 'orders' && (
