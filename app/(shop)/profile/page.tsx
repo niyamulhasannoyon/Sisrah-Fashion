@@ -106,6 +106,39 @@ export default function AdvancedProfilePage() {
     }
   };
 
+  const handleRemoveImage = async () => {
+    if (!user) return;
+    if (!confirm("Are you sure you want to remove your profile picture?")) return;
+    setUploading(true);
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formName || user.name,
+          phone: formPhone || user.phone,
+          image: '',
+          address: {
+            street: formStreet || user.address?.street,
+            city: formCity || user.address?.city,
+            division: formDivision || user.address?.division,
+          }
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        updateUser({ image: '' });
+      } else {
+        alert(result.error || "Failed to remove profile picture.");
+      }
+    } catch (error) {
+      console.error("Remove image error:", error);
+      alert("Error removing image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -211,7 +244,7 @@ export default function AdvancedProfilePage() {
     <div className="container mx-auto px-4 py-12 lg:py-24 flex flex-col md:flex-row gap-8">
       <div className="w-full md:w-64 flex flex-col gap-2">
         <div className="bg-[#1A1A1A] p-6 rounded-lg mb-4 text-white flex flex-col items-center text-center">
-          <div className="relative group w-20 h-20 mb-4">
+          <div className="relative w-20 h-20 mb-4">
             {user.image ? (
               <img src={user.image} alt={user.name} className="w-20 h-20 rounded-full object-cover border-2 border-white/20" />
             ) : (
@@ -219,8 +252,8 @@ export default function AdvancedProfilePage() {
                 {user.name.charAt(0)}
               </div>
             )}
-            <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              <span className="text-[10px] text-white font-bold uppercase tracking-widest">Edit</span>
+            <label className="absolute bottom-0 right-0 bg-[#A31F24] hover:bg-red-800 text-white w-7 h-7 rounded-full flex items-center justify-center cursor-pointer shadow-md transition-colors border-2 border-[#1A1A1A]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} disabled={uploading} />
             </label>
           </div>
@@ -255,8 +288,45 @@ export default function AdvancedProfilePage() {
                 </span>
               )}
             </div>
+
+            {/* Profile Photo Section in Form */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-slate-100">
+              <div className="relative w-24 h-24">
+                {user.image ? (
+                  <img src={user.image} alt={user.name} className="w-24 h-24 rounded-full object-cover border" />
+                ) : (
+                  <div className="w-24 h-24 bg-[#F9F9F9] border border-slate-200 rounded-full flex items-center justify-center text-4xl font-bold uppercase text-slate-400 select-none">
+                    {user.name.charAt(0)}
+                  </div>
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#A31F24]" />
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 text-center sm:text-left">
+                <h3 className="text-sm font-bold uppercase text-[#1A1A1A]">Profile Photo</h3>
+                <p className="text-xs text-gray-400">Update your profile picture. PNG or JPG, up to 5MB.</p>
+                <div className="flex gap-3 justify-center sm:justify-start mt-1">
+                  <label className="bg-[#1A1A1A] hover:bg-[#A31F24] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors duration-300 rounded cursor-pointer shadow-sm">
+                    Upload Photo
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} disabled={uploading} />
+                  </label>
+                  {user.image && (
+                    <button 
+                      type="button" 
+                      onClick={handleRemoveImage}
+                      className="border border-slate-200 text-gray-500 hover:text-red-600 hover:border-red-200 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors duration-300 rounded"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase">Full Name</label>
                 <input 
