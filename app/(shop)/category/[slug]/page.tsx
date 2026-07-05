@@ -18,7 +18,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const { slug } = await params;
   const category = normalizeCategory(slug);
-  const products = await Product.find({ category }).lean();
+  const products = await Product.find({
+    category: { $regex: new RegExp(`^${slug.replace('-', ' ')}$`, 'i') }
+  }).lean();
   const safeProducts = JSON.parse(JSON.stringify(products));
 
   return (

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
     let query = {};
     if (category) {
-      query = { category };
+      query = { category: { $regex: new RegExp(`^${category.replace('-', ' ')}$`, 'i') } };
     }
 
     const products = await Product.find(query).sort({ createdAt: -1 });
