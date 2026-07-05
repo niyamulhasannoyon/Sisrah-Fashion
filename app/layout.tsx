@@ -45,9 +45,16 @@ export async function generateMetadata(): Promise<Metadata> {
     authors: [{ name: 'AS SIDRAT' }],
     metadataBase: new URL(BASE_URL),
     icons: {
-      icon: faviconUrl,
+      icon: [
+        { url: faviconUrl, sizes: 'any' },
+        { url: '/icon.png', type: 'image/png', sizes: '32x32' },
+        { url: '/favicon.png', type: 'image/png', sizes: '192x192' },
+      ],
       shortcut: faviconUrl,
-      apple: faviconUrl,
+      apple: [
+        { url: faviconUrl, sizes: '180x180' },
+        { url: '/apple-icon.png', sizes: '180x180' },
+      ],
     },
     openGraph: {
       title: 'AS SIDRAT | Premium Shirt & T-Shirt Brand Bangladesh',
@@ -97,6 +104,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              'name': 'AS SIDRAT',
+              'url': BASE_URL,
+              'alternateName': ['AS SIDRAT Clothing', 'Sisrah Fashion'],
+            }),
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans" suppressHydrationWarning>
         <StoreInitializer settings={settings} />
         {children}
