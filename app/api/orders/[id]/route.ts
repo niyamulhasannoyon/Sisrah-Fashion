@@ -14,7 +14,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const { id } = await params;
     const { orderStatus, paymentStatus } = await req.json();
     const updateData: any = {};
-    if (orderStatus !== undefined) updateData.orderStatus = orderStatus;
+    if (orderStatus !== undefined) {
+      updateData.orderStatus = orderStatus;
+      if (orderStatus === 'Delivered') {
+        updateData.deliveredAt = new Date();
+      }
+    }
     if (paymentStatus !== undefined) updateData.paymentStatus = paymentStatus;
 
     const updatedOrder = await Order.findByIdAndUpdate(
@@ -25,6 +30,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     if (!updatedOrder) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
+    }
+
+    if (orderStatus === 'Delivered') {
+      console.log(`[NOTIFICATION] Order #${updatedOrder._id} manual confirmation to Delivered. timestamp: ${updatedOrder.deliveredAt}`);
+      console.log(`[MOCK SMS] Sent to ${updatedOrder.shippingInfo.phone}: "আপনার AS SIDRAT অর্ডার #${updatedOrder._id.toString().slice(-8).toUpperCase()} সফলভাবে ডেলিভার করা হয়েছে! আমাদের প্রোডাক্ট সম্পর্কে আপনার মতামত শেয়ার করুন।"`);
+      console.log(`[MOCK EMAIL] Sent to customer: "Your order #${updatedOrder._id.toString().slice(-8).toUpperCase()} has been delivered successfully. Please leave a review!"`);
     }
 
     return NextResponse.json({ success: true, order: updatedOrder }, { status: 200 });

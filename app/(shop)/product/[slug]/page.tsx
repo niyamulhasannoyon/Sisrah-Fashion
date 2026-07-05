@@ -51,7 +51,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const reviews = await Review.find({ product: product._id }).sort({ createdAt: -1 }).limit(5).lean();
+  const reviews = await Review.find({ product: product._id, status: 'approved' }).sort({ createdAt: -1 }).limit(10).lean();
 
   const productData = JSON.parse(JSON.stringify(product));
   const reviewsData = JSON.parse(JSON.stringify(reviews));

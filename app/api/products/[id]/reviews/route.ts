@@ -1,19 +1,23 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+import Review from '@/models/Review';
+import Order from '@/models/Order';
+import User from '@/models/User';
 import { cookies } from 'next/headers';
 import * as jose from 'jose';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
-    const { rating, comment } = await req.json();
+    const { rating, comment, images } = await req.json();
 
     const token = (await cookies()).get('loomra_token')?.value;
     if (!token) return NextResponse.json({ error: 'Please login to review' }, { status: 401 });
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your_jwt_secret');
     const { payload } = await jose.jwtVerify(token, secret);
+    const userId = payload.userId;
 
     const { id } = await params;
     const product = await Product.findById(id);
@@ -22,26 +26,46 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const alreadyReviewed = product.reviews.find((r: any) => r.user.toString() === payload.userId);
-    if (alreadyReviewed) return NextResponse.json({ error: 'Product already reviewed' }, { status: 400 });
+    // Check if already reviewed in the separate collection
+    const alreadyReviewed = await Review.findOne({ product: id, user: userId });
+    if (alreadyReviewed) {
+      return NextResponse.json({ error: 'You have already reviewed this product' }, { status: 400 });
+    }
 
-    const review = {
-      user: payload.userId,
-      name: (payload as any).name || 'User', 
+    const user = await User.findById(userId);
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Check if verified purchase (Order delivered containing this product title)
+    // We check user's phone from profile
+    const userOrders = await Order.findOne({
+      'shippingInfo.phone': user.phone,
+      orderStatus: { $in: ['Delivered', 'Completed'] },
+      'orderItems.title': product.title
+    });
+
+    const verifiedPurchase = !!userOrders;
+
+    const review = await Review.create({
+      user: userId,
+      product: id,
+      name: user.name,
       rating: Number(rating),
-      comment,
-    };
+      comment: comment || '',
+      images: images || [],
+      verifiedPurchase,
+      status: 'pending', // Moderation queue (pending by default)
+    });
 
-    product.reviews.push(review);
-    product.numReviews = product.reviews.length;
-    
-    product.rating = product.reviews.reduce((acc: number, item: any) => item.rating + acc, 0) / product.reviews.length;
-
-    await product.save();
-    return NextResponse.json({ success: true, message: 'Review added' });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Review submitted successfully. It will be visible once approved by admin.',
+      review 
+    }, { status: 201 });
 
   } catch (error) {
-    console.error(error);
+    console.error('Submit review error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

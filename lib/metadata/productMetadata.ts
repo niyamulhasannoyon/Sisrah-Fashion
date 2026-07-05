@@ -76,7 +76,7 @@ export function generateProductMetadata(product: ProductMetadataInput, baseUrl: 
   };
 
   return {
-    title: `${productTitle} - AS SIDRAT`,
+    title: `${productTitle} - AS SIDRAT | Buy Shirt Online Bangladesh`,
     description: productDescription,
     keywords: [
       productTitle,
@@ -91,7 +91,7 @@ export function generateProductMetadata(product: ProductMetadataInput, baseUrl: 
       canonical: productUrl,
     },
     openGraph: {
-      title: `${productTitle} - AS SIDRAT`,
+      title: `${productTitle} - AS SIDRAT | Buy Shirt Online Bangladesh`,
       description: productDescription,
       url: productUrl,
       type: 'website',
@@ -109,7 +109,7 @@ export function generateProductMetadata(product: ProductMetadataInput, baseUrl: 
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${productTitle} - AS SIDRAT`,
+      title: `${productTitle} - AS SIDRAT | Buy Shirt Online Bangladesh`,
       description: productDescription,
       images: [productImage],
       creator: '@AS_SIDRAT',

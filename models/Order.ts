@@ -22,6 +22,7 @@ export interface IOrder extends Document {
   orderId: number;
   transactionId?: string;
   paidAmount?: number;
+  deliveredAt?: Date;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -49,6 +50,7 @@ const OrderSchema: Schema = new Schema(
     orderId: { type: Number, unique: true },
     transactionId: { type: String },
     paidAmount: { type: Number },
+    deliveredAt: { type: Date },
   },
   { timestamps: true }
 );

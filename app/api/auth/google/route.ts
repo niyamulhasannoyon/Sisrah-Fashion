@@ -28,6 +28,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ requirePhone: true, email, name });
       }
       
+      const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+      if (!bdPhoneRegex.test(phone)) {
+        return NextResponse.json({ error: 'Invalid Bangladeshi phone number' }, { status: 400 });
+      }
+      
       user = await User.create({
         name,
         email,

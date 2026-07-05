@@ -1,15 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-const ReviewSchema = new Schema(
-  {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    name: { type: String, required: true },
-    rating: { type: Number, required: true },
-    comment: { type: String, required: true },
-  },
-  { timestamps: true }
-);
-
 const VariantSchema = new Schema({
   size: { type: String, required: true },
   color: { type: String, required: true },
@@ -29,7 +19,6 @@ export interface IProduct extends Document {
   tags: string[];
   images: { url: string; public_id: string }[];
   variants: any[];
-  reviews: any[];
   rating: number;
   numReviews: number;
   isTrending: boolean;
@@ -52,7 +41,6 @@ const ProductSchema: Schema = new Schema(
       },
     ],
     variants: [VariantSchema],
-    reviews: [ReviewSchema],
     rating: { type: Number, required: true, default: 0 },
     numReviews: { type: Number, required: true, default: 0 },
     isTrending: { type: Boolean, default: false },

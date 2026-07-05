@@ -1,12 +1,12 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { Heart, Share2, Star } from 'lucide-react';
+import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2 } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import MobileStickyCart from '@/components/product/MobileStickyCart';
 import SizeGuideModal from '@/components/product/SizeGuideModal';
 import WhatsAppButton from '@/components/product/WhatsAppButton';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getDirectImageLink } from '@/lib/utils';
 
 interface ProductVariant {
   size: string;
@@ -39,8 +39,12 @@ interface ProductDetailsClientProps {
   };
   reviews: Array<{
     _id: string;
+    name: string;
     rating: number;
-    comment?: string;
+    comment: string;
+    createdAt: string;
+    images?: Array<{ url: string; public_id: string }>;
+    verifiedPurchase?: boolean;
   }>;
 }
 
@@ -50,12 +54,82 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
   const [activeImage, setActiveImage] = useState(0);
   const [productUrl, setProductUrl] = useState('');
 
+  // Reviews submission state
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [reviewImages, setReviewImages] = useState<Array<{url: string, public_id: string}>>([]);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [localReviews, setLocalReviews] = useState<any[]>(reviews || []);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    setLocalReviews(reviews || []);
+  }, [reviews]);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setProductUrl(window.location.href);
     }
   }, []);
   const addToCart = useCartStore((state) => state.addToCart);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    setUploading(true);
+    try {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'loomra_preset'); 
+      const CLOUD_NAME = 'dj3uym3gv'; 
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.secure_url) {
+        setReviewImages(prev => [...prev, { url: data.secure_url, public_id: data.public_id }]);
+      } else {
+        alert("Upload failed!");
+      }
+    } catch (error) { 
+      alert("Upload failed!"); 
+    } finally { 
+      setUploading(false); 
+    }
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rating < 1 || rating > 5) return alert("Please select a rating between 1 and 5 stars.");
+    if (!comment.trim()) return alert("Please enter a review comment.");
+    
+    setSubmitting(true);
+    setMessage('');
+
+    try {
+      const res = await fetch(`/api/products/${product._id}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating,
+          comment,
+          images: reviewImages
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage(data.message || "Review submitted successfully!");
+        setComment('');
+        setRating(5);
+        setReviewImages([]);
+      } else {
+        alert(data.error || "Failed to submit review");
+      }
+    } catch (err) {
+      alert("Failed to submit review");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const availableColors = useMemo(
     () => [...new Set(product.variants?.map((variant) => variant.color).filter(Boolean))],
@@ -90,7 +164,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
           <div className="w-full bg-loomra-surface relative group cursor-zoom-in overflow-hidden aspect-[4/5] max-h-[600px] 2xl:max-h-[750px] rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center">
             <img
               src={imageUrl}
-              alt={product.title}
+              alt={`AS SIDRAT ${product.title} for Men Bangladesh`}
               className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
             />
           </div>
@@ -103,7 +177,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                 onClick={() => setActiveImage(idx)}
                 className={`relative w-20 h-24 shrink-0 border-2 rounded-xl overflow-hidden transition-all ${activeImage === idx ? 'border-loomra-black shadow-md opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
-                <img src={img.url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover object-top" />
+                <img src={img.url} alt={`AS SIDRAT ${product.title} for Men Bangladesh - View ${idx + 1}`} className="w-full h-full object-cover object-top" />
               </button>
             ))}
           </div>
@@ -261,42 +335,145 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
 
             {/* Review List */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Submission Form Placeholder (Logic can be added later) */}
-              <div className="bg-white p-8 border border-loomra-surface rounded-2xl shadow-sm">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-loomra-black mb-6">Write a review</h3>
+              {/* Submission Form */}
+              <form onSubmit={handleSubmitReview} className="bg-white p-8 border border-loomra-surface rounded-2xl shadow-sm space-y-5">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-loomra-black">Write a review</h3>
+                
+                {message && (
+                  <div className="bg-emerald-50 text-emerald-700 p-3 rounded-lg text-xs font-semibold border border-emerald-100 animate-in fade-in duration-300">
+                    {message}
+                  </div>
+                )}
+
                 <div className="space-y-4">
-                  <div className="flex gap-1">
+                  {/* Rating Selector */}
+                  <div className="flex gap-1.5 items-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">Your Rating:</span>
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <button key={star} className="text-loomra-muted hover:text-loomra-red transition-colors">
-                        <Star size={24} />
+                      <button 
+                        key={star} 
+                        type="button"
+                        onClick={() => setRating(star)}
+                        className="transition-colors focus:outline-none"
+                      >
+                        <Star 
+                          size={24} 
+                          className={star <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'} 
+                        />
                       </button>
                     ))}
                   </div>
+
+                  {/* Comment Input */}
                   <textarea 
-                    placeholder="Share your experience with this product..." 
+                    placeholder="Share your honest feedback about this product (quality, fit, fabric...)" 
                     rows={4}
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                    required
                     className="w-full p-4 bg-loomra-surface border-none rounded-xl outline-none focus:ring-2 focus:ring-loomra-black/5 text-small transition-all resize-none"
                   />
-                  <button className="bg-loomra-black text-loomra-white px-8 py-4 text-[10px] font-black uppercase tracking-[2px] hover:bg-loomra-red transition-all">
-                    Submit Review
-                  </button>
-                </div>
-              </div>
 
-              <div className="space-y-6 divide-y divide-loomra-surface">
-                {product.reviews && product.reviews.length > 0 ? (
-                  product.reviews.map((review: any) => (
-                    <div key={review._id} className="pt-6 first:pt-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-loomra-black text-small uppercase tracking-widest">{review.name}</span>
-                        <span className="text-[10px] text-loomra-muted font-bold uppercase">{new Date(review.createdAt).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex text-loomra-red mb-3">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} size={14} fill={i < review.rating ? 'currentColor' : 'none'} />
+                  {/* Image Upload for Review */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <label className="px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 hover:border-slate-800 transition-all flex items-center gap-2 select-none">
+                        {uploading ? (
+                          <Loader2 size={16} className="animate-spin text-slate-400" />
+                        ) : (
+                          <UploadCloud size={16} className="text-slate-500" />
+                        )}
+                        <span className="text-[10px] font-black uppercase tracking-wider">
+                          {uploading ? 'Uploading...' : 'Add Photos'}
+                        </span>
+                        <input 
+                          type="file" 
+                          className="hidden" 
+                          accept="image/*" 
+                          disabled={uploading}
+                          onChange={handlePhotoUpload} 
+                        />
+                      </label>
+                      <span className="text-[10px] text-slate-400 font-medium">Show other customers how it looks in real life!</span>
+                    </div>
+
+                    {/* Image Thumbnails preview */}
+                    {reviewImages.length > 0 && (
+                      <div className="flex flex-wrap gap-2.5 pt-1">
+                        {reviewImages.map((img, idx) => (
+                          <div key={idx} className="relative w-14 h-14 border rounded-xl overflow-hidden shadow-sm bg-slate-50 group">
+                            <img src={getDirectImageLink(img.url)} className="w-full h-full object-cover" alt="Review thumbnail" />
+                            <button
+                              type="button"
+                              onClick={() => setReviewImages(prev => prev.filter((_, i) => i !== idx))}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600 transition"
+                            >
+                              <X size={10} />
+                            </button>
+                          </div>
                         ))}
                       </div>
-                      <p className="text-small text-loomra-muted leading-relaxed italic">"{review.comment}"</p>
+                    )}
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={submitting || uploading}
+                    className="bg-loomra-black text-loomra-white px-8 py-4 text-[10px] font-black uppercase tracking-[2px] hover:bg-loomra-red transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {submitting && <Loader2 size={14} className="animate-spin" />}
+                    {submitting ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                </div>
+              </form>
+
+              {/* Reviews List */}
+              <div className="space-y-6 divide-y divide-loomra-surface">
+                {localReviews && localReviews.length > 0 ? (
+                  localReviews.map((review: any) => (
+                    <div key={review._id} className="pt-6 first:pt-0 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-loomra-black text-small uppercase tracking-widest">{review.name}</span>
+                          {review.verifiedPurchase && (
+                            <span className="inline-flex items-center gap-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded select-none">
+                              <ShieldCheck size={11} className="text-emerald-500" /> Verified Purchase
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-loomra-muted font-bold uppercase">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      
+                      {/* Star rating */}
+                      <div className="flex text-amber-400 gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star 
+                            key={i} 
+                            size={14} 
+                            fill={i < review.rating ? 'currentColor' : 'none'} 
+                            className={i < review.rating ? 'text-amber-400' : 'text-slate-200'}
+                          />
+                        ))}
+                      </div>
+
+                      <p className="text-small text-slate-600 leading-relaxed italic bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                        "{review.comment}"
+                      </p>
+
+                      {/* Display review photos */}
+                      {review.images && review.images.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {review.images.map((img: any, idx: number) => (
+                            <div key={idx} className="relative w-16 h-16 rounded-xl border border-slate-200 overflow-hidden shadow-sm shrink-0 bg-slate-50">
+                              <a href={getDirectImageLink(img.url)} target="_blank" rel="noopener noreferrer">
+                                <img src={getDirectImageLink(img.url)} className="w-full h-full object-cover hover:scale-105 transition duration-300" alt="Review photo upload" />
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (

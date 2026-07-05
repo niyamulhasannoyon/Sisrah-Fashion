@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    title: 'AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh',
+    title: 'AS SIDRAT | Premium Shirt & T-Shirt Brand Bangladesh',
     description: 'Shop premium, minimalist clothing crafted for South Asian weather. Breathable linen shirts, organic cotton t-shirts, tailored trousers, and modern fusion wear with local cash on delivery.',
     keywords: ['AS SIDRAT', 'Fashion Bangladesh', 'Linen Shirts Dhaka', 'Premium Clothing Bangladesh', 'Minimalist Fashion', 'Fusion Wear Dhaka', 'AS SIDRAT Clothing'],
     authors: [{ name: 'AS SIDRAT' }],
@@ -50,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: faviconUrl,
     },
     openGraph: {
-      title: 'AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh',
+      title: 'AS SIDRAT | Premium Shirt & T-Shirt Brand Bangladesh',
       description: 'Shop premium, minimalist clothing crafted for South Asian weather. Breathable linen shirts, organic cotton t-shirts, tailored trousers, and modern fusion wear.',
       url: BASE_URL,
       siteName: 'AS SIDRAT',
@@ -67,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh',
+      title: 'AS SIDRAT | Premium Shirt & T-Shirt Brand Bangladesh',
       description: 'Shop premium, minimalist clothing crafted for South Asian weather. Breathable linen shirts, organic cotton t-shirts, tailored trousers, and modern fusion wear.',
       images: ['/images/hero-model.jpg'],
     },

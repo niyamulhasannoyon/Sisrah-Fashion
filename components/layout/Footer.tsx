@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,6 +9,11 @@ import { getDirectImageLink } from '@/lib/utils';
 
 export function Footer() {
   const { settings } = useSettingsStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <footer className="border-t border-slate-100 bg-[#0F0F10] text-[#E4E4E7] pt-16 pb-32 pb-safe md:pb-12">
@@ -18,7 +24,9 @@ export function Footer() {
           {/* Brand Info */}
           <div className="flex flex-col gap-4">
             <Link href="/" className="text-xl font-black tracking-tight text-white block">
-              {settings?.logo ? (
+              {!mounted ? (
+                <div className="h-12 md:h-16 w-32 md:w-44 bg-[#1F1F22] animate-pulse rounded" />
+              ) : settings?.logo ? (
                 <div className="relative h-12 md:h-16 w-32 md:w-44">
                   <Image 
                     src={getDirectImageLink(settings.logo)} 

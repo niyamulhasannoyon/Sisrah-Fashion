@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut, Bell, Search, Tag, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut, Bell, Search, Tag, BarChart3, MessageSquare } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useRouter } from 'next/navigation';
@@ -62,6 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Orders', href: '/orders', icon: ShoppingCart },
     { name: 'Customers', href: '/users', icon: Users },
+    { name: 'Reviews', href: '/reviews', icon: MessageSquare },
     { name: 'Coupons', href: '/coupons', icon: Tag },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];

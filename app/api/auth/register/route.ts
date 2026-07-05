@@ -9,6 +9,21 @@ export async function POST(req: Request) {
     await dbConnect();
     const { name, email, password, phone } = await req.json();
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+
+    if (!name || !email || !password || !phone) {
+      return NextResponse.json({ success: false, error: 'All fields are required' }, { status: 400 });
+    }
+
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ success: false, error: 'Invalid email address format' }, { status: 400 });
+    }
+
+    if (!bdPhoneRegex.test(phone)) {
+      return NextResponse.json({ success: false, error: 'Invalid Bangladeshi phone number' }, { status: 400 });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json({ success: false, error: 'Email already exists' }, { status: 400 });

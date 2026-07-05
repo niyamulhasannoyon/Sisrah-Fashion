@@ -38,10 +38,26 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    if (!isLogin && !formData.phone) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address (e.g. user@domain.com).");
+      setLoading(false);
+      return;
+    }
+
+    if (!isLogin) {
+      if (!formData.phone) {
         setError("Phone number is strictly required to create an account.");
         setLoading(false);
         return;
+      }
+      if (!bdPhoneRegex.test(formData.phone)) {
+        setError("Please enter a valid Bangladeshi phone number (e.g. 017XXXXXXXX).");
+        setLoading(false);
+        return;
+      }
     }
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
@@ -105,6 +121,15 @@ export default function LoginPage() {
   const handleGooglePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+
+    const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+    if (!bdPhoneRegex.test(googlePhone)) {
+      setError("Please enter a valid Bangladeshi phone number (e.g. 017XXXXXXXX).");
+      setLoading(false);
+      return;
+    }
+
     try {
         const res = await fetch('/api/auth/google', {
             method: 'POST',
