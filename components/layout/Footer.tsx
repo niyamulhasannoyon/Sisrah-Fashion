@@ -33,7 +33,7 @@ export function Footer() {
                     alt="AS SIDRAT" 
                     fill 
                     sizes="(max-width: 768px) 128px, 176px"
-                    className="object-contain brightness-0 invert" 
+                    className="object-contain object-left" 
                     loading="lazy" 
                   />
                 </div>
