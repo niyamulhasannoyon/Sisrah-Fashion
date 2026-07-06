@@ -3,12 +3,19 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('id');
   const phone = searchParams.get('phone');
+
+  useEffect(() => {
+    if (orderId && phone) {
+      localStorage.setItem('loomra_latest_order_id', orderId);
+      localStorage.setItem('loomra_latest_order_phone', phone);
+    }
+  }, [orderId, phone]);
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 py-12 lg:py-24 animate-in fade-in zoom-in duration-500">

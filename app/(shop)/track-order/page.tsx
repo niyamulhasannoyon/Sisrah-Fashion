@@ -3,9 +3,11 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Loader2, Search, Package, Truck, CheckCircle, Clock, ShoppingBag } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
+  const { user, isAuthenticated } = useAuthStore();
   const [orderId, setOrderId] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,8 +21,42 @@ function TrackOrderContent() {
       setOrderId(qId);
       setPhone(qPhone);
       autoTrack(qId, qPhone);
+    } else {
+      const loadLatestOrder = async () => {
+        // Try to fetch logged-in user's latest order
+        if (isAuthenticated && user) {
+          try {
+            const res = await fetch('/api/user/orders');
+            const data = await res.json();
+            if (data.success && data.orders && data.orders.length > 0) {
+              const latest = data.orders[0]; // Sort order is descending by default
+              const fetchedId = (latest.orderId || '').toString();
+              const fetchedPhone = latest.shippingInfo?.phone || '';
+              if (fetchedId && fetchedPhone) {
+                setOrderId(fetchedId);
+                setPhone(fetchedPhone);
+                autoTrack(fetchedId, fetchedPhone);
+                return;
+              }
+            }
+          } catch (err) {
+            console.error('Failed to auto-fetch user orders:', err);
+          }
+        }
+
+        // Fallback to localStorage for guest or when user has no orders
+        const localId = localStorage.getItem('loomra_latest_order_id');
+        const localPhone = localStorage.getItem('loomra_latest_order_phone');
+        if (localId && localPhone) {
+          setOrderId(localId);
+          setPhone(localPhone);
+          autoTrack(localId, localPhone);
+        }
+      };
+
+      loadLatestOrder();
     }
-  }, [searchParams]);
+  }, [searchParams, isAuthenticated, user]);
 
   const autoTrack = async (id: string, ph: string) => {
     setLoading(true);

@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     await dbConnect();
     const { name, email, password, phone } = await req.json();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
 
     if (!name || !email || !password || !phone) {

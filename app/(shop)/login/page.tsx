@@ -38,7 +38,7 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
 
     if (!emailRegex.test(formData.email)) {

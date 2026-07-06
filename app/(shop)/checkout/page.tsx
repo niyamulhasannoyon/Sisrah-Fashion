@@ -192,6 +192,8 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (data.success) {
         clearCart();
+        localStorage.setItem('loomra_latest_order_id', data.orderId.toString());
+        localStorage.setItem('loomra_latest_order_phone', data.phone);
         router.push(`/order-success?id=${data.orderId}&phone=${data.phone}`);
       } else {
         alert('Order failed: ' + (data.error || 'Unknown error'));
