@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const payload = ticket.getPayload();
     if (!payload) return NextResponse.json({ error: 'Invalid Google token' }, { status: 400 });
 
-    const { email, name } = payload;
+    const { email, name, picture } = payload;
 
     let user = await User.findOne({ email });
 
@@ -37,8 +37,12 @@ export async function POST(req: Request) {
         name,
         email,
         phone,
-        role: 'customer'
+        role: 'customer',
+        image: picture || ''
       });
+    } else if (picture && !user.image) {
+      user.image = picture;
+      await user.save();
     }
 
     const token = jwt.sign(
@@ -55,6 +59,7 @@ export async function POST(req: Request) {
         email: user.email, 
         role: user.role,
         phone: user.phone || '',
+        image: user.image || '',
         address: user.address || {}
       } 
     });
