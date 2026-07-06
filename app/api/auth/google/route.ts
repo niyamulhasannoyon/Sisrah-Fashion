@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         role: 'customer',
         image: picture || ''
       });
-    } else if (picture && !user.image) {
+    } else if (picture) {
       user.image = picture;
       await user.save();
     }
