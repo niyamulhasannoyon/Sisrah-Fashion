@@ -24,7 +24,7 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const { toggleCart, cart } = useCartStore();
-  const { isAuthenticated, logout, checkAuth } = useAuthStore();
+  const { isAuthenticated, logout, checkAuth, user } = useAuthStore();
   const pathname = usePathname();
 
   const { settings, fetchSettings } = useSettingsStore();
