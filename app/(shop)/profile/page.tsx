@@ -244,16 +244,16 @@ export default function AdvancedProfilePage() {
     <div className="container mx-auto px-4 py-12 lg:py-24 flex flex-col md:flex-row gap-8">
       <div className="w-full md:w-64 flex flex-col gap-2">
         <div className="bg-[#1A1A1A] p-6 rounded-lg mb-4 text-white flex flex-col items-center text-center">
-          <div className="relative w-20 h-20 mb-4">
+          <div className="relative w-16 h-16 mb-4">
             {user.image ? (
-              <img src={user.image} alt={user.name} className="w-20 h-20 rounded-full object-cover border-2 border-white/20" />
+              <img src={user.image} alt={user.name} className="w-16 h-16 rounded-full object-cover border-2 border-white/20 shadow-sm" />
             ) : (
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-3xl font-bold uppercase select-none">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold uppercase select-none">
                 {user.name.charAt(0)}
               </div>
             )}
-            <label className="absolute bottom-0 right-0 bg-[#A31F24] hover:bg-red-800 text-white w-7 h-7 rounded-full flex items-center justify-center cursor-pointer shadow-md transition-colors border-2 border-[#1A1A1A]">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            <label className="absolute -bottom-1 -right-1 bg-[#A31F24] hover:bg-red-800 text-white w-6 h-6 rounded-full flex items-center justify-center cursor-pointer shadow-md transition-colors border-2 border-[#1A1A1A]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} disabled={uploading} />
             </label>
           </div>
@@ -291,17 +291,17 @@ export default function AdvancedProfilePage() {
 
             {/* Profile Photo Section in Form */}
             <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-slate-100">
-              <div className="relative w-24 h-24">
+              <div className="relative w-20 h-20">
                 {user.image ? (
-                  <img src={user.image} alt={user.name} className="w-24 h-24 rounded-full object-cover border" />
+                  <img src={user.image} alt={user.name} className="w-20 h-20 rounded-full object-cover border shadow-sm" />
                 ) : (
-                  <div className="w-24 h-24 bg-[#F9F9F9] border border-slate-200 rounded-full flex items-center justify-center text-4xl font-bold uppercase text-slate-400 select-none">
+                  <div className="w-20 h-20 bg-[#F9F9F9] border border-slate-200 rounded-full flex items-center justify-center text-3xl font-bold uppercase text-slate-400 select-none">
                     {user.name.charAt(0)}
                   </div>
                 )}
                 {uploading && (
                   <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#A31F24]" />
+                    <Loader2 className="w-5 h-5 animate-spin text-[#A31F24]" />
                   </div>
                 )}
               </div>
