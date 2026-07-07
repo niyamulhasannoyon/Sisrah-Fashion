@@ -38,6 +38,7 @@ export async function GET() {
           name: staff.name,
           email: staff.email,
           role: staff.role,
+          permissions: (staff as any).permissions || undefined,
           phone: '',
           image: '',
           address: {},

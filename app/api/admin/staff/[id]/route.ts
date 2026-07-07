@@ -4,6 +4,7 @@ import dbConnect from '@/lib/dbConnect';
 import { isAdmin } from '@/lib/adminAuth';
 import Staff from '@/models/Staff';
 import StaffActivityLog from '@/models/StaffActivityLog';
+import { isValidResource } from '@/lib/staffPermissions';
 
 // PATCH — Update role / active status / password reset (Super Admin only)
 export async function PATCH(
@@ -19,7 +20,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
 
-    const allowedFields: Record<string, true> = { role: true, isActive: true, password: true };
+    const allowedFields: Record<string, true> = { role: true, isActive: true, password: true, permissions: true };
     const updateData: Record<string, any> = {};
 
     for (const key of Object.keys(body)) {
@@ -32,6 +33,16 @@ export async function PATCH(
             );
           }
           updateData.password = await bcrypt.hash(body.password, 12);
+        } else if (key === 'permissions') {
+          const perms = body.permissions;
+          if (!Array.isArray(perms)) {
+            return NextResponse.json({ success: false, error: 'Permissions must be an array' }, { status: 400 });
+          }
+          const invalid = perms.find((p: string) => !isValidResource(p));
+          if (invalid) {
+            return NextResponse.json({ success: false, error: `Invalid permission: ${invalid}` }, { status: 400 });
+          }
+          updateData.permissions = perms;
         } else {
           updateData[key] = body[key];
         }

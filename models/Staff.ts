@@ -6,6 +6,7 @@ export interface IStaff extends Document {
   email: string;
   password: string;
   role: StaffRole;
+  permissions?: string[];
   isActive: boolean;
   lastLogin?: Date;
   createdBy: string; // Super Admin email who created this staff
@@ -28,6 +29,9 @@ const StaffSchema: Schema = new Schema(
       default: 'support',
       required: true,
     },
+    // Optional explicit permissions array. When present, this array overrides
+    // the default role permissions and allows per-resource access control.
+    permissions: { type: [String], default: undefined },
     isActive: { type: Boolean, default: true },
     lastLogin: { type: Date },
     createdBy: { type: String, required: true },

@@ -43,8 +43,24 @@ export const ROLE_COLORS: Record<StaffRole, string> = {
 /**
  * Check if a given role has access to a nav resource key.
  */
-export function hasPermission(role: StaffRole | string, resource: string): boolean {
+
+// All resource keys available across roles (useful for validation/UI)
+export const ALL_RESOURCES: string[] = Array.from(
+  new Set(Object.values(ROLE_PERMISSIONS).flat())
+).sort();
+
+/**
+ * Role-based permission check.
+ */
+export function roleHasPermission(role: StaffRole | string, resource: string): boolean {
   const permissions = ROLE_PERMISSIONS[role as StaffRole];
   if (!permissions) return false;
   return permissions.includes(resource);
+}
+
+/**
+ * Convenience validator for resource keys.
+ */
+export function isValidResource(resource: string): boolean {
+  return ALL_RESOURCES.includes(resource);
 }

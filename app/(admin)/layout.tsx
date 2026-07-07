@@ -80,15 +80,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return null;
   }
 
-  // Build filtered nav based on role
+  // Build filtered nav based on role or per-staff permissions
   let allowedKeys: string[];
   if (isSuperAdminOwner) {
     // Original owner sees everything
     allowedKeys = ALL_NAV_ITEMS.map((i) => i.key);
-  } else if (staffRole && ROLE_PERMISSIONS[staffRole]) {
-    allowedKeys = ROLE_PERMISSIONS[staffRole];
   } else {
-    allowedKeys = ['dashboard'];
+    // If the user has an explicit permissions array (set per-staff), use it.
+    const userPerms = (user as any)?.permissions as string[] | undefined;
+    if (userPerms && Array.isArray(userPerms) && userPerms.length > 0) {
+      allowedKeys = userPerms;
+    } else if (staffRole && ROLE_PERMISSIONS[staffRole]) {
+      allowedKeys = ROLE_PERMISSIONS[staffRole];
+    } else {
+      allowedKeys = ['dashboard'];
+    }
   }
 
   const navItems = ALL_NAV_ITEMS.filter((item) => allowedKeys.includes(item.key));

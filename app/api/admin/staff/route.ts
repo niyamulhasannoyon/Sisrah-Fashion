@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/dbConnect';
 import { isAdmin } from '@/lib/adminAuth';
 import Staff from '@/models/Staff';
+import { isValidResource } from '@/lib/staffPermissions';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, email, password, role } = await req.json();
+    const { name, email, password, role, permissions } = await req.json();
 
     if (!name || !email || !password || !role) {
       return NextResponse.json({ success: false, error: 'All fields are required' }, { status: 400 });
@@ -62,14 +63,25 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const staff = await Staff.create({
+    const createData: any = {
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
       role,
       isActive: true,
       createdBy,
-    });
+    };
+
+    // Optional explicit permissions array — validate keys
+    if (permissions && Array.isArray(permissions)) {
+      const invalid = permissions.find((p: string) => !isValidResource(p));
+      if (invalid) {
+        return NextResponse.json({ success: false, error: `Invalid permission: ${invalid}` }, { status: 400 });
+      }
+      createData.permissions = permissions;
+    }
+
+    const staff = await Staff.create(createData);
 
     const { password: _pw, ...staffData } = staff.toObject();
 

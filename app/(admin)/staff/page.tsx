@@ -6,6 +6,7 @@ import {
   CheckCircle2, XCircle, Clock, Activity, ChevronDown, RefreshCw,
   UserCheck, UserX, KeyRound, Filter,
 } from 'lucide-react';
+import { ALL_RESOURCES } from '@/lib/staffPermissions';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -15,6 +16,7 @@ interface StaffMember {
   _id: string;
   name: string;
   email: string;
+  permissions?: string[];
   role: StaffRole;
   isActive: boolean;
   lastLogin?: string;
@@ -99,7 +101,7 @@ export default function StaffManagementPage() {
   const [logFilter, setLogFilter]       = useState<string>('');
 
   // Add-staff form state
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'support' as StaffRole });
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'support' as StaffRole, permissions: [] as string[] });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting]     = useState(false);
   const [formError, setFormError]       = useState('');
@@ -670,6 +672,26 @@ export default function StaffManagementPage() {
                       </label>
                     );
                   })}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Explicit Permissions (optional)</label>
+                <p className="text-xs text-slate-400 mb-2">Leave empty to use role defaults. Select specific pages to grant only those accesses.</p>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-100 rounded-lg">
+                  {ALL_RESOURCES.map((r) => (
+                    <label key={r} className="flex items-center gap-2 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={form.permissions.includes(r)}
+                        onChange={(e) => {
+                          if (e.target.checked) setForm(f => ({ ...f, permissions: [...f.permissions, r] }));
+                          else setForm(f => ({ ...f, permissions: f.permissions.filter(p => p !== r) }));
+                        }}
+                        className="accent-[#A31F24]"
+                      />
+                      <span className="capitalize">{r.replace('-', ' ')}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </form>

@@ -3,6 +3,7 @@ import { jwtVerify } from 'jose';
 import dbConnect from './dbConnect';
 import User from '@/models/User';
 import Staff from '@/models/Staff';
+import { roleHasPermission } from '@/lib/staffPermissions';
 import StaffActivityLog from '@/models/StaffActivityLog';
 
 const ALLOWED_EMAILS = ['niyamulhasanbd@gmail.com', 'niyamulhasan1089@gmail.com'];
@@ -44,6 +45,7 @@ export interface StaffSession {
   name: string;
   email: string;
   role: string;
+  permissions?: string[];
 }
 
 /**
@@ -68,6 +70,7 @@ export async function getStaffSession(): Promise<StaffSession | null> {
         name: staff.name,
         email: staff.email,
         role: staff.role,
+        permissions: (staff as any).permissions || undefined,
       };
     }
 
@@ -75,6 +78,25 @@ export async function getStaffSession(): Promise<StaffSession | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Returns true when the current session (admin or staff) has access to a
+ * named resource key (e.g. 'orders', 'products'). Super admin bypasses checks.
+ */
+export async function hasAccessTo(resource: string): Promise<boolean> {
+  if (await isAdmin()) return true;
+
+  const session = await getStaffSession();
+  if (!session) return false;
+
+  // If staff member has an explicit permissions array, it overrides role
+  if (session.permissions && Array.isArray(session.permissions)) {
+    return session.permissions.includes(resource);
+  }
+
+  // Fallback to role-based permissions
+  return roleHasPermission(session.role, resource);
 }
 
 /**
