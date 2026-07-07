@@ -2,7 +2,32 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Loader2, Eye, Search, AlertTriangle, X, Copy } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, Eye, Search, AlertTriangle, X, Copy, ImageOff } from 'lucide-react';
+
+
+// Fallback-aware product image thumbnail
+function ProductImage({ url, alt }: { url?: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!url || hasError) {
+    return (
+      <div className="w-12 h-12 rounded border border-dashed border-gray-300 overflow-hidden bg-gray-50 flex items-center justify-center" title="No image available">
+        <ImageOff size={18} className="text-gray-400" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-12 h-12 rounded border border-gray-200 overflow-hidden bg-white">
+      <img
+        src={url}
+        alt={alt}
+        className="w-full h-full object-cover"
+        onError={() => setHasError(true)}
+      />
+    </div>
+  );
+}
 
 export default function AdminProductsList() {
   const [products, setProducts] = useState<any[]>([]);
@@ -155,9 +180,7 @@ export default function AdminProductsList() {
                   filteredProducts.map((product) => (
                     <tr key={product._id} className="hover:bg-gray-50 transition-colors group">
                       <td className="p-4">
-                        <div className="w-12 h-12 rounded border border-gray-200 overflow-hidden bg-white">
-                          <img src={product.images[0]?.url || '/placeholder.jpg'} alt={product.title} className="w-full h-full object-cover" />
-                        </div>
+                        <ProductImage url={product.images[0]?.url} alt={product.title} />
                       </td>
                       <td className="p-4">
                         <p className="text-sm font-bold text-[#1A1A1A]">{product.title}</p>

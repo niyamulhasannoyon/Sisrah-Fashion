@@ -40,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
               <div className="flex items-center gap-1.5">
                 <div 
                   className="w-2 h-2 rounded-full" 
-                  style={{ backgroundColor: item.stroke }} 
+                  style={{ backgroundColor: item.color ?? item.stroke }} 
                 />
                 <span className="text-xs text-gray-300 font-medium">{item.name}</span>
               </div>
