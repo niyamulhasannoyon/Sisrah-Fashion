@@ -8,6 +8,7 @@ interface User {
   role: string;
   phone?: string;
   image?: string;
+  isStaff?: boolean;  // true when logged in as a staff member
   address?: {
     street?: string;
     city?: string;
