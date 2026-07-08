@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import User from '@/models/User';
+import Product from '@/models/Product';
 import { isAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,28 @@ export async function GET() {
 
     const deliveredOrders = await Order.find({ orderStatus: 'Delivered' });
     const totalRevenue = deliveredOrders.reduce((acc, order) => acc + order.totalAmount, 0);
+
+    // Calculate net profit
+    const productsList = await Product.find({}, 'title costPrice marketingCost deliveryCost');
+    const productMap = new Map(productsList.map(p => [
+      p.title.toLowerCase().trim(), 
+      {
+        costPrice: p.costPrice || 0,
+        marketingCost: p.marketingCost || 0,
+        deliveryCost: p.deliveryCost || 0
+      }
+    ]));
+
+    let totalCost = 0;
+    deliveredOrders.forEach(order => {
+      order.orderItems.forEach((item: any) => {
+        const pInfo = productMap.get(item.title.toLowerCase().trim()) || { costPrice: 0, marketingCost: 0, deliveryCost: 0 };
+        const qty = item.quantity || 0;
+        totalCost += ((pInfo.costPrice || 0) + (pInfo.marketingCost || 0) + (pInfo.deliveryCost || 0)) * qty;
+      });
+    });
+
+    const netProfit = totalRevenue - totalCost;
 
     const totalOrders = await Order.countDocuments();
     const totalCustomers = await User.countDocuments({ role: 'customer' });
@@ -59,6 +82,7 @@ export async function GET() {
       success: true,
       stats: { 
         totalRevenue, 
+        netProfit,
         totalOrders, 
         totalCustomers,
         conversionRate: 0 

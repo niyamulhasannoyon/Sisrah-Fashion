@@ -31,7 +31,7 @@ export default function ManagerLoginPage() {
 
       // API sets cookie; update client store and redirect to staff area
       loginAction(data.user);
-      router.replace('/staff');
+      router.replace('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {

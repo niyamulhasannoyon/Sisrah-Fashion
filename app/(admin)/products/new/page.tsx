@@ -14,6 +14,9 @@ export default function AddProductPage() {
   const [description, setDescription] = useState('');
   const [basePrice, setBasePrice] = useState<number>(0);
   const [offerPrice, setOfferPrice] = useState<number>(0);
+  const [costPrice, setCostPrice] = useState<number>(0);
+  const [marketingCost, setMarketingCost] = useState<number>(0);
+  const [deliveryCost, setDeliveryCost] = useState<number>(0);
   
   // Category States
   const [category, setCategory] = useState('Men');
@@ -162,6 +165,9 @@ export default function AddProductPage() {
       description,
       basePrice,
       offerPrice,
+      costPrice,
+      marketingCost,
+      deliveryCost,
       category: finalCategory,
       lowStockThreshold,
       isTrending,
@@ -272,6 +278,25 @@ export default function AddProductPage() {
               </div>
             </div>
             <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">Set 0 in Offer Price if there is no discount.</p>
+            
+            {/* Costs & Finance Fields */}
+            <div className="grid grid-cols-3 gap-4 pt-2 border-t border-slate-100">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500">Cost Price (৳)</label>
+                <input type="number" required min={0} value={costPrice} onChange={e => setCostPrice(Number(e.target.value))}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500">Marketing Cost (৳)</label>
+                <input type="number" min={0} value={marketingCost} onChange={e => setMarketingCost(Number(e.target.value))}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500">Delivery Cost (৳)</label>
+                <input type="number" min={0} value={deliveryCost} onChange={e => setDeliveryCost(Number(e.target.value))}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
+              </div>
+            </div>
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-slate-500">Description</label>
               <textarea required rows={4} value={description} onChange={e => setDescription(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black resize-none transition-all" />

@@ -281,6 +281,75 @@ export async function GET(req: Request) {
       session.events.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     });
 
+    // --- PROFIT ANALYTICS REPORT ---
+    // Fetch all products with costs to map details
+    const allProducts = await Product.find({}, 'title costPrice marketingCost deliveryCost images');
+    const productMap = new Map(allProducts.map(p => [
+      p.title.toLowerCase().trim(), 
+      {
+        costPrice: p.costPrice || 0,
+        marketingCost: p.marketingCost || 0,
+        deliveryCost: p.deliveryCost || 0,
+        image: p.images?.[0]?.url || ''
+      }
+    ]));
+
+    let totalProfitRevenue = 0;
+    let totalProfitCost = 0;
+
+    const productBreakdown: Record<string, { 
+      title: string; 
+      image: string; 
+      quantity: number; 
+      revenue: number; 
+      cost: number; 
+      profit: number; 
+      margin: number; 
+    }> = {};
+
+    ordersInRange.forEach(order => {
+      order.orderItems.forEach((item: any) => {
+        const pInfo = productMap.get(item.title.toLowerCase().trim()) || { costPrice: 0, marketingCost: 0, deliveryCost: 0, image: item.image || '' };
+        const qty = item.quantity || 0;
+        const itemRevenue = (item.price || 0) * qty;
+        
+        const itemCost = ((pInfo.costPrice || 0) + (pInfo.marketingCost || 0) + (pInfo.deliveryCost || 0)) * qty;
+        const itemProfit = itemRevenue - itemCost;
+
+        totalProfitRevenue += itemRevenue;
+        totalProfitCost += itemCost;
+
+        const prodTitle = item.title;
+        if (!productBreakdown[prodTitle]) {
+          productBreakdown[prodTitle] = {
+            title: prodTitle,
+            image: pInfo.image || item.image || '',
+            quantity: 0,
+            revenue: 0,
+            cost: 0,
+            profit: 0,
+            margin: 0
+          };
+        }
+        productBreakdown[prodTitle].quantity += qty;
+        productBreakdown[prodTitle].revenue += itemRevenue;
+        productBreakdown[prodTitle].cost += itemCost;
+        productBreakdown[prodTitle].profit += itemProfit;
+      });
+    });
+
+    Object.keys(productBreakdown).forEach(key => {
+      const pb = productBreakdown[key];
+      pb.margin = pb.revenue > 0 ? Math.round((pb.profit / pb.revenue) * 100) : 0;
+    });
+
+    const profitStats = {
+      totalRevenue: totalProfitRevenue,
+      totalCost: totalProfitCost,
+      netProfit: totalProfitRevenue - totalProfitCost,
+      productBreakdown: Object.values(productBreakdown).sort((a, b) => b.profit - a.profit)
+    };
+
     return NextResponse.json({
       success: true,
       stats: {
@@ -295,6 +364,7 @@ export async function GET(req: Request) {
         averageOrderValue,
         totalQuantitySold
       },
+      profitStats,
       topProducts: {
         byQuantity: topProductsByQuantity,
         byRevenue: topProductsByRevenue

@@ -117,9 +117,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       // Must be either original super admin OR an active staff member
       if (!user || (!isSuperAdminOwner && !isStaffUser)) {
         router.push('/');
+        return;
+      }
+
+      // Route permission protection check
+      const currentNavItem = ALL_NAV_ITEMS.find(item => 
+        pathname === item.href || pathname.startsWith(`${item.href}/`)
+      );
+      if (currentNavItem) {
+        let allowed: string[];
+        if (isSuperAdminOwner) {
+          allowed = ALL_NAV_ITEMS.map((i) => i.key);
+        } else {
+          const userPerms = (user as any)?.permissions as string[] | undefined;
+          if (userPerms && Array.isArray(userPerms) && userPerms.length > 0) {
+            allowed = userPerms;
+          } else if (staffRole && ROLE_PERMISSIONS[staffRole]) {
+            allowed = ROLE_PERMISSIONS[staffRole];
+          } else {
+            allowed = ['dashboard'];
+          }
+        }
+
+        if (!allowed.includes(currentNavItem.key)) {
+          const fallbackItem = ALL_NAV_ITEMS.find(item => allowed.includes(item.key));
+          router.replace(fallbackItem ? fallbackItem.href : '/dashboard');
+        }
       }
     }
-  }, [checking, user, router, isSuperAdminOwner, isStaffUser]);
+  }, [checking, user, pathname, router, isSuperAdminOwner, isStaffUser, staffRole]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });

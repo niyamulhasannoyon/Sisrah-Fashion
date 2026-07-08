@@ -37,9 +37,9 @@ export default function AdminDashboard() {
 
   const stats = [
     { title: 'Total Revenue', value: `৳ ${data?.stats?.totalRevenue?.toLocaleString() || 0}`, increase: '+0%', isPositive: true, icon: DollarSign },
+    { title: 'Net Profit', value: `৳ ${data?.stats?.netProfit?.toLocaleString() || 0}`, increase: '+0%', isPositive: true, icon: TrendingUp },
     { title: 'Total Orders', value: data?.stats?.totalOrders || 0, increase: '+0%', isPositive: true, icon: ShoppingBag },
     { title: 'Active Customers', value: data?.stats?.totalCustomers || 0, increase: '+0%', isPositive: true, icon: Users },
-    { title: 'Conversion Rate', value: '0%', increase: '0%', isPositive: true, icon: TrendingUp },
   ];
 
   return (

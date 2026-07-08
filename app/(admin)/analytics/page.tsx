@@ -85,6 +85,7 @@ export default function AdminAnalytics() {
   const [endDate, setEndDate] = useState('');
 
   // UI Selection States
+  const [activeSection, setActiveSection] = useState<'sales' | 'profit'>('sales');
   const [chartType, setChartType] = useState<'traffic' | 'sales'>('sales');
   const [topProductsMetric, setTopProductsMetric] = useState<'quantity' | 'revenue'>('quantity');
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
@@ -342,7 +343,16 @@ export default function AdminAnalytics() {
     );
   }
 
-  const { stats, trend, topProducts, categorySales, customerSegment } = data || {};
+  const { stats, trend, topProducts, categorySales, customerSegment, profitStats } = data || {};
+
+  // Profit KPI configurations
+  const avgMargin = profitStats?.totalRevenue > 0 ? Math.round((profitStats?.netProfit / profitStats?.totalRevenue) * 100) : 0;
+  const profitKPIs = [
+    { title: 'Total Revenue', value: `৳${profitStats?.totalRevenue?.toLocaleString() || 0}`, desc: 'Selling price × quantity', icon: DollarSign, color: 'bg-indigo-50 text-indigo-600 border-indigo-105' },
+    { title: 'Total Costs', value: `৳${profitStats?.totalCost?.toLocaleString() || 0}`, desc: 'Cost + Marketing + Delivery', icon: Package, color: 'bg-rose-50 text-[#A31F24] border-rose-105' },
+    { title: 'Net Profit', value: `৳${profitStats?.netProfit?.toLocaleString() || 0}`, desc: 'Revenue - Costs', icon: TrendingUp, color: 'bg-emerald-50 text-emerald-600 border-emerald-105' },
+    { title: 'Average Margin', value: `${avgMargin}%`, desc: 'Profit margin ratio', icon: Percent, color: 'bg-amber-50 text-amber-600 border-amber-105' },
+  ];
 
   // KPI configurations
   const trafficKPIs = [
@@ -457,11 +467,36 @@ export default function AdminAnalytics() {
           >
             <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
           </button>
-
         </div>
       </div>
 
-      {/* SALES REPORT METRICS GRID */}
+      {/* Section Switcher */}
+      <div className="flex border-b border-slate-200 mt-2">
+        <button
+          onClick={() => setActiveSection('sales')}
+          className={`pb-4 px-6 text-sm font-bold border-b-2 transition-all ${
+            activeSection === 'sales'
+              ? 'border-slate-900 text-slate-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-950'
+          }`}
+        >
+          General Sales Analytics
+        </button>
+        <button
+          onClick={() => setActiveSection('profit')}
+          className={`pb-4 px-6 text-sm font-bold border-b-2 transition-all ${
+            activeSection === 'profit'
+              ? 'border-slate-900 text-slate-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-950'
+          }`}
+        >
+          Profit Analytics (লাভ বিশ্লেষণ)
+        </button>
+      </div>
+
+      {activeSection === 'sales' ? (
+        <>
+          {/* SALES REPORT METRICS GRID */}
       <div>
         <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">Business Sales Report Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -911,8 +946,93 @@ export default function AdminAnalytics() {
             )}
           </div>
         </div>
-
       </div>
+      </>
+      ) : (
+        <div className="space-y-8 animate-in fade-in duration-300">
+          
+          {/* Profit KPI Summary Grid */}
+          <div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">Profitability Overview</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {profitKPIs.map((stat, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.title}</p>
+                      <h3 className="text-2xl font-black text-slate-900 mt-2">{stat.value}</h3>
+                    </div>
+                    <div className={`p-3 rounded-xl border ${stat.color}`}>
+                      <stat.icon size={20} />
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">{stat.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Product Profit Margin Breakdown Table */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100 bg-white">
+              <h3 className="text-base font-bold text-slate-900">Per-Product Profit Breakdown</h3>
+              <p className="text-xs text-slate-400 mt-1">Breakdown of revenues, costs, margins and net profits for each product sold in the selected range.</p>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-150">
+                    <th className="p-4 pl-6 text-xs font-semibold text-slate-500 uppercase tracking-widest">Product</th>
+                    <th className="p-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-widest">Units Sold</th>
+                    <th className="p-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-widest">Revenue</th>
+                    <th className="p-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-widest">Total Costs</th>
+                    <th className="p-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-widest">Net Profit</th>
+                    <th className="p-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-widest pr-6">Profit Margin</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white text-sm">
+                  {!profitStats?.productBreakdown || profitStats.productBreakdown.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-12 text-center text-slate-450 italic font-medium">No profit data available for this range.</td>
+                    </tr>
+                  ) : (
+                    profitStats.productBreakdown.map((item: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 pl-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-12 bg-slate-50 border border-slate-200 rounded overflow-hidden shrink-0">
+                              <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                            </div>
+                            <span className="font-bold text-slate-900 leading-tight">{item.title}</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-center font-bold text-slate-700">{item.quantity}</td>
+                        <td className="p-4 text-right font-medium text-slate-800">৳{item.revenue.toLocaleString()}</td>
+                        <td className="p-4 text-right font-medium text-slate-500">৳{item.cost.toLocaleString()}</td>
+                        <td className={`p-4 text-right font-black ${item.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          ৳{item.profit.toLocaleString()}
+                        </td>
+                        <td className="p-4 text-center pr-6">
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            item.margin >= 40 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                            item.margin >= 20 ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                            item.margin >= 0 ? 'bg-yellow-50 text-yellow-800 border-yellow-250' :
+                            'bg-rose-50 text-rose-800 border-rose-250'
+                          }`}>
+                            {item.margin}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      )}
 
     </div>
   );

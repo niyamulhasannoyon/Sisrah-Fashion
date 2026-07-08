@@ -16,6 +16,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [description, setDescription] = useState('');
   const [basePrice, setBasePrice] = useState<number>(0);
   const [offerPrice, setOfferPrice] = useState<number>(0);
+  const [costPrice, setCostPrice] = useState<number>(0);
+  const [marketingCost, setMarketingCost] = useState<number>(0);
+  const [deliveryCost, setDeliveryCost] = useState<number>(0);
   const [lowStockThreshold, setLowStockThreshold] = useState<number>(10);
   const [category, setCategory] = useState('Men');
   const [isTrending, setIsTrending] = useState(false);
@@ -45,7 +48,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           setDescription(p.description);
           setBasePrice(p.basePrice);
           setOfferPrice(p.offerPrice || 0);
-            setLowStockThreshold(p.lowStockThreshold ?? 10);
+          setCostPrice(p.costPrice || 0);
+          setMarketingCost(p.marketingCost || 0);
+          setDeliveryCost(p.deliveryCost || 0);
+          setLowStockThreshold(p.lowStockThreshold ?? 10);
           if (p.variants && p.variants.length > 0) {
             setVariants(p.variants);
             const eSizes = Array.from(new Set(p.variants.map((v:any) => v.size))) as string[];
@@ -147,7 +153,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     e.preventDefault();
     setUpdating(true);
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    const productData = { title, slug, description, basePrice, offerPrice, lowStockThreshold, category, isTrending, isNewArrival, tags, images: mainImages, variants };
+    const productData = { title, slug, description, basePrice, offerPrice, lowStockThreshold, category, isTrending, isNewArrival, tags, images: mainImages, variants, costPrice, marketingCost, deliveryCost };
 
     try {
       const res = await fetch(`/api/products/${id}`, {
@@ -217,6 +223,26 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <div className="space-y-2"><label className="text-xs font-bold uppercase text-slate-500">Regular Price (৳)</label><input type="number" required value={basePrice} onChange={e => setBasePrice(Number(e.target.value))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" /></div>
               <div className="space-y-2"><label className="text-xs font-bold uppercase text-slate-500">Offer Price (৳)</label><input type="number" value={offerPrice} onChange={e => setOfferPrice(Number(e.target.value))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" placeholder="0 if no offer" /></div>
             </div>
+            
+            {/* Costs & Finance Fields */}
+            <div className="grid grid-cols-3 gap-4 pt-2 border-t border-slate-100">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500">Cost Price (৳)</label>
+                <input type="number" required min={0} value={costPrice} onChange={e => setCostPrice(Number(e.target.value))}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500">Marketing Cost (৳)</label>
+                <input type="number" min={0} value={marketingCost} onChange={e => setMarketingCost(Number(e.target.value))}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500">Delivery Cost (৳)</label>
+                <input type="number" min={0} value={deliveryCost} onChange={e => setDeliveryCost(Number(e.target.value))}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
+              </div>
+            </div>
+
             <div className="space-y-2"><label className="text-xs font-bold uppercase text-slate-500">Description</label><textarea required rows={4} value={description} onChange={e => setDescription(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black resize-none transition-all" /></div>
           </div>
 
