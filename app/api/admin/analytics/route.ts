@@ -3,10 +3,11 @@ import dbConnect from '@/lib/dbConnect';
 
 export const dynamic = 'force-dynamic';
 import AnalyticsEvent from '@/models/AnalyticsEvent';
+import Order from '@/models/Order';
+import Product from '@/models/Product';
 import { isAdmin } from '@/lib/adminAuth';
-import User from '@/models/User';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     // 1. Verify admin permissions
     if (!await isAdmin()) {
@@ -15,17 +16,46 @@ export async function GET() {
 
     await dbConnect();
 
-    // --- A. GENERAL METRICS ---
+    // Parse date filters
+    const { searchParams } = new URL(req.url);
+    const rangePreset = searchParams.get('rangePreset') || 'This Month'; // Today, This Week, This Month, Custom
+    let startDate: Date;
+    let endDate = new Date();
+
+    const now = new Date();
+    if (rangePreset === 'Today') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    } else if (rangePreset === 'This Week') {
+      const day = now.getDay();
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+      startDate.setHours(0,0,0,0);
+    } else if (rangePreset === 'This Month') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (rangePreset === 'Custom') {
+      const startStr = searchParams.get('startDate');
+      const endStr = searchParams.get('endDate');
+      startDate = startStr ? new Date(startStr) : new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = endStr ? new Date(endStr) : new Date();
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    // --- A. TRAFFIC METRICS (within selected range) ---
+    const trafficMatch = { timestamp: { $gte: startDate, $lte: endDate } };
+    
     // Count distinct sessions
-    const sessionIds = await AnalyticsEvent.distinct('sessionId');
+    const sessionIds = await AnalyticsEvent.distinct('sessionId', trafficMatch);
     const totalSessions = sessionIds.length;
 
     // Count pageviews and clicks
-    const totalPageviews = await AnalyticsEvent.countDocuments({ eventType: 'pageview' });
-    const totalClicks = await AnalyticsEvent.countDocuments({ eventType: 'click' });
+    const totalPageviews = await AnalyticsEvent.countDocuments({ ...trafficMatch, eventType: 'pageview' });
+    const totalClicks = await AnalyticsEvent.countDocuments({ ...trafficMatch, eventType: 'click' });
 
-    // Calculate bounce rate (sessions with only 1 pageview event and 0 clicks)
+    // Calculate bounce rate in range
     const bouncedCountResults = await AnalyticsEvent.aggregate([
+      { $match: trafficMatch },
       {
         $group: {
           _id: "$sessionId",
@@ -46,14 +76,114 @@ export async function GET() {
     const bouncedSessions = bouncedCountResults[0]?.bouncedCount || 0;
     const bounceRate = totalSessions > 0 ? Math.round((bouncedSessions / totalSessions) * 100) : 0;
 
-    // --- B. CHART DATA COMPILATION ---
-    // Get daily stats for last 90 days (covers both 30 days daily and 12 weeks weekly)
-    const dailyStats = await AnalyticsEvent.aggregate([
+    // --- B. SALES METRICS (within selected range, excluding cancelled) ---
+    const orderMatch = {
+      createdAt: { $gte: startDate, $lte: endDate },
+      orderStatus: { $ne: 'Cancelled' }
+    };
+
+    const ordersInRange = await Order.find(orderMatch);
+    const totalRevenue = ordersInRange.reduce((acc, o) => acc + o.totalAmount, 0);
+    const totalOrders = ordersInRange.length;
+    const averageOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+    
+    const totalQuantitySold = ordersInRange.reduce((acc, o) => {
+      const q = o.orderItems?.reduce((subAcc: number, item: any) => subAcc + (item.quantity || 0), 0) || 0;
+      return acc + q;
+    }, 0);
+
+    // --- C. TOP SELLING PRODUCTS ---
+    // Top products by quantity
+    const topProductsByQuantity = await Order.aggregate([
+      { $match: orderMatch },
+      { $unwind: "$orderItems" },
       {
-        $match: {
-          timestamp: { $gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) }
+        $group: {
+          _id: "$orderItems.title",
+          image: { $first: "$orderItems.image" },
+          quantity: { $sum: "$orderItems.quantity" },
+          revenue: { $sum: { $multiply: ["$orderItems.price", "$orderItems.quantity"] } }
         }
       },
+      { $sort: { quantity: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Top products by revenue
+    const topProductsByRevenue = await Order.aggregate([
+      { $match: orderMatch },
+      { $unwind: "$orderItems" },
+      {
+        $group: {
+          _id: "$orderItems.title",
+          image: { $first: "$orderItems.image" },
+          quantity: { $sum: "$orderItems.quantity" },
+          revenue: { $sum: { $multiply: ["$orderItems.price", "$orderItems.quantity"] } }
+        }
+      },
+      { $sort: { revenue: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // --- D. CATEGORY-WISE SALES BREAKDOWN ---
+    const products = await Product.find({}, 'title category');
+    const titleToCategoryMap = new Map(products.map(p => [p.title.toLowerCase().trim(), p.category]));
+
+    const aggregatedItems = await Order.aggregate([
+      { $match: orderMatch },
+      { $unwind: "$orderItems" },
+      {
+        $group: {
+          _id: "$orderItems.title",
+          quantity: { $sum: "$orderItems.quantity" },
+          revenue: { $sum: { $multiply: ["$orderItems.price", "$orderItems.quantity"] } }
+        }
+      }
+    ]);
+
+    const categoryStatsMap: Record<string, { category: string; quantity: number; revenue: number }> = {};
+    aggregatedItems.forEach(item => {
+      const category = titleToCategoryMap.get(item._id.toLowerCase().trim()) || 'Other';
+      if (!categoryStatsMap[category]) {
+        categoryStatsMap[category] = { category, quantity: 0, revenue: 0 };
+      }
+      categoryStatsMap[category].quantity += item.quantity;
+      categoryStatsMap[category].revenue += item.revenue;
+    });
+    const categorySales = Object.values(categoryStatsMap).sort((a, b) => b.revenue - a.revenue);
+
+    // --- E. CUSTOMER SEGMENTS: New vs Returning ---
+    const uniquePhones = [...new Set(ordersInRange.map(o => o.shippingInfo.phone))];
+    const firstOrders = await Order.aggregate([
+      { $match: { 'shippingInfo.phone': { $in: uniquePhones } } },
+      {
+        $group: {
+          _id: "$shippingInfo.phone",
+          firstOrderDate: { $min: "$createdAt" }
+        }
+      }
+    ]);
+    const firstOrderMap = new Map(firstOrders.map(f => [f._id, f.firstOrderDate]));
+
+    let newCustomersCount = 0;
+    let returningCustomersCount = 0;
+    let newCustomersRevenue = 0;
+    let returningCustomersRevenue = 0;
+
+    ordersInRange.forEach(order => {
+      const firstDate = firstOrderMap.get(order.shippingInfo.phone);
+      if (firstDate && new Date(firstDate) >= startDate) {
+        newCustomersCount++;
+        newCustomersRevenue += order.totalAmount;
+      } else {
+        returningCustomersCount++;
+        returningCustomersRevenue += order.totalAmount;
+      }
+    });
+
+    // --- F. DAILY TREND LINE DATA ---
+    const dailyEventStats = await AnalyticsEvent.aggregate([
+      { $match: trafficMatch },
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
@@ -64,88 +194,46 @@ export async function GET() {
       { $sort: { _id: 1 } }
     ]);
 
-    // 1. Daily Chart (Last 30 Days)
-    const last30Days = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const formatted = d.toISOString().split('T')[0];
-      last30Days.push(formatted);
-    }
-    const dailyChart = last30Days.map(dateStr => {
-      const stat = dailyStats.find(s => s._id === dateStr);
-      return {
-        label: new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        pageviews: stat ? stat.pageviews : 0,
-        clicks: stat ? stat.clicks : 0
-      };
-    });
-
-    // 2. Weekly Chart (Last 12 Weeks)
-    const last12Weeks = [];
-    const today = new Date();
-    for (let i = 11; i >= 0; i--) {
-      const sunday = new Date();
-      sunday.setDate(today.getDate() - today.getDay() - i * 7);
-      sunday.setHours(0, 0, 0, 0);
-      const saturday = new Date(sunday);
-      saturday.setDate(sunday.getDate() + 6);
-      saturday.setHours(23, 59, 59, 999);
-      last12Weeks.push({ sunday, saturday });
-    }
-    const weeklyChart = last12Weeks.map(week => {
-      let pageviews = 0;
-      let clicks = 0;
-      
-      dailyStats.forEach(stat => {
-        const statDate = new Date(stat._id);
-        if (statDate >= week.sunday && statDate <= week.saturday) {
-          pageviews += stat.pageviews;
-          clicks += stat.clicks;
-        }
-      });
-
-      const label = week.sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      return { label, pageviews, clicks };
-    });
-
-    // 3. Yearly Chart (Last 12 Months)
-    const monthlyStats = await AnalyticsEvent.aggregate([
-      {
-        $match: {
-          timestamp: { $gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) }
-        }
-      },
+    const dailyOrderStats = await Order.aggregate([
+      { $match: orderMatch },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m", date: "$timestamp" } },
-          pageviews: { $sum: { $cond: [{ $eq: ["$eventType", "pageview"] }, 1, 0] } },
-          clicks: { $sum: { $cond: [{ $eq: ["$eventType", "click"] }, 1, 0] } }
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: "$totalAmount" },
+          orders: { $sum: 1 }
         }
       },
       { $sort: { _id: 1 } }
     ]);
 
-    const last12Months = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date();
-      d.setMonth(d.getMonth() - i);
-      const formatted = d.toISOString().slice(0, 7); // "YYYY-MM"
-      last12Months.push(formatted);
+    // Build day-by-day unified list
+    const trendData = [];
+    const tempDate = new Date(startDate);
+    
+    // Safety break in case of infinite loop
+    let loops = 0;
+    while (tempDate <= endDate && loops < 1000) {
+      loops++;
+      const dateStr = tempDate.toISOString().split('T')[0];
+      const eventStat = dailyEventStats.find(s => s._id === dateStr);
+      const orderStat = dailyOrderStats.find(s => s._id === dateStr);
+      
+      trendData.push({
+        date: dateStr,
+        label: tempDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        pageviews: eventStat ? eventStat.pageviews : 0,
+        clicks: eventStat ? eventStat.clicks : 0,
+        revenue: orderStat ? orderStat.revenue : 0,
+        orders: orderStat ? orderStat.orders : 0
+      });
+      
+      tempDate.setDate(tempDate.getDate() + 1);
     }
-    const yearlyChart = last12Months.map(monthStr => {
-      const stat = monthlyStats.find(s => s._id === monthStr);
-      const dateObj = new Date(monthStr + '-02'); // force day 2 to prevent local timezone shifts
-      return {
-        label: dateObj.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-        pageviews: stat ? stat.pageviews : 0,
-        clicks: stat ? stat.clicks : 0
-      };
-    });
 
-    // --- C. DETAILED VISITOR SESSIONS ---
-    // Fetch and aggregate recent session profiles (who visited)
+    // --- G. RECENT VISITOR SESSIONS (last 30) ---
     const sessionProfiles = await AnalyticsEvent.aggregate([
+      { $sort: { timestamp: -1 } },
+      { $limit: 1000 },
       {
         $group: {
           _id: "$sessionId",
@@ -189,7 +277,6 @@ export async function GET() {
       { $limit: 30 }
     ]);
 
-    // Format events chronologically inside each profile
     sessionProfiles.forEach(session => {
       session.events.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     });
@@ -200,15 +287,29 @@ export async function GET() {
         totalSessions,
         totalPageviews,
         totalClicks,
-        bounceRate
+        bounceRate,
+        
+        // Sales statistics
+        totalRevenue,
+        totalOrders,
+        averageOrderValue,
+        totalQuantitySold
       },
-      charts: {
-        daily: dailyChart,
-        weekly: weeklyChart,
-        yearly: yearlyChart
+      topProducts: {
+        byQuantity: topProductsByQuantity,
+        byRevenue: topProductsByRevenue
       },
+      categorySales,
+      customerSegment: {
+        newCustomersCount,
+        returningCustomersCount,
+        newCustomersRevenue,
+        returningCustomersRevenue
+      },
+      trend: trendData,
       sessions: sessionProfiles
     });
+
   } catch (error) {
     console.error('Failed to load admin analytics:', error);
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });

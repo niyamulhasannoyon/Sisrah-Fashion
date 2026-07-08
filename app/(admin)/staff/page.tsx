@@ -174,7 +174,7 @@ export default function StaffManagementPage() {
       if (!data.success) { setFormError(data.error || 'Failed to create staff.'); return; }
       setStaff(prev => [data.staff, ...prev]);
       setDrawerOpen(false);
-      setForm({ name: '', email: '', password: '', role: 'support' });
+      setForm({ name: '', email: '', password: '', role: 'support', permissions: [] });
     } finally {
       setSubmitting(false);
     }

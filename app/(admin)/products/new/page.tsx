@@ -30,6 +30,7 @@ export default function AddProductPage() {
   // Main Images State
   const [mainImages, setMainImages] = useState<any[]>([]);
   const [imageUrl, setImageUrl] = useState('');
+  const [lowStockThreshold, setLowStockThreshold] = useState<number>(10);
 
   // Variants States
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -162,6 +163,7 @@ export default function AddProductPage() {
       basePrice,
       offerPrice,
       category: finalCategory,
+      lowStockThreshold,
       isTrending,
       isNewArrival,
       tags,
@@ -251,7 +253,7 @@ export default function AddProductPage() {
               <label className="text-xs font-bold uppercase text-slate-500">Product Title</label>
               <input type="text" required value={title} onChange={e => setTitle(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-slate-500">Regular Price (৳)</label>
                 <input type="number" required value={basePrice} onChange={e => setBasePrice(Number(e.target.value))}
@@ -261,6 +263,11 @@ export default function AddProductPage() {
                 <label className="text-xs font-bold uppercase text-slate-500">Offer Price (৳) <span className="text-[10px] text-gray-400 font-normal uppercase">(Optional)</span></label>
                 <input type="number" value={offerPrice} onChange={e => setOfferPrice(Number(e.target.value))}
                   placeholder="0 if no offer"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500">Low Stock Threshold</label>
+                <input type="number" min={0} value={lowStockThreshold} onChange={e => setLowStockThreshold(Number(e.target.value))}
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-all" />
               </div>
             </div>

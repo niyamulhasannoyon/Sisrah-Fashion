@@ -28,7 +28,7 @@ export async function GET(req: Request) {
        return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    const userOrders = await Order.find({ 'shippingInfo.phone': user.phone }).sort({ createdAt: -1 });
+    const userOrders = await Order.find({ 'shippingInfo.phone': user.phone }).sort({ createdAt: -1 }).select('-internalNotes');
 
     return NextResponse.json({ success: true, orders: userOrders }, { status: 200 });
 

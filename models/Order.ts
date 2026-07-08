@@ -23,6 +23,9 @@ export interface IOrder extends Document {
   transactionId?: string;
   paidAmount?: number;
   deliveredAt?: Date;
+  courier?: string;
+  trackingNumber?: string;
+  internalNotes?: string;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -51,6 +54,9 @@ const OrderSchema: Schema = new Schema(
     transactionId: { type: String },
     paidAmount: { type: Number },
     deliveredAt: { type: Date },
+    courier: { type: String, default: '' },
+    trackingNumber: { type: String, default: '' },
+    internalNotes: { type: String, default: '' },
   },
   { timestamps: true }
 );

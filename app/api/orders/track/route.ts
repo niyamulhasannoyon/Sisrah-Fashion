@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const order = await Order.findOne({
       orderId: Number(orderId),
       'shippingInfo.phone': trimmedPhone
-    });
+    }).select('-internalNotes');
 
     console.log('Order found:', order ? 'Yes' : 'No');
 

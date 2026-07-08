@@ -16,6 +16,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [description, setDescription] = useState('');
   const [basePrice, setBasePrice] = useState<number>(0);
   const [offerPrice, setOfferPrice] = useState<number>(0);
+  const [lowStockThreshold, setLowStockThreshold] = useState<number>(10);
   const [category, setCategory] = useState('Men');
   const [isTrending, setIsTrending] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(false);
@@ -44,12 +45,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           setDescription(p.description);
           setBasePrice(p.basePrice);
           setOfferPrice(p.offerPrice || 0);
-          setCategory(p.category);
-          setIsTrending(p.isTrending || false);
-          setIsNewArrival(p.isNewArrival || false);
-          setTags(p.tags || []);
-          setMainImages(p.images || []);
-          
+            setLowStockThreshold(p.lowStockThreshold ?? 10);
           if (p.variants && p.variants.length > 0) {
             setVariants(p.variants);
             const eSizes = Array.from(new Set(p.variants.map((v:any) => v.size))) as string[];
@@ -151,7 +147,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     e.preventDefault();
     setUpdating(true);
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    const productData = { title, slug, description, basePrice, offerPrice, category, isTrending, isNewArrival, tags, images: mainImages, variants };
+    const productData = { title, slug, description, basePrice, offerPrice, lowStockThreshold, category, isTrending, isNewArrival, tags, images: mainImages, variants };
 
     try {
       const res = await fetch(`/api/products/${id}`, {

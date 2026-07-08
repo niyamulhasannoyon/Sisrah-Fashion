@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
+import Notification from '@/models/Notification';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +21,18 @@ export async function POST(req: Request) {
     });
 
     console.log('New Order Created:', JSON.stringify(newOrder, null, 2));
+
+    try {
+      await Notification.create({
+        title: 'New Order Placed',
+        message: `Order #${nextOrderId} of ৳${(body.totalAmount || 0).toLocaleString()} has been placed by ${body.shippingInfo?.name || 'Customer'}.`,
+        type: 'order',
+        link: `/orders/${newOrder._id}`,
+        isRead: false
+      });
+    } catch (notifError) {
+      console.error('Failed to create new order notification:', notifError);
+    }
 
     return NextResponse.json({ 
       success: true, 
@@ -41,7 +54,58 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();
-    const orders = await Order.find().sort({ createdAt: -1 });
+
+    // Parse query params for search and filters
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get('status');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const search = searchParams.get('search');
+
+    let query: any = {};
+
+    // Status filter
+    if (status && status !== 'All') {
+      query.orderStatus = status;
+    }
+
+    // Date range filter
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) {
+        query.createdAt.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999); // Include the entire end date
+        query.createdAt.$lte = end;
+      }
+    }
+
+    // Search filter: Order ID, customer name, phone number
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+
+      // Check if search query is numeric (for orderId match)
+      const searchNum = parseInt(search);
+      const isNumeric = !isNaN(searchNum);
+
+      query.$or = [
+        { 'shippingInfo.name': searchRegex },
+        { 'shippingInfo.phone': searchRegex }
+      ];
+
+      if (isNumeric) {
+        query.$or.push({ orderId: searchNum });
+      }
+
+      // Check for exact object ID
+      if (search.match(/^[0-9a-fA-F]{24}$/)) {
+        query.$or.push({ _id: search });
+      }
+    }
+
+    const orders = await Order.find(query).sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, orders }, { status: 200 });
   } catch (error: any) {

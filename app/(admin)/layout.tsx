@@ -35,6 +35,68 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { settings, fetchSettings } = useSettingsStore();
   const [checking, setChecking] = useState(true);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch('/api/admin/notifications');
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(data.notifications);
+        setUnreadCount(data.unreadCount);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // 30s poll
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleNotifClick = async (notif: any) => {
+    try {
+      if (!notif.isRead) {
+        const res = await fetch('/api/admin/notifications', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: notif._id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setNotifications(prev => prev.map(n => n._id === notif._id ? { ...n, isRead: true } : n));
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
+      }
+      setShowNotifDropdown(false);
+      if (notif.link) {
+        router.push(notif.link);
+      }
+    } catch (error) {
+      console.error('Failed to handle notification click:', error);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      const res = await fetch('/api/admin/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markAllAsRead: true })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
+  };
 
   useEffect(() => {
     const verifyAccess = async () => {
@@ -187,10 +249,60 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           <div className="flex items-center gap-5">
-            <button className="relative text-slate-400 hover:text-slate-600 transition-colors">
-              <Bell size={20} />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#A31F24] rounded-full ring-2 ring-white"></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+                className="relative text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100/80 cursor-pointer"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 bg-[#A31F24] text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white px-1 shadow-sm">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Dropdown */}
+              {showNotifDropdown && (
+                <div className="absolute right-0 mt-2.5 w-80 sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-700">Notifications</h4>
+                    {unreadCount > 0 && (
+                      <button 
+                        onClick={handleMarkAllRead}
+                        className="text-[10px] font-bold text-[#A31F24] hover:underline cursor-pointer"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="divide-y divide-slate-100 max-h-[300px] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-xs text-slate-400 italic">No notifications yet.</div>
+                    ) : (
+                      notifications.map((notif) => (
+                        <div 
+                          key={notif._id}
+                          onClick={() => handleNotifClick(notif)}
+                          className={`p-4 hover:bg-slate-50/80 transition-colors cursor-pointer text-xs ${
+                            !notif.isRead ? 'bg-slate-50/60 font-semibold' : ''
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2 mb-1">
+                            <span className="text-slate-800 font-bold leading-tight">{notif.title}</span>
+                            <span className="text-[9px] text-slate-400 font-medium shrink-0">
+                              {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <p className="text-slate-500 font-medium leading-relaxed">{notif.message}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="h-8 w-px bg-slate-200"></div>
             <div className="flex items-center gap-3 cursor-pointer group">
               <div className="text-right hidden sm:block">

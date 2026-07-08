@@ -4,6 +4,7 @@ import Product from '@/models/Product';
 import Review from '@/models/Review';
 import Order from '@/models/Order';
 import User from '@/models/User';
+import Notification from '@/models/Notification';
 import { cookies } from 'next/headers';
 import * as jose from 'jose';
 
@@ -57,6 +58,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       verifiedPurchase,
       status: 'pending', // Moderation queue (pending by default)
     });
+
+    try {
+      await Notification.create({
+        title: 'New Review Submitted',
+        message: `A new review has been submitted for "${product.title}" by ${user.name} and is pending moderation.`,
+        type: 'review',
+        link: '/reviews',
+        isRead: false
+      });
+    } catch (notifError) {
+      console.error('Failed to create review notification:', notifError);
+    }
 
     return NextResponse.json({ 
       success: true, 

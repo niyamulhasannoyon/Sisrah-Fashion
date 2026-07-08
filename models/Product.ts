@@ -9,6 +9,15 @@ const VariantSchema = new Schema({
   image: { url: String, public_id: String },
 });
 
+export interface IProductVariant {
+  size: string;
+  color: string;
+  price: number;
+  offerPrice?: number;
+  stock: number;
+  image?: { url: string; public_id: string } | null;
+}
+
 export interface IProduct extends Document {
   title: string;
   slug: string;
@@ -18,7 +27,8 @@ export interface IProduct extends Document {
   category: string;
   tags: string[];
   images: { url: string; public_id: string }[];
-  variants: any[];
+  variants: IProductVariant[];
+  lowStockThreshold: number;
   rating: number;
   numReviews: number;
   isTrending: boolean;
@@ -41,6 +51,7 @@ const ProductSchema: Schema = new Schema(
       },
     ],
     variants: [VariantSchema],
+    lowStockThreshold: { type: Number, required: true, default: 10 },
     rating: { type: Number, required: true, default: 0 },
     numReviews: { type: Number, required: true, default: 0 },
     isTrending: { type: Boolean, default: false },
