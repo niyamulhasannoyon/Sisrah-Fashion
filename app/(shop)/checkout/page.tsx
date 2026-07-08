@@ -699,10 +699,32 @@ export default function CheckoutPage() {
                   )}
                 </button>
 
-                <div className="mt-8 flex items-center justify-center gap-6 opacity-20 grayscale">
-                   <Truck size={20} />
-                   <ShieldCheck size={20} />
-                   <MapPin size={20} />
+                {/* Secure Payment Badges */}
+                <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col items-center gap-3">
+                  <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest">Guaranteed Safe Checkout</span>
+                  <div className="flex justify-center items-center gap-3.5 flex-wrap">
+                    {/* bKash Badge */}
+                    <div className="h-6 w-11 bg-[#E2125B] rounded-md flex items-center justify-center shadow-md select-none border border-[#E2125B]/20">
+                      <span className="text-[9px] text-white font-black italic">bKash</span>
+                    </div>
+                    {/* Nagad Badge */}
+                    <div className="h-6 w-11 bg-[#F15A22] rounded-md flex items-center justify-center shadow-md select-none border border-[#F15A22]/20">
+                      <span className="text-[9px] text-white font-black italic">নগদ</span>
+                    </div>
+                    {/* Visa Badge */}
+                    <div className="h-6 w-11 bg-[#1A1F71] rounded-md flex items-center justify-center shadow-md select-none border border-[#1A1F71]/20">
+                      <span className="text-[9px] text-white font-black tracking-wide">VISA</span>
+                    </div>
+                    {/* Mastercard Badge */}
+                    <div className="h-6 w-11 bg-[#222222] rounded-md flex items-center justify-center gap-0.5 shadow-md select-none border border-[#222222]/20">
+                      <div className="w-2 h-2 bg-[#EB001B] rounded-full"></div>
+                      <div className="w-2 h-2 bg-[#FF5F00] rounded-full -ml-1.5 mix-blend-screen"></div>
+                    </div>
+                    {/* SSLCommerz Badge */}
+                    <div className="h-6 w-20 bg-white/10 rounded-md flex items-center justify-center shadow-md select-none border border-white/15">
+                      <span className="text-[8px] text-white/80 font-black uppercase tracking-wider">SSLCommerz</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               

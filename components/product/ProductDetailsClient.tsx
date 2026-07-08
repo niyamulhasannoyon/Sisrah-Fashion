@@ -251,6 +251,29 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                 </button>
               ))}
             </div>
+
+            {/* Dynamic Scarcity/Stock Urgency Indicator */}
+            {hasSelectedOptions && currentVariant && (
+              <div className="mt-4 text-xs font-bold transition-all">
+                {currentVariant.stock === 0 ? (
+                  <span className="text-[#A31F24] uppercase tracking-wider flex items-center gap-1.5 animate-pulse">
+                    ⚡ Out of Stock (Select another option)
+                  </span>
+                ) : (currentVariant.stock || 0) <= 10 ? (
+                  <span className="text-[#A31F24] uppercase tracking-wider flex items-center gap-1.5 animate-pulse">
+                    ⚡ Only {currentVariant.stock} items left in stock — order soon!
+                  </span>
+                ) : (currentVariant.stock || 0) <= 20 ? (
+                  <span className="text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
+                    ⚠️ Limited quantity available
+                  </span>
+                ) : (
+                  <span className="text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
+                    ✓ In Stock (Ready to Ship)
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="hidden lg:flex gap-4 mt-4">
@@ -268,9 +291,10 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                   availableColors
                 });
               }}
-              className="flex-1 bg-loomra-red text-loomra-white py-4 text-small font-bold uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg"
+              disabled={!hasSelectedOptions || currentVariant?.stock === 0}
+              className="flex-1 bg-loomra-red text-loomra-white py-4 text-small font-bold uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add to Cart
+              {currentVariant?.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
             <button className="px-6 border border-loomra-surface text-loomra-black hover:border-loomra-red hover:text-loomra-red transition-all flex items-center justify-center">
               <Heart size={24} />
@@ -300,7 +324,14 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
         product={product}
         selectedSize={selectedSize}
         selectedColor={selectedColor}
-        disabled={!hasSelectedOptions}
+        disabled={!hasSelectedOptions || currentVariant?.stock === 0}
+        buttonText={
+          currentVariant?.stock === 0 
+            ? 'Out of Stock' 
+            : !hasSelectedOptions 
+              ? 'Select Size' 
+              : 'Add to Cart'
+        }
       />
 
       <SizeGuideModal 

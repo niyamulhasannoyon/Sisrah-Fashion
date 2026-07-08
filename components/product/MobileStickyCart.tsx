@@ -14,9 +14,10 @@ interface MobileStickyCartProps {
   selectedSize: string;
   selectedColor: string;
   disabled?: boolean;
+  buttonText?: string;
 }
 
-export default function MobileStickyCart({ product, selectedSize, selectedColor, disabled }: MobileStickyCartProps) {
+export default function MobileStickyCart({ product, selectedSize, selectedColor, disabled, buttonText }: MobileStickyCartProps) {
   const addToCart = useCartStore((state) => state.addToCart);
   const imageUrl = product.images?.[0]?.url ?? '/images/linen-shirt.jpg';
 
@@ -43,7 +44,7 @@ export default function MobileStickyCart({ product, selectedSize, selectedColor,
         disabled={disabled}
         className="flex-1 min-h-[48px] bg-loomra-red text-loomra-white text-small font-bold uppercase tracking-widest active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center"
       >
-        {disabled ? 'Select Size' : 'Add to Cart'}
+        {buttonText || (disabled ? 'Select Size' : 'Add to Cart')}
       </button>
     </motion.div>
   );

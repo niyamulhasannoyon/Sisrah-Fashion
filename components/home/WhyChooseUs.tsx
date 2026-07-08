@@ -5,23 +5,23 @@ import { Truck, Award, RefreshCw, ShieldCheck } from 'lucide-react';
 const features = [
   {
     icon: Truck,
-    title: 'দেশব্যাপী দ্রুত ডেলিভারি',
-    description: 'সারা বাংলাদেশে নির্ভরযোগ্য ও দ্রুত হোম ডেলিভারি সুবিধা',
+    title: 'Nationwide Fast Delivery',
+    description: 'Reliable and swift home delivery across Bangladesh.',
   },
   {
     icon: Award,
-    title: 'প্রিমিয়াম কারিগরি',
-    description: 'সেরা মানের সুতা ও শতভাগ খাঁটি কাপড়ের নিশ্চয়তা',
+    title: 'Premium Craftsmanship',
+    description: 'Assurance of high-quality fabrics and fine threads.',
   },
   {
     icon: RefreshCw,
-    title: 'সহজ ও স্বাচ্ছন্দ্যময় রিটার্ন',
-    description: '৭ দিনের মধ্যে যেকোনো পোশাক সহজে পরিবর্তনের সুবিধা',
+    title: 'Easy & Hassle-Free Returns',
+    description: 'Convenient 7-day exchange window for any item.',
   },
   {
     icon: ShieldCheck,
-    title: 'শতভাগ নিরাপদ পেমেন্ট',
-    description: 'ক্যাশ অন ডেলিভারি এবং সুরক্ষিত অনলাইন পেমেন্ট গেটওয়ে',
+    title: '100% Secure Payments',
+    description: 'Safe online payment gateways and cash-on-delivery options.',
   },
 ];
 
@@ -43,8 +43,8 @@ export function WhyChooseUs() {
             </span>
             
             {/* Foreground Title */}
-            <h2 className="relative text-2xl sm:text-3xl font-bold text-loomra-black font-bengali z-10 leading-relaxed py-2">
-              কেন আমাদের বেছে নেবেন?
+            <h2 className="relative text-2xl sm:text-3xl font-bold text-loomra-black z-10 leading-relaxed py-2">
+              Why Choose Us?
             </h2>
           </div>
           
@@ -64,10 +64,10 @@ export function WhyChooseUs() {
                 <div className="w-12 h-12 bg-loomra-red/5 text-loomra-red rounded-full flex items-center justify-center mb-5">
                   <Icon size={24} strokeWidth={2} />
                 </div>
-                <h3 className="text-base font-bold text-loomra-black font-bengali leading-relaxed">
+                <h3 className="text-base font-bold text-loomra-black leading-relaxed">
                   {feature.title}
                 </h3>
-                <p className="text-xs text-loomra-muted font-bengali mt-3 leading-relaxed">
+                <p className="text-xs text-loomra-muted mt-3 leading-relaxed">
                   {feature.description}
                 </p>
               </div>

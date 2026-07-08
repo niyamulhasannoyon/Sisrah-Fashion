@@ -31,12 +31,12 @@ export default function CommunityPage() {
     <div className="bg-[#FBFBFB] min-h-screen py-16 font-sans">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="text-center mb-16">
-          <p className="text-[10px] font-black uppercase tracking-[4px] text-loomra-red mb-2">Our Community</p>
+          <p className="text-[10px] font-black uppercase tracking-[4px] text-loomra-red mb-2">Style Lookbook</p>
           <h1 className="text-4xl font-black uppercase tracking-tight text-loomra-black flex items-center justify-center gap-2">
-            <Camera className="text-loomra-red" size={28} /> Everyday Style
+            <Camera className="text-loomra-red" size={28} /> Style Inspiration
           </h1>
           <p className="text-loomra-muted mt-2 text-sm max-w-md mx-auto">
-            See how our premium minimalist fashion is styled by the community in everyday life. Tag us on Instagram <span className="font-bold text-loomra-black">@as_sidrat_official</span> to be featured.
+            Explore our carefully curated lookbook showcasing our premium climate-conscious silhouettes in contemporary daily life. Follow us on Instagram <span className="font-bold text-loomra-black">@as_sidrat_official</span>.
           </p>
         </div>
 

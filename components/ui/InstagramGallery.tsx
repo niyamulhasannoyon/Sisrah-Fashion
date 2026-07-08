@@ -23,7 +23,7 @@ export default function InstagramGallery() {
         <h2 className="text-product-title font-bold flex items-center justify-center gap-8px">
           <Camera /> @AsSidrat
         </h2>
-        <p className="text-small text-loomra-muted mt-8px">Tag us to be featured.</p>
+        <p className="text-small text-loomra-muted mt-8px">Follow us on Instagram for daily inspirations.</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 w-full">

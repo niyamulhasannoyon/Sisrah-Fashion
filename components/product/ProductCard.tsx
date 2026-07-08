@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart } from 'lucide-react';
+import { Heart, Star } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 
@@ -36,7 +36,7 @@ export default function ProductCard({ product }: { product: any }) {
           src={product.images[0]?.url || '/placeholder.jpg'} 
           alt={product.title} 
           fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 288px"
           className="object-cover object-top transition-transform duration-700 group-hover:scale-105" 
           loading="lazy"
         />
@@ -64,6 +64,22 @@ export default function ProductCard({ product }: { product: any }) {
 
       <Link href={`/product/${product.slug}`} className="flex flex-col gap-1 px-1">
         <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-400">{product.category}</span>
+        {/* Star Rating */}
+        <div className="flex items-center gap-1 my-0.5">
+          <div className="flex text-amber-400 gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star 
+                key={i} 
+                size={11} 
+                fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} 
+                className={i < Math.round(product.rating || 0) ? 'text-amber-400' : 'text-slate-200'}
+              />
+            ))}
+          </div>
+          {product.numReviews > 0 && (
+            <span className="text-[9px] text-slate-400 font-bold ml-0.5">({product.numReviews})</span>
+          )}
+        </div>
         <h3 className="text-sm font-bold text-[#1A1A1A] line-clamp-1">{product.title}</h3>
         <div className="flex items-center gap-2 mt-0.5">
           {product.offerPrice > 0 && product.offerPrice < product.basePrice ? (

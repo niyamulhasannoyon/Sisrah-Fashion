@@ -57,7 +57,7 @@ export function CategoryGrid() {
                 src={category.image} 
                 alt={category.title} 
                 fill
-                sizes="(max-width: 768px) 100vw, 33vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 384px"
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 loading="lazy"
               />

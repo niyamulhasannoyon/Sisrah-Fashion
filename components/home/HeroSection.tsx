@@ -42,7 +42,7 @@ export function HeroSection() {
             src={getDirectImageLink(slide.url)}
             alt="AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh"
             fill
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px"
             priority={index === 0}
             className="object-cover object-center"
             quality={90}
