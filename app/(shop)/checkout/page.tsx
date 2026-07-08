@@ -5,7 +5,7 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart } from 'lucide-react';
+import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const districts = [
@@ -140,8 +140,9 @@ export default function CheckoutPage() {
     }
 
     let parsedPaidAmount = finalTotal;
+    const isMobilePayment = paymentMethod === 'bKash' || paymentMethod === 'Nagad';
 
-    if (paymentMethod === 'Mobile Banking') {
+    if (isMobilePayment) {
       if (!txnId) {
         setTxnIdError("Please enter your Transaction ID");
         setLoading(false);
@@ -179,8 +180,8 @@ export default function CheckoutPage() {
         totalAmount: finalTotal,
         paymentMethod,
         paymentStatus: 'Pending',
-        transactionId: paymentMethod === 'Mobile Banking' ? txnId : undefined,
-        paidAmount: paymentMethod === 'Mobile Banking' ? parsedPaidAmount : undefined,
+        transactionId: isMobilePayment ? txnId : undefined,
+        paidAmount: isMobilePayment ? parsedPaidAmount : undefined,
         couponCode: appliedCoupon?.code
       };
 
@@ -436,7 +437,8 @@ export default function CheckoutPage() {
                     <CreditCard className="text-gray-200" size={24} />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Cash on Delivery */}
                     <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'Cash on Delivery' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
                       <div className="flex items-center gap-4">
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'Cash on Delivery' ? 'border-black' : 'border-gray-300'}`}>
@@ -451,28 +453,69 @@ export default function CheckoutPage() {
                       <input type="radio" name="payment" value="Cash on Delivery" checked={paymentMethod === 'Cash on Delivery'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
 
-                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'Mobile Banking' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
+                    {/* bKash */}
+                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'bKash' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
                       <div className="flex items-center gap-4">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'Mobile Banking' ? 'border-black' : 'border-gray-300'}`}>
-                          {paymentMethod === 'Mobile Banking' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'bKash' ? 'border-black' : 'border-gray-300'}`}>
+                          {paymentMethod === 'bKash' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-black text-sm uppercase tracking-tight">Mobile Banking</span>
-                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Bkash, Nagad, Rocket</span>
+                          <span className="font-black text-sm uppercase tracking-tight">bKash (বিকাশ)</span>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Pay via bKash MFS</span>
                         </div>
                       </div>
-                      <CreditCard className={paymentMethod === 'Mobile Banking' ? 'text-black' : 'text-gray-300'} size={24} />
-                      <input type="radio" name="payment" value="Mobile Banking" checked={paymentMethod === 'Mobile Banking'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
+                      <CreditCard className={paymentMethod === 'bKash' ? 'text-black' : 'text-gray-300'} size={24} />
+                      <input type="radio" name="payment" value="bKash" checked={paymentMethod === 'bKash'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
+                    </label>
+
+                    {/* Nagad */}
+                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'Nagad' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'Nagad' ? 'border-black' : 'border-gray-300'}`}>
+                          {paymentMethod === 'Nagad' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-black text-sm uppercase tracking-tight">Nagad (নগদ)</span>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Pay via Nagad MFS</span>
+                        </div>
+                      </div>
+                      <CreditCard className={paymentMethod === 'Nagad' ? 'text-black' : 'text-gray-300'} size={24} />
+                      <input type="radio" name="payment" value="Nagad" checked={paymentMethod === 'Nagad'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
+                    </label>
+
+                    {/* Due (Baki) */}
+                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'Due (Baki)' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'Due (Baki)' ? 'border-black' : 'border-gray-300'}`}>
+                          {paymentMethod === 'Due (Baki)' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-black text-sm uppercase tracking-tight">Due / Baki (বাকি)</span>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Buy on Credit / Due</span>
+                        </div>
+                      </div>
+                      <Clock className={paymentMethod === 'Due (Baki)' ? 'text-black' : 'text-gray-300'} size={24} />
+                      <input type="radio" name="payment" value="Due (Baki)" checked={paymentMethod === 'Due (Baki)'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
                   </div>
 
-                  {paymentMethod === 'Cash on Delivery' ? (
+                  {paymentMethod === 'Cash on Delivery' && (
                     <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100/50">
                       <p className="text-xs text-gray-600 leading-relaxed font-medium">
                         You will pay a total of <span className="font-bold text-black">৳{finalTotal.toLocaleString()}</span> in cash when the delivery agent arrives at your address.
                       </p>
                     </div>
-                  ) : (
+                  )}
+
+                  {paymentMethod === 'Due (Baki)' && (
+                    <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100/50">
+                      <p className="text-xs text-gray-600 leading-relaxed font-medium">
+                        আপনার অর্ডারটি <span className="font-bold text-black">বাকি (Due)</span> হিসেবে প্রসেস করা হবে। অর্ডারটির মোট মূল্য <span className="font-bold text-black">৳{finalTotal.toLocaleString()}</span> পরবর্তীতে পরিশোধ করতে হবে।
+                      </p>
+                    </div>
+                  )}
+
+                  {(paymentMethod === 'bKash' || paymentMethod === 'Nagad') && (
                     <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100/50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="space-y-1.5">
                         <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Payment Instructions</p>
@@ -484,7 +527,7 @@ export default function CheckoutPage() {
                             {settings?.paymentNumber || '01733919156'}
                           </span>
                           <span className="text-[9px] bg-gray-100 px-2 py-0.5 rounded font-black uppercase tracking-widest text-gray-500">
-                            Bkash/Nagad/Rocket
+                            {paymentMethod}
                           </span>
                         </div>
                       </div>
@@ -560,7 +603,7 @@ export default function CheckoutPage() {
                             </span>
                           </div>
                           <p className="text-[11px] text-slate-500 leading-relaxed">
-                            Tip: After sending the money, copy the Transaction ID (TxnID) from the confirmation SMS you received from bKash/Nagad/Rocket (e.g. 9J88X29K).
+                            Tip: After sending the money, copy the Transaction ID (TxnID) from the confirmation SMS you received from bKash/Nagad (e.g. 9J88X29K).
                           </p>
                           <input 
                             type="text" 
@@ -593,7 +636,7 @@ export default function CheckoutPage() {
                   >
                     {loading ? <Loader2 className="animate-spin" /> : (
                       <>
-                        {paymentMethod === 'Mobile Banking' ? 'Verify & Confirm Order' : 'Place My Order'} <ShieldCheck size={20} />
+                        {(paymentMethod === 'bKash' || paymentMethod === 'Nagad') ? 'Verify & Confirm Order' : 'Place My Order'} <ShieldCheck size={20} />
                       </>
                     )}
                   </button>
@@ -694,7 +737,7 @@ export default function CheckoutPage() {
                 >
                   {loading ? <Loader2 className="animate-spin" /> : (
                     <>
-                      {paymentMethod === 'Mobile Banking' ? 'Verify & Confirm Order' : 'Place My Order'} <ShieldCheck size={20} className="group-hover:scale-125 transition-transform duration-500" />
+                      {(paymentMethod === 'bKash' || paymentMethod === 'Nagad') ? 'Verify & Confirm Order' : 'Place My Order'} <ShieldCheck size={20} className="group-hover:scale-125 transition-transform duration-500" />
                     </>
                   )}
                 </button>

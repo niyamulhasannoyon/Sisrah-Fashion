@@ -475,39 +475,51 @@ export default function OrderDetailPage() {
               </div>
 
               {order.transactionId && (
-                <div className="space-y-2 border-t border-slate-200/50 pt-3">
+                <div className="border-t border-slate-200/50 pt-3">
                   <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-between items-center">
                     <span className="text-xs text-slate-500 font-bold uppercase">Txn ID</span>
                     <span className="text-xs font-mono font-black text-[#A31F24] tracking-wider select-all">
                       {order.transactionId}
                     </span>
                   </div>
-                  
-                  {/* Bill details */}
-                  <div className="bg-white p-3 rounded-lg border border-slate-200 space-y-2 text-xs font-semibold text-slate-700">
-                    <div className="flex justify-between">
-                      <span>Total Bill:</span>
-                      <span className="font-bold">৳{order.totalAmount.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Paid Amount:</span>
-                      <span className="font-bold text-emerald-600">
-                        ৳{(order.paidAmount !== undefined ? order.paidAmount : order.totalAmount).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-t pt-1.5 border-dashed border-slate-200">
-                      <span>Due Amount:</span>
-                      <span className="font-bold text-rose-600">
-                        ৳{Math.max(0, order.totalAmount - (order.paidAmount !== undefined ? order.paidAmount : order.totalAmount)).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               )}
+
+              {/* Bill details */}
+              <div className="space-y-2 border-t border-slate-200/50 pt-3">
+                <div className="bg-white p-3 rounded-lg border border-slate-200 space-y-2 text-xs font-semibold text-slate-700">
+                  <div className="flex justify-between">
+                    <span>Total Bill:</span>
+                    <span className="font-bold">৳{order.totalAmount.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Paid Amount:</span>
+                    <span className="font-bold text-emerald-600">
+                      ৳{(() => {
+                        const paid = order.paidAmount !== undefined 
+                          ? order.paidAmount 
+                          : (order.paymentStatus === 'Paid' ? order.totalAmount : 0);
+                        return paid.toLocaleString();
+                      })()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t pt-1.5 border-dashed border-slate-200">
+                    <span>Due Amount:</span>
+                    <span className="font-bold text-rose-600">
+                      ৳{(() => {
+                        const paid = order.paidAmount !== undefined 
+                          ? order.paidAmount 
+                          : (order.paymentStatus === 'Paid' ? order.totalAmount : 0);
+                        return Math.max(0, order.totalAmount - paid).toLocaleString();
+                      })()}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Verification panel if Mobile payment and not confirmed */}
-            {order.paymentMethod === 'Mobile Banking' && order.paymentStatus !== 'Paid' && order.paymentStatus !== 'Partially Paid' && (
+            {(order.paymentMethod === 'bKash' || order.paymentMethod === 'Nagad' || order.paymentMethod === 'Mobile Banking') && order.paymentStatus !== 'Paid' && order.paymentStatus !== 'Partially Paid' && (
               <div className="border border-slate-200 p-4 rounded-xl space-y-3 bg-slate-50/50">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-slate-500 block">Verify Transaction ID</label>
@@ -547,7 +559,7 @@ export default function OrderDetailPage() {
               </div>
             )}
 
-            {order.paymentMethod === 'Mobile Banking' && (order.paymentStatus === 'Paid' || order.paymentStatus === 'Partially Paid') && (
+            {(order.paymentMethod === 'bKash' || order.paymentMethod === 'Nagad' || order.paymentMethod === 'Mobile Banking') && (order.paymentStatus === 'Paid' || order.paymentStatus === 'Partially Paid') && (
               <div className="flex flex-col gap-2 pt-2">
                 <div className="p-2.5 rounded-lg border text-center text-xs font-bold uppercase tracking-wide bg-green-50 text-green-800 border-green-150">
                   ✓ Payment Confirmed
