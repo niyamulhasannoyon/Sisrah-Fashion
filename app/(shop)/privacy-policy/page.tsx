@@ -1,4 +1,26 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy - AS SIDRAT',
+  description: 'Learn how AS SIDRAT handles and protects your personal information and transaction security.',
+  alternates: {
+    canonical: 'https://assidrat.com/privacy-policy',
+  },
+  openGraph: {
+    title: 'Privacy Policy - AS SIDRAT',
+    description: 'Learn how AS SIDRAT handles and protects your personal information and transaction security.',
+    url: 'https://assidrat.com/privacy-policy',
+    type: 'website',
+    siteName: 'AS SIDRAT',
+    locale: 'en_BD',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Policy - AS SIDRAT',
+    description: 'Learn how AS SIDRAT handles and protects your personal information and transaction security.',
+  }
+};
 
 export default function PrivacyPolicyPage() {
   return (

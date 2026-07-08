@@ -123,7 +123,6 @@ export function generateProductMetadata(product: ProductMetadataInput, baseUrl: 
         'product:rating': product.rating.toString(),
         'product:review_count': (product.numReviews || 0).toString(),
       }),
-      'structured-data': JSON.stringify(schemaMarkup),
     },
     robots: {
       index: true,

@@ -165,6 +165,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
             <img
               src={imageUrl}
               alt={`AS SIDRAT ${product.title} for Men Bangladesh`}
+              fetchPriority="high"
               className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
             />
           </div>

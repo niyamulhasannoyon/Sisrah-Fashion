@@ -20,11 +20,7 @@ import dbConnect from '@/lib/dbConnect';
 import Settings from '@/models/Settings';
 import { getDirectImageLink } from '@/lib/utils';
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-  'https://assidrat.com';
+const BASE_URL = 'https://assidrat.com';
 
 export async function generateMetadata(): Promise<Metadata> {
   let faviconUrl = '/favicon.png';
@@ -44,6 +40,9 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: ['AS SIDRAT', 'Fashion Bangladesh', 'Linen Shirts Dhaka', 'Premium Clothing Bangladesh', 'Minimalist Fashion', 'Fusion Wear Dhaka', 'AS SIDRAT Clothing'],
     authors: [{ name: 'AS SIDRAT' }],
     metadataBase: new URL(BASE_URL),
+    alternates: {
+      canonical: '/',
+    },
     icons: {
       icon: [
         { url: faviconUrl, sizes: 'any' },

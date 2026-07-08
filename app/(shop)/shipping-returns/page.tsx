@@ -1,4 +1,26 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Shipping, Delivery & Exchange Policy - AS SIDRAT',
+  description: 'Read about our delivery timelines (Dhaka & nationwide), cash on delivery options, and hassle-free 7-day exchange and return policy.',
+  alternates: {
+    canonical: 'https://assidrat.com/shipping-returns',
+  },
+  openGraph: {
+    title: 'Shipping, Delivery & Exchange Policy - AS SIDRAT',
+    description: 'Read about our delivery timelines (Dhaka & nationwide), cash on delivery options, and exchange policy.',
+    url: 'https://assidrat.com/shipping-returns',
+    type: 'website',
+    siteName: 'AS SIDRAT',
+    locale: 'en_BD',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Shipping, Delivery & Exchange Policy - AS SIDRAT',
+    description: 'Read about our delivery timelines (Dhaka & nationwide), cash on delivery options, and exchange policy.',
+  }
+};
 
 export default function ShippingReturnsPage() {
   return (

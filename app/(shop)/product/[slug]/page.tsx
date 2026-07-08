@@ -56,5 +56,53 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const productData = JSON.parse(JSON.stringify(product));
   const reviewsData = JSON.parse(JSON.stringify(reviews));
 
-  return <ProductDetailsClient product={productData} reviews={reviewsData} />;
+  const displayPrice = product.offerPrice && product.offerPrice > 0 ? product.offerPrice : product.basePrice;
+  const inStock = product.variants?.some((v: any) => v.stock > 0);
+  const productImage = product.images?.[0]?.url || '/images/placeholder.jpg';
+  const productUrl = `https://assidrat.com/product/${product.slug}`;
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    description: product.description,
+    image: productImage,
+    brand: {
+      '@type': 'Brand',
+      name: 'AS SIDRAT',
+    },
+    sku: product._id.toString(),
+    url: productUrl,
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'BDT',
+      price: displayPrice.toString(),
+      availability: inStock
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+    ...(product.rating && product.numReviews > 0 ? {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: product.rating.toString(),
+        reviewCount: product.numReviews.toString(),
+        bestRating: '5',
+        worstRating: '1',
+      }
+    } : {})
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productSchema),
+        }}
+      />
+      <ProductDetailsClient product={productData} reviews={reviewsData} />
+    </>
+  );
 }
