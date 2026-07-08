@@ -22,6 +22,8 @@ import { getDirectImageLink } from '@/lib/utils';
 
 const BASE_URL = 'https://assidrat.com';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   let faviconUrl = '/favicon.png';
   try {

@@ -3,15 +3,17 @@ import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { WhyChooseUs } from '@/components/home/WhyChooseUs';
 import { ReviewMarquee } from '@/components/home/ReviewMarquee';
 import { Newsletter } from '@/components/home/Newsletter';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 
-const NewDrop = dynamic(() => import('@/components/home/NewDrop').then(mod => mod.NewDrop));
-const TrendingSlider = dynamic(() => import('@/components/home/TrendingSlider').then(mod => mod.TrendingSlider));
-const LifestyleBanner = dynamic(() => import('@/components/home/LifestyleBanner').then(mod => mod.LifestyleBanner));
-const SocialGallery = dynamic(() => import('@/components/home/SocialGallery').then(mod => mod.SocialGallery));
+const NewDrop = nextDynamic(() => import('@/components/home/NewDrop').then(mod => mod.NewDrop));
+const TrendingSlider = nextDynamic(() => import('@/components/home/TrendingSlider').then(mod => mod.TrendingSlider));
+const LifestyleBanner = nextDynamic(() => import('@/components/home/LifestyleBanner').then(mod => mod.LifestyleBanner));
+const SocialGallery = nextDynamic(() => import('@/components/home/SocialGallery').then(mod => mod.SocialGallery));
 
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   let newDropProducts = [];
