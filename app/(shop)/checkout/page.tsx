@@ -25,7 +25,7 @@ export default function CheckoutPage() {
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [shippingInfo, setShippingInfo] = useState({ name: '', phone: '', address: '', city: '' });
+  const [shippingInfo, setShippingInfo] = useState({ name: '', phone: '', email: '', address: '', city: '' });
   const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
   const [txnId, setTxnId] = useState('');
   const [txnIdError, setTxnIdError] = useState('');
@@ -49,6 +49,7 @@ export default function CheckoutPage() {
         ...prev,
         name: prev.name || user.name || '',
         phone: prev.phone || user.phone || '',
+        email: prev.email || user.email || '',
         address: prev.address || user.address?.street || '',
         city: prev.city || user.address?.city || '',
       }));
@@ -409,6 +410,13 @@ export default function CheckoutPage() {
                         value={shippingInfo.address}
                         className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium resize-none" 
                         onChange={(e) => setShippingInfo({...shippingInfo, address: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Email Address <span className="text-[8px] font-normal lowercase text-gray-300">(for invoice)</span></label>
+                      <input type="email" placeholder="your@email.com" 
+                        value={shippingInfo.email}
+                        className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium" 
+                        onChange={(e) => setShippingInfo({...shippingInfo, email: e.target.value})} />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">City / District</label>

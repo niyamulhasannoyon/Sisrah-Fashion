@@ -6,6 +6,7 @@ export interface IOrder extends Document {
     phone: string;
     address: string;
     city: string;
+    email?: string;
   };
   orderItems: {
     title: string;
@@ -37,6 +38,7 @@ const OrderSchema: Schema = new Schema(
       phone: { type: String, required: true },
       address: { type: String, required: true },
       city: { type: String, required: true },
+      email: { type: String },
     },
     orderItems: [
       {

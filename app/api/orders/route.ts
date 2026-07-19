@@ -25,6 +25,7 @@ export async function POST(req: Request) {
     const sanitizedShipping = {
       name: (body.shippingInfo.name || '').replace(/<[^>]*>/g, '').trim(),
       phone: (body.shippingInfo.phone || '').replace(/<[^>]*>/g, '').trim(),
+      email: (body.shippingInfo.email || '').replace(/<[^>]*>/g, '').trim(),
       address: (body.shippingInfo.address || '').replace(/<[^>]*>/g, '').trim(),
       city: (body.shippingInfo.city || '').replace(/<[^>]*>/g, '').trim(),
     };
