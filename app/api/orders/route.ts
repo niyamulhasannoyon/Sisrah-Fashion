@@ -4,6 +4,7 @@ import Order from '@/models/Order';
 import Coupon from '@/models/Coupon';
 import Notification from '@/models/Notification';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
+import { generateAndEmailInvoice } from '@/lib/invoice';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,6 +121,9 @@ export async function POST(req: Request) {
     } catch (notifError) {
       console.error('[Order] Failed to create notification:', notifError);
     }
+
+    // Auto-generate invoice (non-blocking)
+    generateAndEmailInvoice(newOrder.toObject(), body.shippingInfo?.email);
 
     return NextResponse.json({ 
       success: true, 

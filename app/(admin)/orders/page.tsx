@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Loader2, Eye, Trash2, Search, Filter, Calendar, 
-  X, CheckSquare, Square, RefreshCw, AlertCircle, Truck 
+  X, CheckSquare, Square, RefreshCw, AlertCircle, Truck, PlusCircle, FileText 
 } from 'lucide-react';
+import Link from 'next/link';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   'Pending': ['Confirmed', 'Cancelled'],
@@ -287,7 +288,20 @@ export default function AdminOrdersPage() {
         <div>
           <h1 className="text-2xl font-black text-[#1A1A1A] tracking-tight">Orders Management</h1>
           <p className="text-xs text-slate-500 mt-1">Search, filter, and manage orders strictly through the delivery funnel.</p>
-        </div>
+        </div>          <div className="flex items-center gap-2">
+            <Link
+              href="/orders/invoice-custom"
+              className="border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 transition-all"
+            >
+              <FileText size={14} /> Invoice Tool
+            </Link>
+            <Link
+              href="/orders/manual"
+              className="bg-black text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-[#A31F24] transition-all shadow-sm"
+            >
+              <PlusCircle size={16} /> Create Manual Order
+            </Link>
+          </div>
       </div>
 
       {/* Filter and Search Panel */}

@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { 
   ArrowLeft, Loader2, Save, Trash2, 
-  MapPin, User, CreditCard, Truck, FileText, CheckCircle2, AlertCircle 
+  MapPin, User, CreditCard, Truck, FileText, CheckCircle2, AlertCircle, Download 
 } from 'lucide-react';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -281,6 +281,26 @@ export default function OrderDetailPage() {
 
         {/* Top Actions */}
         <div className="flex items-center gap-3">
+          <button 
+            onClick={async () => {
+              try {
+                const res = await fetch(`/api/invoice/generate?orderId=${id}&download=true`);
+                if (!res.ok) throw new Error('Failed to generate invoice');
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Invoice-${order?.orderId || id.slice(-6)}.pdf`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+              } catch (err) {
+                alert('Failed to download invoice. Make sure the server is running.');
+              }
+            }}
+            className="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2"
+          >
+            <Download size={16} /> Invoice
+          </button>
           <button 
             onClick={() => setShowDeleteModal(true)}
             className="px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2"
