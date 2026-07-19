@@ -22,6 +22,7 @@ const menu = [
 
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
   const { toggleCart, cart } = useCartStore();
   const { isAuthenticated, logout, checkAuth, user } = useAuthStore();
@@ -31,10 +32,14 @@ export function Navbar() {
 
   useEffect(() => {
     setMounted(true);
+    // Wait for Zustand to rehydrate from localStorage
+    const unsubscribe = useCartStore.persist.onFinishHydration(() => setHydrated(true));
+    if (useCartStore.persist.hasHydrated()) setHydrated(true);
     checkAuth();
     if (!settings) {
       fetchSettings();
     }
+    return () => unsubscribe();
   }, [settings, fetchSettings, checkAuth]);
 
   const handleLogout = async () => {
@@ -59,7 +64,7 @@ export function Navbar() {
           )}
         </div>
       )}
-      <header className="sticky top-0 z-[100] w-full border-b border-slate-100/80 bg-white/75 backdrop-blur-md transition-all duration-300">
+      <header className="sticky top-0 z-[100] w-full border-b border-white/20 bg-white/80 backdrop-blur-lg shadow-sm transition-all duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 md:py-3 sm:px-8 lg:px-12">
         <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
           {/* Brand Logo Icon Container */}
@@ -110,10 +115,10 @@ export function Navbar() {
             Track Order
           </Link>
 
-          <button onClick={toggleCart} aria-label="Open Cart" className="relative hidden md:flex items-center justify-center w-12 h-12 border border-loomra-surface rounded-full hover:border-loomra-red transition">
+          <button onClick={toggleCart} aria-label="Open Cart" className="relative hidden md:flex items-center justify-center w-12 h-12 border border-white/30 bg-white/50 hover:bg-white/80 rounded-full hover:border-loomra-red transition-all duration-300">
             <ShoppingBag size={20} />
-            {cart.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-loomra-red text-loomra-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {hydrated && cart.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-loomra-red text-loomra-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
                 {cart.length}
               </span>
             )}

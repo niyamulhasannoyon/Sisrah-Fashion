@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Coupon from '@/models/Coupon';
+import Order from '@/models/Order';
 import { isAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
@@ -11,9 +12,39 @@ export async function GET() {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();
+
     const coupons = await Coupon.find().sort({ createdAt: -1 });
-    return NextResponse.json({ success: true, coupons });
+
+    // Aggregate total discount given per coupon from orders
+    const couponDiscounts = await Order.aggregate([
+      { $match: { couponCode: { $exists: true, $nin: [null, ''] } } },
+      {
+        $group: {
+          _id: '$couponCode',
+          totalDiscount: { $sum: { $ifNull: ['$couponDiscount', 0] } },
+          totalRevenue: { $sum: { $cond: [{ $eq: ['$orderStatus', 'Cancelled'] }, 0, '$totalAmount'] } },
+        },
+      },
+    ]);
+
+    // Build a lookup map: couponCode -> { totalDiscount, totalRevenue }
+    const discountMap = new Map(
+      couponDiscounts.map((d: any) => [d._id, { totalDiscount: d.totalDiscount, totalRevenue: d.totalRevenue }])
+    );
+
+    // Attach usage stats to each coupon
+    const enrichedCoupons = coupons.map((coupon: any) => {
+      const stats = discountMap.get(coupon.code) || { totalDiscount: 0, totalRevenue: 0 };
+      return {
+        ...coupon.toObject(),
+        totalDiscount: stats.totalDiscount,
+        totalRevenue: stats.totalRevenue,
+      };
+    });
+
+    return NextResponse.json({ success: true, coupons: enrichedCoupons });
   } catch (error) {
+    console.error('[Coupons GET]', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch coupons' }, { status: 500 });
   }
 }

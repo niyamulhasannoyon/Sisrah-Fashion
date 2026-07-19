@@ -1,68 +1,53 @@
+import { Suspense } from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { WhyChooseUs } from '@/components/home/WhyChooseUs';
 import { ReviewMarquee } from '@/components/home/ReviewMarquee';
 import { Newsletter } from '@/components/home/Newsletter';
 import nextDynamic from 'next/dynamic';
+import { Loader2 } from 'lucide-react';
 
 const NewDrop = nextDynamic(() => import('@/components/home/NewDrop').then(mod => mod.NewDrop));
 const TrendingSlider = nextDynamic(() => import('@/components/home/TrendingSlider').then(mod => mod.TrendingSlider));
 const LifestyleBanner = nextDynamic(() => import('@/components/home/LifestyleBanner').then(mod => mod.LifestyleBanner));
 const SocialGallery = nextDynamic(() => import('@/components/home/SocialGallery').then(mod => mod.SocialGallery));
 
-import dbConnect from '@/lib/dbConnect';
-import Product from '@/models/Product';
+// Loading skeleton for dynamic sections
+function SectionSkeleton() {
+  return (
+    <div className="py-20 flex justify-center items-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="animate-spin text-loomra-red" size={28} />
+        <span className="text-[10px] font-black uppercase tracking-[3px] text-gray-400">Loading...</span>
+      </div>
+    </div>
+  );
+}
 
-export const dynamic = 'force-dynamic';
-
-export default async function HomePage() {
-  let newDropProducts = [];
-  let trendingProducts = [];
-
-  try {
-    await dbConnect();
-
-    // 1. Get products explicitly marked as New Arrival
-    let newDrops = await Product.find({ isNewArrival: true })
-      .sort({ createdAt: -1 })
-      .limit(8);
-
-    // Fallback: fill with latest arrivals
-    if (newDrops.length < 8) {
-      const dropIds = newDrops.map(p => p._id);
-      const additional = await Product.find({ _id: { $nin: dropIds } })
-        .sort({ createdAt: -1 })
-        .limit(8 - newDrops.length);
-      newDrops = [...newDrops, ...additional];
-    }
-    newDropProducts = JSON.parse(JSON.stringify(newDrops));
-
-    // 2. Get products explicitly marked as trending
-    let trending = await Product.find({ isTrending: true })
-      .sort({ createdAt: -1 })
-      .limit(8);
-
-    // Fallback: fill with latest products
-    if (trending.length < 8) {
-      const trendingIds = trending.map(p => p._id);
-      const additional = await Product.find({ _id: { $nin: trendingIds } })
-        .sort({ createdAt: -1 })
-        .limit(8 - trending.length);
-      trending = [...trending, ...additional];
-    }
-    trendingProducts = JSON.parse(JSON.stringify(trending));
-  } catch (error) {
-    console.error('Error fetching homepage products on server:', error);
-  }
-
+export default function HomePage() {
   return (
     <div className="bg-loomra-white text-loomra-black font-sans scroll-smooth">
       <main>
+        {/* Hero — static shell, handles its own client-side settings fetch */}
         <HeroSection />
+        
+        {/* Category Grid — static shell, fetches settings images client-side */}
         <CategoryGrid />
-        <NewDrop initialProducts={newDropProducts} />
-        <TrendingSlider initialProducts={trendingProducts} />
+        
+        {/* New Drop — fully client-side fetched, wrapped in Suspense */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <NewDrop />
+        </Suspense>
+        
+        {/* Trending — fully client-side fetched, wrapped in Suspense */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <TrendingSlider />
+        </Suspense>
+        
+        {/* Lifestyle Banner — static shell, handles own settings fetch */}
         <LifestyleBanner />
+        
+        {/* Static sections — no data fetching needed */}
         <WhyChooseUs />
         <SocialGallery />
         <ReviewMarquee />

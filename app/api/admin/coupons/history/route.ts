@@ -43,7 +43,8 @@ export async function GET(req: Request) {
     // Group by coupon code for summary stats alongside the timeline
     const grouped: Record<string, { code: string; totalUses: number; totalDiscount: number; totalRevenue: number; uses: any[] }> = {};
 
-    for (const entry of history) {
+    for (const raw of history) {
+      const entry = raw as any;
       const code = entry.couponCode as string;
       if (!grouped[code]) {
         grouped[code] = {
@@ -55,12 +56,12 @@ export async function GET(req: Request) {
         };
       }
       grouped[code].totalUses += 1;
-      grouped[code].totalDiscount += (entry.couponDiscount as number) || 0;
+      grouped[code].totalDiscount += entry.couponDiscount || 0;
       grouped[code].totalRevenue += entry.totalAmount || 0;
       grouped[code].uses.push({
-        orderId: entry.orderId || entry._id.toString().slice(-6).toUpperCase(),
-        customerName: (entry.shippingInfo as any)?.name || 'Unknown',
-        customerPhone: (entry.shippingInfo as any)?.phone || '',
+        orderId: entry.orderId || String(entry._id).toUpperCase().slice(-6),
+        customerName: entry.shippingInfo?.name || 'Unknown',
+        customerPhone: entry.shippingInfo?.phone || '',
         totalAmount: entry.totalAmount,
         discount: entry.couponDiscount || 0,
         date: entry.createdAt,
