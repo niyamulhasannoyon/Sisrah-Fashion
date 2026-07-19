@@ -59,7 +59,7 @@ export async function GET(req: Request) {
       grouped[code].totalDiscount += entry.couponDiscount || 0;
       grouped[code].totalRevenue += entry.totalAmount || 0;
       grouped[code].uses.push({
-        orderId: entry.orderId || String(entry._id).toUpperCase().slice(-6),
+        orderId: entry.orderId || (entry as any)._id?.toString().slice(-6).toUpperCase(),
         customerName: entry.shippingInfo?.name || 'Unknown',
         customerPhone: entry.shippingInfo?.phone || '',
         totalAmount: entry.totalAmount,
