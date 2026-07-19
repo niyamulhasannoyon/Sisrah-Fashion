@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Save, Loader2, UploadCloud, X, Users, Image as ImageIcon, Sliders, Layers, Truck, Settings } from 'lucide-react';
 import { getDirectImageLink } from '@/lib/utils';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -350,13 +351,13 @@ export default function AdminSettings() {
                     <div>
                       <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Logo Preview</p>
                       <div className="w-32 h-20 bg-slate-50 border rounded-xl flex items-center justify-center p-2">
-                        {settings.logo ? <img src={getDirectImageLink(settings.logo)} className="max-w-full max-h-full object-contain" /> : 'No Logo'}
+                        {settings.logo ? <Image src={getDirectImageLink(settings.logo)} alt="Logo preview" width={128} height={80} className="max-w-full max-h-full object-contain" /> : 'No Logo'}
                       </div>
                     </div>
                     <div>
                       <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Favicon Preview</p>
                       <div className="w-16 h-16 bg-slate-50 border rounded-xl flex items-center justify-center p-2">
-                        {settings.favicon ? <img src={getDirectImageLink(settings.favicon)} className="w-8 h-8 object-contain" /> : 'No Icon'}
+                        {settings.favicon ? <Image src={getDirectImageLink(settings.favicon)} alt="Favicon preview" width={32} height={32} className="w-8 h-8 object-contain" /> : 'No Icon'}
                       </div>
                     </div>
                   </div>
@@ -430,7 +431,7 @@ export default function AdminSettings() {
                     <div className="flex flex-wrap gap-4 mt-2 mb-2">
                       {settings.heroImages?.map((img: any, idx: number) => (
                         <div key={idx} className="relative w-32 h-20 border border-slate-100 rounded-xl overflow-hidden group shadow-sm bg-slate-50">
-                          <img src={getDirectImageLink(img.url)} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="hero slider banner" />
+                          <Image src={getDirectImageLink(img.url)} fill sizes="128px" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="hero slider banner" />
                           <button 
                             type="button" 
                             onClick={() => {
@@ -583,7 +584,7 @@ export default function AdminSettings() {
                     <label className="text-xs font-bold uppercase text-slate-500 tracking-widest block">Men's Category Image</label>
                     <div className="aspect-[4/5] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center relative group">
                       {settings.categoryImageMen ? (
-                        <img src={getDirectImageLink(settings.categoryImageMen)} className="w-full h-full object-cover animate-in fade-in duration-300" alt="Men's Banner" />
+                        <Image src={getDirectImageLink(settings.categoryImageMen)} fill sizes="(max-width: 768px) 100vw, 33vw" className="w-full h-full object-cover animate-in fade-in duration-300" alt="Men's Banner" />
                       ) : (
                         <span className="text-xs text-slate-400">Default Unsplash Image</span>
                       )}
@@ -614,7 +615,7 @@ export default function AdminSettings() {
                     <label className="text-xs font-bold uppercase text-slate-500 tracking-widest block">Women's Category Image</label>
                     <div className="aspect-[4/5] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center relative group">
                       {settings.categoryImageWomen ? (
-                        <img src={getDirectImageLink(settings.categoryImageWomen)} className="w-full h-full object-cover animate-in fade-in duration-300" alt="Women's Banner" />
+                        <Image src={getDirectImageLink(settings.categoryImageWomen)} fill sizes="(max-width: 768px) 100vw, 33vw" className="w-full h-full object-cover animate-in fade-in duration-300" alt="Women's Banner" />
                       ) : (
                         <span className="text-xs text-slate-400">Default Unsplash Image</span>
                       )}
@@ -645,7 +646,7 @@ export default function AdminSettings() {
                     <label className="text-xs font-bold uppercase text-slate-500 tracking-widest block">Fusion Category Image</label>
                     <div className="aspect-[4/5] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex items-center justify-center relative group">
                       {settings.categoryImageFusion ? (
-                        <img src={getDirectImageLink(settings.categoryImageFusion)} className="w-full h-full object-cover animate-in fade-in duration-300" alt="Fusion Banner" />
+                        <Image src={getDirectImageLink(settings.categoryImageFusion)} fill sizes="(max-width: 768px) 100vw, 33vw" className="w-full h-full object-cover animate-in fade-in duration-300" alt="Fusion Banner" />
                       ) : (
                         <span className="text-xs text-slate-400">Default Unsplash Image</span>
                       )}
@@ -863,7 +864,7 @@ export default function AdminSettings() {
                   <div className="flex flex-wrap gap-4 mt-2">
                     {settings.communityImages?.map((img: any, idx: number) => (
                       <div key={idx} className="relative w-32 h-40 border border-slate-100 rounded-xl overflow-hidden group shadow-sm">
-                        <img src={img.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="community" />
+                        <Image src={img.url} fill sizes="128px" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="community" />
                         <button 
                           type="button" 
                           onClick={() => removeCommunityImage(idx)} 

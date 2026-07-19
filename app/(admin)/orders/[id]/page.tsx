@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import { 
   ArrowLeft, Loader2, Save, Trash2, 
   MapPin, User, CreditCard, Truck, FileText, CheckCircle2, AlertCircle 
@@ -357,8 +358,8 @@ export default function OrderDetailPage() {
                     <tr key={idx} className="hover:bg-slate-50/50 transition-colors text-sm">
                       <td className="p-4 pl-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-16 bg-slate-50 rounded-lg overflow-hidden border border-slate-150 shrink-0">
-                            <img src={item.images?.[0]?.url || item.image} alt={item.title} className="w-full h-full object-cover" />
+                          <div className="relative w-12 h-16 bg-slate-50 rounded-lg overflow-hidden border border-slate-150 shrink-0">
+                            <Image src={item.images?.[0]?.url || item.image} alt={item.title} fill sizes="48px" className="w-full h-full object-cover" />
                           </div>
                           <div>
                             <p className="font-bold text-slate-900 leading-tight">{item.title}</p>

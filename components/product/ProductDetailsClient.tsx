@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2 } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import MobileStickyCart from '@/components/product/MobileStickyCart';
@@ -163,10 +164,12 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
         <div className="w-full lg:w-3/5 flex flex-col gap-4">
           {/* Main Image Container - Fixed Max Height to avoid screen overflow */}
           <div className="w-full bg-loomra-surface relative group cursor-zoom-in overflow-hidden aspect-[4/5] max-h-[600px] 2xl:max-h-[750px] rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center">
-            <img
+            <Image
               src={imageUrl}
               alt={`AS SIDRAT ${product.title} for Men Bangladesh`}
-              fetchPriority="high"
+              priority
+              fill
+              sizes="(max-width: 768px) 100vw, 60vw"
               className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
             />
           </div>
@@ -179,7 +182,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                 onClick={() => setActiveImage(idx)}
                 className={`relative w-20 h-24 shrink-0 border-2 rounded-xl overflow-hidden transition-all ${activeImage === idx ? 'border-loomra-black shadow-md opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
-                <img src={img.url} alt={`AS SIDRAT ${product.title} for Men Bangladesh - View ${idx + 1}`} className="w-full h-full object-cover object-top" />
+                <Image src={img.url} alt={`AS SIDRAT ${product.title} for Men Bangladesh - View ${idx + 1}`} fill sizes="80px" className="w-full h-full object-cover object-top" />
               </button>
             ))}
           </div>
@@ -435,7 +438,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                       <div className="flex flex-wrap gap-2.5 pt-1">
                         {reviewImages.map((img, idx) => (
                           <div key={idx} className="relative w-14 h-14 border rounded-xl overflow-hidden shadow-sm bg-slate-50 group">
-                            <img src={getDirectImageLink(img.url)} className="w-full h-full object-cover" alt="Review thumbnail" />
+                            <Image src={getDirectImageLink(img.url)} fill sizes="56px" className="w-full h-full object-cover" alt="Review thumbnail" />
                             <button
                               type="button"
                               onClick={() => setReviewImages(prev => prev.filter((_, i) => i !== idx))}
@@ -501,7 +504,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                           {review.images.map((img: any, idx: number) => (
                             <div key={idx} className="relative w-16 h-16 rounded-xl border border-slate-200 overflow-hidden shadow-sm shrink-0 bg-slate-50">
                               <a href={getDirectImageLink(img.url)} target="_blank" rel="noopener noreferrer">
-                                <img src={getDirectImageLink(img.url)} className="w-full h-full object-cover hover:scale-105 transition duration-300" alt="Review photo upload" />
+                                <Image src={getDirectImageLink(img.url)} fill sizes="64px" className="w-full h-full object-cover hover:scale-105 transition duration-300" alt="Review photo upload" />
                               </a>
                             </div>
                           ))}

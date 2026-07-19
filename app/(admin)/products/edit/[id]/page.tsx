@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Loader2, X, Save, UploadCloud, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -186,7 +187,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             <div className="flex flex-wrap gap-4 mb-4">
               {mainImages.map((img, idx) => (
                 <div key={idx} className="relative w-24 h-32 border rounded-lg overflow-hidden group">
-                  <img src={img.url} className="w-full h-full object-cover" alt="img" />
+                  <Image src={img.url} fill sizes="96px" className="w-full h-full object-cover" alt="img" />
                   <button type="button" onClick={() => setMainImages(mainImages.filter((_, i) => i !== idx))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"><X size={12} /></button>
                 </div>
               ))}
@@ -287,7 +288,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                           <div className="flex flex-col gap-2">
                             {variant.image ? (
                                <div className="relative w-12 h-16 border rounded overflow-hidden group shadow-sm">
-                                 <img src={variant.image.url} className="w-full h-full object-cover" alt="var" />
+                                 <Image src={variant.image.url} fill sizes="48px" className="w-full h-full object-cover" alt="var" />
                                  <button type="button" onClick={() => handleVariantChange(idx, 'image', null)} className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X size={14} /></button>
                                </div>
                             ) : (

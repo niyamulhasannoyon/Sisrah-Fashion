@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Loader2, MessageSquare, Check, X, Trash2, Star, ShieldCheck, Eye } from 'lucide-react';
 import { getDirectImageLink } from '@/lib/utils';
 import Link from 'next/link';
@@ -122,9 +123,11 @@ export default function ReviewModeration() {
                   {/* Product Micro-card */}
                   {review.product ? (
                     <div className="w-full md:w-[180px] shrink-0 border border-slate-200/80 rounded-xl p-3 bg-white flex flex-row md:flex-col gap-3">
-                      <div className="w-14 h-14 md:w-full md:aspect-[4/5] bg-slate-50 rounded-lg overflow-hidden shrink-0">
-                        <img 
+                      <div className="relative w-14 h-14 md:w-full md:aspect-[4/5] bg-slate-50 rounded-lg overflow-hidden shrink-0">
+                        <Image 
                           src={getDirectImageLink(review.product.images?.[0]?.url || '/images/placeholder.jpg')} 
+                          fill
+                          sizes="72px"
                           className="w-full h-full object-cover" 
                           alt={review.product.title} 
                         />
@@ -184,7 +187,7 @@ export default function ReviewModeration() {
                               onClick={() => setSelectedPhoto(img.url)}
                               className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 hover:border-slate-800 transition bg-slate-50 cursor-zoom-in group shadow-sm"
                             >
-                              <img src={getDirectImageLink(img.url)} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="Review upload" />
+                              <Image src={getDirectImageLink(img.url)} fill sizes="64px" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="Review upload" />
                               <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity duration-200">
                                 <Eye size={12} />
                               </div>
@@ -241,7 +244,7 @@ export default function ReviewModeration() {
             <X size={20} />
           </button>
           <div className="max-w-4xl max-h-[85vh] overflow-hidden rounded-xl bg-white shadow-2xl p-1" onClick={e => e.stopPropagation()}>
-            <img src={getDirectImageLink(selectedPhoto)} className="max-w-full max-h-[80vh] object-contain rounded-lg" alt="Full screen preview" />
+            <Image src={getDirectImageLink(selectedPhoto)} width={1200} height={960} className="max-w-full max-h-[80vh] w-auto h-auto object-contain rounded-lg" alt="Full screen preview" />
           </div>
         </div>
       )}

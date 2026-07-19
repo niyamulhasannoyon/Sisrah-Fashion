@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Plus, Edit, Trash2, Loader2, Eye, Search, AlertTriangle, X, Copy, ImageOff, Upload } from 'lucide-react';
 
 
@@ -18,10 +19,12 @@ function ProductImage({ url, alt }: { url?: string; alt: string }) {
   }
 
   return (
-    <div className="w-12 h-12 rounded border border-gray-200 overflow-hidden bg-white">
-      <img
+    <div className="relative w-12 h-12 rounded border border-gray-200 overflow-hidden bg-white">
+      <Image
         src={url}
         alt={alt}
+        fill
+        sizes="48px"
         className="w-full h-full object-cover"
         onError={() => setHasError(true)}
       />

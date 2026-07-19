@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Settings,
   LogOut, Bell, Search, Tag, BarChart3, MessageSquare, UserCog,
@@ -208,7 +209,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="h-16 flex items-center px-6 border-b border-slate-800/50">
           <Link href="/dashboard" className="text-xl font-bold tracking-widest text-white uppercase flex items-center gap-2">
             {settings?.logo ? (
-              <img src={getDirectImageLink(settings.logo)} alt="Logo" className="h-12 w-auto object-contain" />
+              <Image src={getDirectImageLink(settings.logo)} alt="Logo" width={120} height={48} className="h-12 w-auto object-contain" />
             ) : (
               <>
                 <div className="w-6 h-6 bg-[#A31F24] rounded-sm flex items-center justify-center text-[10px]">AS</div>

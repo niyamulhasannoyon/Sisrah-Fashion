@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { 
   Eye, 
   MousePointerClick, 
@@ -652,8 +653,8 @@ export default function AdminAnalytics() {
                     <tr key={idx} className="hover:bg-slate-50/50 transition-colors text-sm">
                       <td className="p-4 pl-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-12 bg-slate-100 rounded overflow-hidden shrink-0 border">
-                            <img src={product.image} alt={product._id} className="w-full h-full object-cover" />
+                          <div className="relative w-10 h-12 bg-slate-100 rounded overflow-hidden shrink-0 border">
+                            <Image src={product.image} alt={product._id} fill sizes="40px" className="w-full h-full object-cover" />
                           </div>
                           <div>
                             <p className="font-bold text-slate-950 line-clamp-1">{product._id}</p>
@@ -1001,8 +1002,8 @@ export default function AdminAnalytics() {
                       <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                         <td className="p-4 pl-6">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-12 bg-slate-50 border border-slate-200 rounded overflow-hidden shrink-0">
-                              <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                            <div className="relative w-10 h-12 bg-slate-50 border border-slate-200 rounded overflow-hidden shrink-0">
+                              <Image src={item.image} alt={item.title} fill sizes="40px" className="w-full h-full object-cover" />
                             </div>
                             <span className="font-bold text-slate-900 leading-tight">{item.title}</span>
                           </div>
