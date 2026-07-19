@@ -235,40 +235,60 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-[#FBFBFB] min-h-screen pb-20 font-sans">
-      <div className="container mx-auto px-4 pt-12">
+    <div className="bg-[#F8F6F3] min-h-screen pb-24 font-sans">
+      <div className="mx-auto px-4 pt-6 sm:px-6 lg:px-8 max-w-7xl">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-12">
-            <button onClick={() => router.back()} className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white transition-all group">
-              <span className="text-xl group-hover:-translate-x-0.5 transition-transform">←</span>
+          {/* ── Compact Header ── */}
+          <div className="flex items-center gap-3 mb-8 lg:mb-12">
+            <button 
+              onClick={() => router.back()} 
+              className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all group bg-white/80"
+            >
+              <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
             <div>
-              <h1 className="text-3xl font-black uppercase tracking-tight text-gray-900 leading-none">
+              <h1 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-gray-900 leading-none">
                 Checkout<span className="text-[#A31F24]">.</span>
               </h1>
-              <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Secure Transaction & Express Delivery</p>
+              <p className="text-[9px] sm:text-xs text-gray-500 font-bold uppercase tracking-[0.15em] mt-0.5">Secure Transaction &amp; Express Delivery</p>
             </div>
           </div>
 
-          {/* Mobile Collapsible Order Summary Accordion (Shopify Style) */}
-          <div className="lg:hidden w-full bg-[#1A1A1A] text-white p-4.5 rounded-2xl mb-8 flex flex-col gap-4 shadow-md transition-all">
-            <button 
+          {/* ── Mobile Order Summary Accordion (Premium Light) ── */}
+          <div className="lg:hidden w-full bg-white border border-gray-200 rounded-2xl mb-8 shadow-sm transition-all overflow-hidden">
+            <button
               type="button"
               onClick={() => setShowMobileSummary(!showMobileSummary)}
-              className="flex justify-between items-center w-full font-bold text-xs uppercase tracking-wider focus:outline-none"
+              className="flex justify-between items-center w-full px-5 py-4 bg-white focus:outline-none"
             >
-              <div className="flex items-center gap-2 text-white/90">
-                <ShoppingCart size={16} />
-                <span>{showMobileSummary ? 'Hide Order Summary' : 'Show Order Summary'}</span>
-                <span className="text-[10px] bg-white/10 px-2.5 py-0.5 rounded-full font-black ml-1 text-white">
-                  {cart.reduce((acc, item) => acc + item.quantity, 0)} items
-                </span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center">
+                  <ShoppingCart size={14} className="text-gray-700" />
+                </div>
+                <div className="text-left">
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500 block leading-none">
+                    {showMobileSummary ? 'Hide' : 'Show'} Order Summary
+                  </span>
+                  <span className="text-[9px] font-bold text-gray-400 mt-0.5 block">
+                    {cart.reduce((acc, item) => acc + item.quantity, 0)} items
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-white">
-                <span className="text-sm font-black">৳ {finalTotal.toLocaleString()}</span>
-                <span className="text-xs transition-transform duration-300 transform inline-block" style={{ transform: showMobileSummary ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                  ▼
-                </span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-black text-gray-900">৳ {finalTotal.toLocaleString()}</span>
+                <div className={`w-6 h-6 rounded-lg border border-gray-200 flex items-center justify-center transition-all duration-300 ${showMobileSummary ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500'}`}>
+                  <svg
+                    className={`w-3 h-3 transition-transform duration-300 ${showMobileSummary ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
             </button>
 
@@ -279,81 +299,78 @@ export default function CheckoutPage() {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="overflow-hidden border-t border-white/10 pt-5 mt-2 flex flex-col gap-6"
+                  className="overflow-hidden border-t border-gray-100"
                 >
-                  {/* Cart Items List */}
-                  <div className="space-y-4 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar-white">
-                    {cart.map((item, idx) => (
-                      <div key={idx} className="flex gap-4">
-                        <div className="w-12 h-16 bg-white/5 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                          <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 flex flex-col justify-center">
-                          <div className="flex justify-between items-start">
-                            <h4 className="text-xs font-bold text-white/90 line-clamp-1 pr-2">{item.title}</h4>
-                            <span className="text-xs font-black">৳ {(item.price * item.quantity).toLocaleString()}</span>
+                  <div className="px-5 py-5 flex flex-col gap-5 bg-gray-50/50">
+                    {/* ── Cart Items ── */}
+                    <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+                      {cart.map((item, idx) => (
+                        <div key={idx} className="flex gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                          <div className="w-14 h-[60px] bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-50">
+                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                           </div>
-                          <p className="text-[9px] uppercase text-white/40 font-black tracking-widest mt-1">
-                            {item.selectedSize} / {item.selectedColor} — Qty: {item.quantity}
-                          </p>
+                          <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+                            <div className="flex justify-between items-start gap-1">
+                              <h4 className="text-xs font-bold text-gray-900 truncate">{item.title}</h4>
+                              <span className="text-xs font-black text-gray-900 shrink-0">৳{(item.price * item.quantity).toLocaleString()}</span>
+                            </div>
+                            <p className="text-[9px] uppercase text-gray-400 font-bold tracking-wider">
+                              {item.selectedSize} / {item.selectedColor}
+                              <span className="ml-1.5 text-gray-300">| Qty: {item.quantity}</span>
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
 
-                  {/* Coupon Code Interface */}
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                    <div className="flex gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="ENTER PROMO CODE" 
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                        className="flex-1 bg-white/5 border border-white/10 p-3 rounded-lg text-[10px] font-bold outline-none focus:border-white/40 uppercase transition-all placeholder:text-white/20 text-white"
-                      />
-                      <button 
-                        type="button" 
-                        onClick={applyCoupon} 
-                        className="bg-white text-black px-4 py-3 text-[10px] font-black rounded-lg hover:bg-[#A31F24] hover:text-white transition-all shadow-sm active:scale-95"
-                      >
-                        APPLY
-                      </button>
-                    </div>
-                    {couponError && <p className="text-red-400 text-[9px] mt-2 font-bold uppercase tracking-widest text-center">{couponError}</p>}
-                    {appliedCoupon && (
-                       <div className="flex justify-between items-center mt-2.5 px-1">
-                         <p className="text-green-400 text-[9px] font-black italic uppercase tracking-widest">SAVED ৳{calculateDiscount().toLocaleString()}</p>
-                         <button onClick={() => setAppliedCoupon(null)} className="text-[9px] text-white/30 hover:text-white underline font-bold uppercase">Remove</button>
-                       </div>
-                    )}
-                  </div>
-
-                  {/* Price Totals */}
-                  <div className="space-y-3.5 border-t border-white/10 pt-5">
-                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/40">
-                      <span>Subtotal</span>
-                      <span className="text-white">৳ {getCartTotal().toLocaleString()}</span>
-                    </div>
-                    {appliedCoupon && (
-                       <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-green-400">
-                         <span>Discount</span>
-                         <span>- ৳ {calculateDiscount().toLocaleString()}</span>
-                       </div>
-                    )}
-                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/40">
-                      <span>Shipping</span>
-                      <span className={isShippingFree() || (getShippingCost() === 0 && !shippingInfo.city) ? "text-green-400 italic font-bold" : "text-white"}>
-                        {isShippingFree() ? "FREE" : !shippingInfo.city ? "Enter city for rate" : `৳ ${getShippingCost().toLocaleString()}`}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center pt-5 mt-2 border-t border-white/10">
-                      <div>
-                        <span className="text-lg font-black uppercase tracking-tighter leading-none block">Total</span>
-                        <span className="text-[9px] text-white/30 font-bold uppercase tracking-[3px]">Vat Included</span>
+                    {/* ── Coupon Code ── */}
+                    <div className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="PROMO CODE"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                          className="flex-1 bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-lg text-[10px] font-bold outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10 uppercase transition-all placeholder:text-gray-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={applyCoupon}
+                          className="bg-gray-900 text-white px-4 py-2.5 text-[10px] font-black rounded-lg hover:bg-[#A31F24] transition-all active:scale-95 shadow-sm"
+                        >
+                          Apply
+                        </button>
                       </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-black text-white tracking-tighter block">৳ {finalTotal.toLocaleString()}</span>
+                      {couponError && <p className="text-red-500 text-[9px] mt-2 font-bold uppercase tracking-wider text-center">{couponError}</p>}
+                      {appliedCoupon && (
+                        <div className="flex justify-between items-center mt-2.5 px-0.5">
+                          <p className="text-emerald-600 text-[9px] font-black italic uppercase tracking-wider">Saved ৳{calculateDiscount().toLocaleString()}</p>
+                          <button onClick={() => setAppliedCoupon(null)} className="text-[9px] text-gray-400 hover:text-red-500 underline font-bold uppercase transition-colors">Remove</button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── Totals ── */}
+                    <div className="space-y-2.5 bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+                      <div className="flex justify-between text-[10px] font-bold text-gray-500">
+                        <span>Subtotal</span>
+                        <span className="text-gray-900">৳{getCartTotal().toLocaleString()}</span>
+                      </div>
+                      {appliedCoupon && (
+                        <div className="flex justify-between text-[10px] font-bold text-emerald-600">
+                          <span>Discount</span>
+                          <span>- ৳{calculateDiscount().toLocaleString()}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-[10px] font-bold text-gray-500">
+                        <span>Shipping</span>
+                        <span className={isShippingFree() || (getShippingCost() === 0 && !shippingInfo.city) ? 'text-emerald-600 italic' : 'text-gray-900'}>
+                          {isShippingFree() ? 'FREE' : !shippingInfo.city ? 'Enter city' : `৳${getShippingCost().toLocaleString()}`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pt-3 mt-1 border-t border-gray-100">
+                        <span className="text-sm font-black text-gray-900 uppercase tracking-tight">Total</span>
+                        <span className="text-lg font-black text-gray-900">৳{finalTotal.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -369,60 +386,65 @@ export default function CheckoutPage() {
               
               <form onSubmit={handlePlaceOrder} id="checkout-form" className="space-y-8">
                 
-                {/* Step 1: Shipping */}
-                <div className="bg-white p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-black text-white w-10 h-10 rounded-2xl flex items-center justify-center text-lg font-black shadow-lg">1</div>
+                {/* ── Step 1: Shipping Details ── */}
+                <div className="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center text-xs font-black shadow-sm shrink-0">1</div>
                       <div>
-                        <h2 className="text-xl font-black uppercase tracking-tight text-gray-900">Shipping Details</h2>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Where should we send your order?</p>
+                        <h2 className="text-sm sm:text-base font-black uppercase tracking-tight text-gray-900 leading-tight">Shipping Details</h2>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em]">Where should we send your order?</p>
                       </div>
                     </div>
-                    <MapPin className="text-gray-200" size={24} />
+                    <MapPin size={18} className="text-gray-200 shrink-0" />
                   </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Recipient Full Name</label>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase text-gray-500 tracking-[0.1em]">Full Name</label>
                       <input type="text" placeholder="e.g. Niyamul Hasan" required 
                         value={shippingInfo.name}
-                        className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium" 
+                        className="w-full border border-gray-200 px-3.5 py-2.5 rounded-lg focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10 outline-none transition-all bg-white text-sm font-medium placeholder:text-gray-300" 
                         onChange={(e) => setShippingInfo({...shippingInfo, name: e.target.value})} />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Phone Number (Active)</label>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase text-gray-500 tracking-[0.1em]">Phone Number</label>
                       <input type="tel" placeholder="017XXXXXXXX" required 
                         value={shippingInfo.phone}
-                        className={`w-full border p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium ${
-                          phoneError ? 'border-red-500 bg-red-50/10 focus:border-red-500' : 'border-gray-100'
+                        className={`w-full border px-3.5 py-2.5 rounded-lg focus:ring-1 outline-none transition-all bg-white text-sm font-medium placeholder:text-gray-300 ${
+                          phoneError 
+                            ? 'border-red-400 bg-red-50/30 focus:border-red-500 focus:ring-red-500/10' 
+                            : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
                         }`} 
                         onChange={(e) => {
                           setShippingInfo({...shippingInfo, phone: e.target.value});
                           if (phoneError) setPhoneError('');
                         }} />
                       {phoneError && (
-                        <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">{phoneError}</p>
+                        <p className="text-red-500 text-[9px] font-bold uppercase tracking-wider">{phoneError}</p>
                       )}
                     </div>
-                    <div className="md:col-span-2 space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Complete Address</label>
-                      <textarea placeholder="House #, Road #, Apartment, Area..." rows={3} required 
+                    <div className="md:col-span-2 space-y-1.5">
+                      <label className="text-[9px] font-black uppercase text-gray-500 tracking-[0.1em]">Complete Address</label>
+                      <textarea placeholder="House #, Road #, Area..." rows={2} required 
                         value={shippingInfo.address}
-                        className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium resize-none" 
+                        className="w-full border border-gray-200 px-3.5 py-2.5 rounded-lg focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10 outline-none transition-all bg-white text-sm font-medium resize-none placeholder:text-gray-300" 
                         onChange={(e) => setShippingInfo({...shippingInfo, address: e.target.value})} />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Email Address <span className="text-[8px] font-normal lowercase text-gray-300">(for invoice)</span></label>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase text-gray-500 tracking-[0.1em]">
+                        Email <span className="font-normal lowercase tracking-normal text-gray-400">(for invoice)</span>
+                      </label>
                       <input type="email" placeholder="your@email.com" 
                         value={shippingInfo.email}
-                        className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium" 
+                        className="w-full border border-gray-200 px-3.5 py-2.5 rounded-lg focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10 outline-none transition-all bg-white text-sm font-medium placeholder:text-gray-300" 
                         onChange={(e) => setShippingInfo({...shippingInfo, email: e.target.value})} />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">City / District</label>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase text-gray-500 tracking-[0.1em]">City / District</label>
                       <select required 
                         value={shippingInfo.city}
-                        className="w-full border border-gray-100 p-4 rounded-xl focus:border-black outline-none transition-all bg-gray-50/50 focus:bg-white text-sm font-medium cursor-pointer" 
+                        className="w-full border border-gray-200 px-3.5 py-2.5 rounded-lg focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10 outline-none transition-all bg-white text-sm font-medium cursor-pointer" 
                         onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
                       >
                         <option value="" disabled>Select City / District</option>
@@ -434,219 +456,265 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Step 2: Payment */}
-                <div className="bg-white p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-black text-white w-10 h-10 rounded-2xl flex items-center justify-center text-lg font-black shadow-lg">2</div>
+                {/* ── Step 2: Payment Gateway ── */}
+                <div className="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center text-xs font-black shadow-sm shrink-0">2</div>
                       <div>
-                        <h2 className="text-xl font-black uppercase tracking-tight text-gray-900">Payment Gateway</h2>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Choose your preferred payment mode</p>
+                        <h2 className="text-sm sm:text-base font-black uppercase tracking-tight text-gray-900 leading-tight">Payment Gateway</h2>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em]">Choose your preferred payment mode</p>
                       </div>
                     </div>
-                    <CreditCard className="text-gray-200" size={24} />
+                    <CreditCard size={18} className="text-gray-200 shrink-0" />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* ── Premium Payment Method Cards ── */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {/* Cash on Delivery */}
-                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'Cash on Delivery' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'Cash on Delivery' ? 'border-black' : 'border-gray-300'}`}>
-                          {paymentMethod === 'Cash on Delivery' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-black text-sm uppercase tracking-tight">Cash on Delivery</span>
-                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Pay when you receive</span>
-                        </div>
+                    <label className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      paymentMethod === 'Cash on Delivery'
+                        ? 'border-gray-900 bg-gray-50 shadow-sm'
+                        : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+                    }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                        paymentMethod === 'Cash on Delivery' ? 'border-gray-900' : 'border-gray-300'
+                      }`}>
+                        {paymentMethod === 'Cash on Delivery' && <div className="w-2 h-2 bg-gray-900 rounded-full" />}
                       </div>
-                      <Banknote className={paymentMethod === 'Cash on Delivery' ? 'text-black' : 'text-gray-300'} size={24} />
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-xs font-black uppercase tracking-tight block leading-tight ${
+                          paymentMethod === 'Cash on Delivery' ? 'text-gray-900' : 'text-gray-700'
+                        }`}>
+                          Cash on Delivery
+                        </span>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Pay when you receive</span>
+                      </div>
+                      <Banknote size={20} className={paymentMethod === 'Cash on Delivery' ? 'text-gray-900' : 'text-gray-300'} />
                       <input type="radio" name="payment" value="Cash on Delivery" checked={paymentMethod === 'Cash on Delivery'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
 
                     {/* bKash */}
-                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'bKash' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'bKash' ? 'border-black' : 'border-gray-300'}`}>
-                          {paymentMethod === 'bKash' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-black text-sm uppercase tracking-tight">bKash (বিকাশ)</span>
-                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Pay via bKash MFS</span>
-                        </div>
+                    <label className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      paymentMethod === 'bKash'
+                        ? 'border-gray-900 bg-gray-50 shadow-sm'
+                        : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+                    }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                        paymentMethod === 'bKash' ? 'border-gray-900' : 'border-gray-300'
+                      }`}>
+                        {paymentMethod === 'bKash' && <div className="w-2 h-2 bg-gray-900 rounded-full" />}
                       </div>
-                      <CreditCard className={paymentMethod === 'bKash' ? 'text-black' : 'text-gray-300'} size={24} />
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-xs font-black uppercase tracking-tight block leading-tight ${
+                          paymentMethod === 'bKash' ? 'text-gray-900' : 'text-gray-700'
+                        }`}>
+                          bKash
+                        </span>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Pay via bKash MFS</span>
+                      </div>
+                      <div className={`w-8 h-5 rounded flex items-center justify-center text-[8px] font-black select-none shrink-0 ${
+                        paymentMethod === 'bKash' ? 'bg-[#E2125B] text-white' : 'bg-gray-100 text-gray-400'
+                      }`}>
+                        bKash
+                      </div>
                       <input type="radio" name="payment" value="bKash" checked={paymentMethod === 'bKash'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
 
                     {/* Nagad */}
-                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'Nagad' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'Nagad' ? 'border-black' : 'border-gray-300'}`}>
-                          {paymentMethod === 'Nagad' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-black text-sm uppercase tracking-tight">Nagad (নগদ)</span>
-                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Pay via Nagad MFS</span>
-                        </div>
+                    <label className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      paymentMethod === 'Nagad'
+                        ? 'border-gray-900 bg-gray-50 shadow-sm'
+                        : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+                    }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                        paymentMethod === 'Nagad' ? 'border-gray-900' : 'border-gray-300'
+                      }`}>
+                        {paymentMethod === 'Nagad' && <div className="w-2 h-2 bg-gray-900 rounded-full" />}
                       </div>
-                      <CreditCard className={paymentMethod === 'Nagad' ? 'text-black' : 'text-gray-300'} size={24} />
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-xs font-black uppercase tracking-tight block leading-tight ${
+                          paymentMethod === 'Nagad' ? 'text-gray-900' : 'text-gray-700'
+                        }`}>
+                          Nagad
+                        </span>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Pay via Nagad MFS</span>
+                      </div>
+                      <div className={`w-8 h-5 rounded flex items-center justify-center text-[8px] font-black select-none shrink-0 ${
+                        paymentMethod === 'Nagad' ? 'bg-[#F15A22] text-white' : 'bg-gray-100 text-gray-400'
+                      }`}>
+                        নগদ
+                      </div>
                       <input type="radio" name="payment" value="Nagad" checked={paymentMethod === 'Nagad'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
 
                     {/* Due (Baki) */}
-                    <label className={`relative flex items-center justify-between p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${paymentMethod === 'Due (Baki)' ? 'border-black bg-gray-50 shadow-md' : 'border-gray-50 hover:border-gray-200'}`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'Due (Baki)' ? 'border-black' : 'border-gray-300'}`}>
-                          {paymentMethod === 'Due (Baki)' && <div className="w-2.5 h-2.5 bg-black rounded-full" />}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-black text-sm uppercase tracking-tight">Due / Baki (বাকি)</span>
-                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Pay Later / Credit</span>
-                        </div>
+                    <label className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      paymentMethod === 'Due (Baki)'
+                        ? 'border-gray-900 bg-gray-50 shadow-sm'
+                        : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+                    }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                        paymentMethod === 'Due (Baki)' ? 'border-gray-900' : 'border-gray-300'
+                      }`}>
+                        {paymentMethod === 'Due (Baki)' && <div className="w-2 h-2 bg-gray-900 rounded-full" />}
                       </div>
-                      <Clock className={paymentMethod === 'Due (Baki)' ? 'text-black' : 'text-gray-300'} size={24} />
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-xs font-black uppercase tracking-tight block leading-tight ${
+                          paymentMethod === 'Due (Baki)' ? 'text-gray-900' : 'text-gray-700'
+                        }`}>
+                          Due / Baki
+                        </span>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Pay Later / Credit</span>
+                      </div>
+                      <Clock size={20} className={paymentMethod === 'Due (Baki)' ? 'text-gray-900' : 'text-gray-300'} />
                       <input type="radio" name="payment" value="Due (Baki)" checked={paymentMethod === 'Due (Baki)'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
                   </div>
 
+                  {/* ── COD Info Block ── */}
                   {paymentMethod === 'Cash on Delivery' && (
-                    <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100/50">
-                      <p className="text-xs text-gray-600 leading-relaxed font-medium">
-                        You will pay a total of <span className="font-bold text-black">৳{finalTotal.toLocaleString()}</span> in cash when the delivery agent arrives at your address.
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentMethod === 'Due (Baki)' && (
-                    <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100/50">
-                      <p className="text-xs text-gray-600 leading-relaxed font-medium">
-                        আপনার অর্ডারটি <span className="font-bold text-black">বাকি (Due)</span> হিসেবে প্রসেস করা হবে। অর্ডারটির মোট মূল্য <span className="font-bold text-black">৳{finalTotal.toLocaleString()}</span> পরবর্তীতে পরিশোধ করতে হবে।
-                      </p>
-                    </div>
-                  )}
-
-                  {(paymentMethod === 'bKash' || paymentMethod === 'Nagad') && (
-                    <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100/50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Payment Instructions</p>
-                        <p className="text-xs text-gray-600 leading-relaxed font-medium">
-                          Please Send Money of <span className="font-bold text-black">৳{finalTotal.toLocaleString()}</span> to this number:
+                    <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                      <div className="flex items-start gap-3">
+                        <Truck size={16} className="text-gray-500 mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-gray-600 leading-relaxed">
+                          You will pay <strong className="text-gray-900">৳{finalTotal.toLocaleString()}</strong> in cash when your order arrives.
                         </p>
-                        <div className="bg-white p-3.5 rounded-xl border border-gray-200/60 flex justify-between items-center max-w-sm">
-                          <span className="font-mono text-sm font-bold text-black tracking-wider">
-                            {settings?.paymentNumber || '01733919156'}
-                          </span>
-                          <span className="text-[9px] bg-gray-100 px-2 py-0.5 rounded font-black uppercase tracking-widest text-gray-500">
-                            {paymentMethod}
-                          </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── Due Info Block ── */}
+                  {paymentMethod === 'Due (Baki)' && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                      <div className="flex items-start gap-3">
+                        <Clock size={16} className="text-gray-500 mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-gray-600 leading-relaxed">
+                          Your order will be processed as <strong className="text-gray-900">Due (বাকি)</strong>. Total of <strong className="text-gray-900">৳{finalTotal.toLocaleString()}</strong> to be paid later.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── bKash/Nagad Details ── */}
+                  {(paymentMethod === 'bKash' || paymentMethod === 'Nagad') && (
+                    <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      {/* Payment Number Card */}
+                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div className="space-y-2">
+                          <p className="text-[9px] font-black uppercase text-gray-400 tracking-[0.15em]">Send Money To</p>
+                          <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                            <span className="font-mono text-sm font-bold text-gray-900 tracking-wider">
+                              {settings?.paymentNumber || '01733919156'}
+                            </span>
+                            <span className="text-[8px] font-black uppercase px-2 py-1 rounded bg-gray-100 text-gray-500">
+                              {paymentMethod}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-gray-500">
+                            Send <strong className="text-gray-900">৳{finalTotal.toLocaleString()}</strong> to this number
+                          </p>
                         </div>
                       </div>
 
-                      {/* Payment Amount Type Selection */}
-                      <div className="space-y-2 pt-2 border-t border-gray-200/50">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block ml-0.5">Payment Option</label>
-                        <div className="grid grid-cols-2 gap-3">
+                      {/* Payment Amount Type */}
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-gray-500 tracking-[0.1em]">Payment Option</label>
+                        <div className="grid grid-cols-2 gap-2">
                           <button
                             type="button"
                             onClick={() => setPaymentAmountType('Full')}
-                            className={`p-3.5 rounded-xl border text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all ${
+                            className={`py-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all ${
                               paymentAmountType === 'Full'
-                                ? 'border-black bg-black text-white shadow-sm'
-                                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-350'
+                                ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
+                                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-400'
                             }`}
                           >
-                            Pay Full Amount
+                            Full Amount
                           </button>
                           <button
                             type="button"
                             onClick={() => setPaymentAmountType('Partial')}
-                            className={`p-3.5 rounded-xl border text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all ${
+                            className={`py-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all ${
                               paymentAmountType === 'Partial'
-                                ? 'border-black bg-black text-white shadow-sm'
-                                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-350'
+                                ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
+                                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-400'
                             }`}
                           >
-                            Partial Payment
+                            Partial
                           </button>
                         </div>
                       </div>
 
-                      {/* Paid Amount Input Field */}
-                      <div className="space-y-2 pt-2 border-t border-gray-200/50">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block ml-0.5">
-                          Amount Paid (৳)
-                        </label>
+                      {/* Amount Paid */}
+                      <div className="space-y-1.5">
+                        <label className="text-[9px] font-black uppercase text-gray-500 tracking-[0.1em]">Amount Paid (৳)</label>
                         <input
                           type="number"
                           readOnly={paymentAmountType === 'Full'}
-                          placeholder="Enter the amount you sent (min ৳200)..."
+                          placeholder="min ৳200"
                           value={paidAmount}
                           onChange={(e) => {
                             setPaidAmount(e.target.value);
                             if (e.target.value) setPaidAmountError('');
                           }}
-                          className={`w-full border p-3.5 rounded-xl outline-none transition-all text-sm font-medium ${
-                            paymentAmountType === 'Full' 
-                              ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' 
-                              : 'bg-white focus:border-black ' + (paidAmountError ? 'border-red-500 bg-red-50/10' : 'border-gray-200')
+                          className={`w-full border px-3.5 py-2.5 rounded-lg outline-none transition-all text-sm font-medium ${
+                            paymentAmountType === 'Full'
+                              ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed'
+                              : 'bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10 ' + (paidAmountError ? 'border-red-400 bg-red-50/30' : 'border-gray-200')
                           }`}
                         />
                         {paymentAmountType === 'Partial' && (
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider ml-1">
-                            * Minimum advance payment is ৳200
-                          </p>
+                          <p className="text-[9px] text-gray-400 font-bold">Min advance: ৳200</p>
                         )}
                         {paidAmountError && (
-                          <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">{paidAmountError}</p>
+                          <p className="text-red-500 text-[9px] font-bold uppercase tracking-wider">{paidAmountError}</p>
                         )}
                       </div>
 
-                      {/* Transaction ID Section with High-Converting Separation */}
-                      <div className="space-y-2 pt-5 mt-3 border-t border-gray-200/50">
-                        <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/[0.06] p-4.5 rounded-2xl space-y-2.5">
-                          <div className="flex items-center justify-between">
-                            <label className="text-xs font-black uppercase text-slate-800 tracking-wider block">
-                              Transaction ID (TxnID)
-                            </label>
-                            <span className="text-[9px] bg-[#A31F24]/10 text-[#A31F24] px-2 py-0.5 rounded font-black uppercase tracking-widest">
-                              Required
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-500 leading-relaxed">
-                            Tip: After sending the money, copy the Transaction ID (TxnID) from the confirmation SMS you received from bKash/Nagad (e.g. 9J88X29K).
-                          </p>
-                          <input 
-                            type="text" 
-                            placeholder="Enter the 8-10 digit TxnID here..." 
-                            value={txnId}
-                            onChange={(e) => {
-                              setTxnId(e.target.value.trim());
-                              if (e.target.value.trim().length > 0) setTxnIdError('');
-                            }}
-                            className={`w-full border p-3.5 rounded-xl focus:bg-white outline-none transition-all text-sm font-medium ${
-                              txnIdError ? 'border-red-500 bg-red-50/10' : 'border-gray-200 bg-white focus:border-black'
-                            }`}
-                          />
-                          {txnIdError && (
-                            <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest ml-1">{txnIdError}</p>
-                          )}
+                      {/* Transaction ID */}
+                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[9px] font-black uppercase text-gray-500 tracking-[0.1em]">Transaction ID (TxnID)</label>
+                          <span className="text-[8px] bg-[#A31F24]/10 text-[#A31F24] px-2 py-0.5 rounded font-black uppercase tracking-wider">Required</span>
                         </div>
+                        <p className="text-[10px] text-gray-500 leading-relaxed">
+                          After sending, copy the TxnID from your bKash/Nagad SMS (e.g. <strong className="text-gray-700">9J88X29K</strong>)
+                        </p>
+                        <input
+                          type="text"
+                          placeholder="Paste Transaction ID..."
+                          value={txnId}
+                          onChange={(e) => {
+                            setTxnId(e.target.value.trim());
+                            if (e.target.value.trim().length > 0) setTxnIdError('');
+                          }}
+                          className={`w-full border px-3.5 py-2.5 rounded-lg outline-none transition-all text-sm font-medium bg-white ${
+                            txnIdError ? 'border-red-400 bg-red-50/30 focus:border-red-500 focus:ring-1 focus:ring-red-500/10' : 'border-gray-200 focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10'
+                          }`}
+                        />
+                        {txnIdError && (
+                          <p className="text-red-500 text-[9px] font-bold uppercase tracking-wider">{txnIdError}</p>
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Mobile-only checkout CTA */}
-                <div className="lg:hidden mt-8">
-                  <button 
+                {/* ── Mobile CTA (Bold, High-Contrast) ── */}
+                <div className="lg:hidden">
+                  <button
                     form="checkout-form"
-                    type="submit" 
-                    disabled={loading} 
-                    className="w-full bg-black text-white py-5 text-sm font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-[#A31F24] transition-all flex justify-center items-center gap-3 active:scale-[0.98] shadow-lg"
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gray-900 text-white py-4.5 text-sm font-black uppercase tracking-[0.22em] rounded-xl hover:bg-[#A31F24] transition-all flex justify-center items-center gap-3 active:scale-[0.97] shadow-lg shadow-black/10"
                   >
-                    {loading ? <Loader2 className="animate-spin" /> : (
+                    {loading ? (
+                      <><Loader2 size={18} className="animate-spin" /> Processing...</>
+                    ) : (
                       <>
-                        {(paymentMethod === 'bKash' || paymentMethod === 'Nagad') ? 'Verify & Confirm Order' : 'Place My Order'} <ShieldCheck size={20} />
+                        <ShieldCheck size={18} />
+                        {paymentMethod === 'bKash' || paymentMethod === 'Nagad' ? 'Confirm Order' : 'Place My Order'}
                       </>
                     )}
                   </button>
