@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-x-hidden">
       <Suspense fallback={null}>
         <AnalyticsTracker />
       </Suspense>

@@ -159,7 +159,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   return (
-    <div className="container mx-auto px-4 py-8 lg:py-16 pb-48 md:pb-8">
+    <div className="container mx-auto px-4 py-6 lg:py-16 pb-48 md:pb-8">
       <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 relative">
         <div className="w-full lg:w-3/5 flex flex-col gap-4">
           {/* Main Image Container - Fixed Max Height to avoid screen overflow */}
@@ -213,21 +213,26 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
           </div>
 
           <div className="flex items-center gap-2">
-             {/* reviews logic ... */}
+            {/* Reviews summary — placeholder for inline star display */}
           </div>
 
           <hr className="border-loomra-surface" />
 
-          <div className="flex flex-col gap-4">
-            <span className="text-small font-bold uppercase tracking-widest text-loomra-black">
-              Color: <span className="font-normal text-loomra-muted">{selectedColor}</span>
+          {/* ── Color Chips ── */}
+          <div className="flex flex-col gap-3">
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] text-gray-900">
+              Color: <span className="font-normal text-gray-500">{selectedColor}</span>
             </span>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {availableColors.map((color: any) => (
                 <button
                   key={color}
                   onClick={() => setSelectedColor(color)}
-                  className={`px-4 py-2 border text-xs font-bold uppercase tracking-widest transition-all ${selectedColor === color ? 'bg-loomra-black text-loomra-white border-loomra-black shadow-lg' : 'bg-white text-loomra-muted border-loomra-surface hover:border-loomra-black'}`}
+                  className={`px-3.5 sm:px-4 py-2 rounded-lg border text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                    selectedColor === color
+                      ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700'
+                  }`}
                 >
                   {color}
                 </button>
@@ -235,22 +240,27 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
             </div>
           </div>
 
-          <div className="flex flex-col gap-4">
+          {/* ── Size Chips ── */}
+          <div className="flex flex-col gap-3">
             <div className="flex justify-between items-center">
-              <span className="text-small font-bold uppercase tracking-widest text-loomra-black">Size: {selectedSize}</span>
-              <button 
+              <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] text-gray-900">Size: {selectedSize}</span>
+              <button
                 onClick={() => setIsSizeGuideOpen(true)}
-                className="text-small text-loomra-muted underline hover:text-loomra-black transition-colors"
+                className="text-[10px] sm:text-xs text-gray-500 underline hover:text-gray-900 transition-colors"
               >
                 Size Guide
               </button>
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="flex flex-wrap gap-2">
               {availableSizes.map((size: any) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`py-4 border ${selectedSize === size ? 'border-loomra-black bg-loomra-black text-loomra-white shadow-md' : 'border-loomra-surface text-loomra-black hover:border-loomra-black'} text-small font-medium transition-all`}
+                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg border text-xs sm:text-sm font-bold transition-all duration-200 ${
+                    selectedSize === size
+                      ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-800'
+                  }`}
                 >
                   {size}
                 </button>

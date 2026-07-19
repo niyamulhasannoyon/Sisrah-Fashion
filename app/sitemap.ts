@@ -16,6 +16,7 @@
 import { MetadataRoute } from 'next';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+import LandingPage from '@/models/LandingPage';
 import Settings from '@/models/Settings';
 
 // Base URL configuration
@@ -114,6 +115,44 @@ function getLastModDate(daysAgo: number = 0): string {
 }
 
 /**
+ * Fetch all active landing pages from database
+ */
+async function fetchActiveLandingPages() {
+  try {
+    await dbConnect();
+    const pages = await LandingPage.find(
+      { isActive: true },
+      { slug: 1, updatedAt: 1 },
+      { lean: true }
+    ).sort({ updatedAt: -1 });
+
+    return pages.map((p: any) => ({
+      slug: p.slug,
+      lastmod: p.updatedAt
+        ? new Date(p.updatedAt).toISOString().split('T')[0]
+        : getLastModDate(1),
+    }));
+  } catch (error) {
+    console.error('Error fetching landing pages for sitemap:', error);
+    return [];
+  }
+}
+
+/**
+ * Generate sitemap URLs for landing pages
+ */
+function generateLandingPageEntries(
+  pages: Array<{ slug: string; lastmod: string }>
+): MetadataRoute.Sitemap {
+  return pages.map(page => ({
+    url: `${BASE_URL}/lp/${page.slug}`,
+    lastModified: new Date(page.lastmod),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
+}
+
+/**
  * Fetch all products from database
  * Used to generate product entries in sitemap
  */
@@ -192,8 +231,9 @@ function generateProductPages(
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
-    // Fetch all products
+    // Fetch all products and landing pages
     const products = await fetchAllProducts();
+    const landingPages = await fetchActiveLandingPages();
 
     // Combine all sitemap entries
     const sitemapEntries: MetadataRoute.Sitemap = [
@@ -202,6 +242,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       // Category pages
       ...generateCategoryPages(),
+
+      // Landing page campaign pages
+      ...generateLandingPageEntries(landingPages),
 
       // Individual product pages
       ...generateProductPages(products),

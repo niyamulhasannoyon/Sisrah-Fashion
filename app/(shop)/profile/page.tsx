@@ -101,7 +101,6 @@ export default function AdvancedProfilePage() {
       console.error("Image upload error:", error);
       alert("Error uploading image.");
     } finally {
-      setUploading(true); // Wait, setting uploading back to true or false? Should be false. We will make it false in finally.
       setUploading(false);
     }
   };
@@ -241,43 +240,59 @@ export default function AdvancedProfilePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-24 flex flex-col md:flex-row gap-8">
-      <div className="w-full md:w-64 flex flex-col gap-2">
-        <div className="bg-[#1A1A1A] p-6 rounded-lg mb-4 text-white flex flex-col items-center text-center">
-          <div className="relative w-16 h-16 mb-4">
+    <div className="container mx-auto px-4 pb-28 md:pb-0 pt-6 lg:pt-24 flex flex-col md:flex-row gap-6 lg:gap-8">
+      {/* ── Mobile: Slim Profile Bar ── */}
+      <div className="w-full md:w-64 flex flex-col gap-3">
+        {/* Profile Card — compact on mobile */}
+        <div className="bg-gray-900 p-5 md:p-6 rounded-xl md:rounded-lg text-white flex md:flex-col items-center md:text-center gap-4 md:gap-3">
+          <div className="relative w-12 h-12 md:w-16 md:h-16 shrink-0">
             {user.image ? (
-              <img src={user.image} alt={user.name} className="w-16 h-16 rounded-full object-cover border-2 border-white/20 shadow-sm" />
+              <img src={user.image} alt={user.name} className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-white/20 shadow-sm" />
             ) : (
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold uppercase select-none">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center text-lg md:text-2xl font-bold uppercase select-none">
                 {user.name.charAt(0)}
               </div>
             )}
-            <label className="absolute -bottom-1 -right-1 bg-[#A31F24] hover:bg-red-800 text-white w-6 h-6 rounded-full flex items-center justify-center cursor-pointer shadow-md transition-colors border-2 border-[#1A1A1A]">
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            <label className="absolute -bottom-0.5 -right-0.5 bg-[#A31F24] hover:bg-red-800 text-white w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center cursor-pointer shadow-md transition-colors border-2 border-gray-900">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} disabled={uploading} />
             </label>
           </div>
-          <h2 className="font-bold text-lg">{user.name}</h2>
-          <p className="text-xs text-gray-400 mt-1">{user.email}</p>
+          <div className="min-w-0">
+            <h2 className="font-bold text-sm md:text-lg truncate">{user.name}</h2>
+            <p className="text-[11px] md:text-xs text-gray-400 truncate">{user.email}</p>
+          </div>
           {uploading && (
-            <div className="flex items-center gap-1.5 mt-2 text-[10px] text-gray-300 animate-pulse">
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-300 animate-pulse md:mt-2">
               <Loader2 className="w-3 h-3 animate-spin" /> Uploading...
             </div>
           )}
         </div>
 
-        <button onClick={() => setActiveTab('orders')} className={`flex items-center gap-3 px-4 py-3 rounded text-sm font-bold uppercase transition ${activeTab === 'orders' ? 'bg-[#F9F9F9] text-[#A31F24]' : 'text-gray-600 hover:bg-gray-50'}`}>
-          <Package size={18} /> My Orders
-        </button>
-        <button onClick={() => setActiveTab('profile')} className={`flex items-center gap-3 px-4 py-3 rounded text-sm font-bold uppercase transition ${activeTab === 'profile' ? 'bg-[#F9F9F9] text-[#A31F24]' : 'text-gray-600 hover:bg-gray-50'}`}>
-          <UserIcon size={18} /> Account Details
-        </button>
-        <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded text-sm font-bold uppercase text-gray-600 hover:bg-red-50 hover:text-red-600 transition mt-auto">
-          <LogOut size={18} /> Sign Out
-        </button>
+        {/* ── Tab pills — horizontal on mobile, vertical on desktop ── */}
+        <div className="flex md:flex-col gap-2">
+          <button onClick={() => setActiveTab('orders')} className={`flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-xl md:rounded-lg text-xs md:text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
+            activeTab === 'orders'
+              ? 'bg-gray-900 text-white shadow-sm'
+              : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+          }`}>
+            <Package size={16} /> Orders
+          </button>
+          <button onClick={() => setActiveTab('profile')} className={`flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-xl md:rounded-lg text-xs md:text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
+            activeTab === 'profile'
+              ? 'bg-gray-900 text-white shadow-sm'
+              : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+          }`}>
+            <UserIcon size={16} /> Profile
+          </button>
+          <button onClick={handleLogout} className="flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-xl md:rounded-lg text-xs md:text-sm font-bold uppercase tracking-wider text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all duration-200 md:mt-auto">
+            <LogOut size={16} /> Sign Out
+          </button>
+        </div>
       </div>
 
-      <div className="flex-1 bg-white border border-gray-100 rounded-lg p-6 lg:p-10 shadow-sm min-h-[500px]">
+      {/* ── Content Area ── */}
+      <div className="flex-1 bg-white border border-gray-100 rounded-xl p-5 md:p-10 shadow-sm min-h-[50vh]">
         {activeTab === 'profile' && (
           <form onSubmit={handleSaveProfile} className="animate-in fade-in duration-500 space-y-6">
             <div className="flex justify-between items-center border-b pb-4 mb-6">
@@ -290,34 +305,35 @@ export default function AdvancedProfilePage() {
             </div>
 
             {/* Profile Photo Section in Form */}
-            <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-slate-100">
-              <div className="relative w-20 h-20">
+            {/* ── Profile Photo ── */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 pb-5 sm:pb-6 border-b border-gray-100">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0">
                 {user.image ? (
-                  <img src={user.image} alt={user.name} className="w-20 h-20 rounded-full object-cover border shadow-sm" />
+                  <img src={user.image} alt={user.name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border shadow-sm" />
                 ) : (
-                  <div className="w-20 h-20 bg-[#F9F9F9] border border-slate-200 rounded-full flex items-center justify-center text-3xl font-bold uppercase text-slate-400 select-none">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 border border-gray-200 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold uppercase text-gray-400 select-none">
                     {user.name.charAt(0)}
                   </div>
                 )}
                 {uploading && (
                   <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#A31F24]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#A31F24]" />
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-2 text-center sm:text-left">
-                <h3 className="text-sm font-bold uppercase text-[#1A1A1A]">Profile Photo</h3>
-                <p className="text-xs text-gray-400">Update your profile picture. PNG or JPG, up to 5MB.</p>
-                <div className="flex gap-3 justify-center sm:justify-start mt-1">
-                  <label className="bg-[#1A1A1A] hover:bg-[#A31F24] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors duration-300 rounded cursor-pointer shadow-sm">
-                    Upload Photo
+              <div className="flex flex-col gap-1.5 text-center sm:text-left">
+                <h3 className="text-xs sm:text-sm font-bold uppercase text-gray-900">Profile Photo</h3>
+                <p className="text-[10px] sm:text-xs text-gray-400">PNG or JPG, up to 5MB.</p>
+                <div className="flex gap-2 justify-center sm:justify-start mt-1">
+                  <label className="bg-gray-900 hover:bg-[#A31F24] text-white px-3.5 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg cursor-pointer transition-all duration-200 shadow-sm">
+                    Upload
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} disabled={uploading} />
                   </label>
                   {user.image && (
                     <button 
-                      type="button" 
+                      type="button"
                       onClick={handleRemoveImage}
-                      className="border border-slate-200 text-gray-500 hover:text-red-600 hover:border-red-200 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors duration-300 rounded"
+                      className="border border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200 px-3.5 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200"
                     >
                       Remove
                     </button>
@@ -325,87 +341,90 @@ export default function AdvancedProfilePage() {
                 </div>
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+            {/* ── Form Fields ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mt-5">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-400 uppercase">Full Name</label>
-                <input 
-                  type="text" 
-                  value={formName} 
-                  onChange={(e) => setFormName(e.target.value)} 
+                <label className="text-[10px] sm:text-xs font-black uppercase text-gray-500 tracking-[0.1em]">Full Name</label>
+                <input
+                  type="text"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
                   required
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg outline-none transition-all text-sm font-medium focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-400 uppercase">Email Address</label>
-                <input 
-                  type="email" 
-                  value={user.email} 
+                <label className="text-[10px] sm:text-xs font-black uppercase text-gray-500 tracking-[0.1em]">Email</label>
+                <input
+                  type="email"
+                  value={user.email}
                   disabled
-                  className="w-full p-3 bg-slate-100 border border-slate-200 text-gray-500 rounded-lg outline-none cursor-not-allowed"
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 text-gray-400 rounded-lg outline-none cursor-not-allowed text-sm font-medium"
                 />
-                <p className="text-[10px] text-gray-400">Email address cannot be changed.</p>
+                <p className="text-[9px] text-gray-400">Cannot be changed</p>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-400 uppercase">Phone Number</label>
-                <input 
-                  type="text" 
-                  value={formPhone} 
-                  onChange={(e) => setFormPhone(e.target.value)} 
+                <label className="text-[10px] sm:text-xs font-black uppercase text-gray-500 tracking-[0.1em]">Phone</label>
+                <input
+                  type="text"
+                  value={formPhone}
+                  onChange={(e) => setFormPhone(e.target.value)}
                   required
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg outline-none transition-all text-sm font-medium focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-400 uppercase">Account Type</label>
-                <div className="p-3 bg-slate-100 border border-slate-200 text-gray-500 rounded-lg capitalize text-sm">
+                <label className="text-[10px] sm:text-xs font-black uppercase text-gray-500 tracking-[0.1em]">Account Type</label>
+                <div className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 text-gray-400 rounded-lg text-sm font-medium capitalize">
                   {user.role}
                 </div>
               </div>
             </div>
 
-            <div className="border-t pt-6 space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A1A1A]">Shipping Address</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* ── Shipping Address ── */}
+            <div className="border-t border-gray-100 pt-5 sm:pt-6 space-y-4">
+              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900">Shipping Address</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                 <div className="md:col-span-3 space-y-1">
-                  <label className="text-xs font-bold text-gray-400 uppercase">Street Address</label>
-                  <input 
-                    type="text" 
-                    value={formStreet} 
-                    onChange={(e) => setFormStreet(e.target.value)} 
-                    placeholder="e.g. House 12, Road 5"
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                  <label className="text-[10px] sm:text-xs font-black uppercase text-gray-500 tracking-[0.1em]">Street Address</label>
+                  <input
+                    type="text"
+                    value={formStreet}
+                    onChange={(e) => setFormStreet(e.target.value)}
+                    placeholder="House 12, Road 5"
+                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg outline-none transition-all text-sm font-medium placeholder:text-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-400 uppercase">City</label>
-                  <input 
-                    type="text" 
-                    value={formCity} 
-                    onChange={(e) => setFormCity(e.target.value)} 
-                    placeholder="e.g. Dhaka"
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                  <label className="text-[10px] sm:text-xs font-black uppercase text-gray-500 tracking-[0.1em]">City</label>
+                  <input
+                    type="text"
+                    value={formCity}
+                    onChange={(e) => setFormCity(e.target.value)}
+                    placeholder="Dhaka"
+                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg outline-none transition-all text-sm font-medium placeholder:text-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-400 uppercase">Division</label>
-                  <input 
-                    type="text" 
-                    value={formDivision} 
-                    onChange={(e) => setFormDivision(e.target.value)} 
-                    placeholder="e.g. Dhaka"
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black transition-colors"
+                  <label className="text-[10px] sm:text-xs font-black uppercase text-gray-500 tracking-[0.1em]">Division</label>
+                  <input
+                    type="text"
+                    value={formDivision}
+                    onChange={(e) => setFormDivision(e.target.value)}
+                    placeholder="Dhaka"
+                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg outline-none transition-all text-sm font-medium placeholder:text-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900/10"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end pt-4">
-              <button 
-                type="submit" 
+            {/* ── Save Button ── */}
+            <div className="flex justify-end pt-4 sm:pt-6">
+              <button
+                type="submit"
                 disabled={saving}
-                className="bg-[#1A1A1A] hover:bg-[#A31F24] text-white px-8 py-3.5 text-xs font-bold uppercase tracking-widest transition duration-300 rounded shadow-md disabled:bg-gray-400 flex items-center gap-2"
+                className="w-full sm:w-auto bg-gray-900 hover:bg-[#A31F24] text-white px-6 sm:px-8 py-3 sm:py-3.5 text-[10px] sm:text-xs font-black uppercase tracking-[0.15em] rounded-lg transition-all duration-200 shadow-sm disabled:bg-gray-300 flex items-center justify-center gap-2 active:scale-[0.97]"
               >
                 {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 {saving ? 'Saving...' : 'Save Changes'}
@@ -451,7 +470,7 @@ export default function AdvancedProfilePage() {
 
                     {/* Timeline stepper skeleton (desktop) */}
                     <div className="hidden sm:flex items-center justify-between mt-6 relative before:absolute before:left-0 before:right-0 before:top-1/2 before:h-0.5 before:w-full before:-translate-y-1/2 before:bg-slate-100 z-0">
-                      {[1, 2, 3].map((step) => (
+                      {[1, 2, 3, 4, 5].map((step) => (
                         <div key={step} className="relative z-10 flex flex-col items-center gap-2 bg-white px-2">
                           <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200" />
                           <div className="h-3 w-16 bg-slate-100 rounded" />
@@ -470,34 +489,36 @@ export default function AdvancedProfilePage() {
                 <p className="text-sm text-gray-400 max-w-xs">You haven&apos;t placed any orders yet. Start shopping to see them here.</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-4 sm:gap-6">
                 {orders.map((order) => (
-                  <div key={order._id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                    <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
-                      <div>
-                        <span className="text-xs font-bold uppercase text-gray-400 tracking-widest">Order Number</span>
-                        <h3 className="font-bold text-[#A31F24] text-lg">#{order._id.slice(-8).toUpperCase()}</h3>
-                        <p className="text-sm text-gray-500 mt-1">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
+                  <div key={order._id} className="border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition-all duration-300">
+                    {/* ── Order Header ── */}
+                    <div className="flex justify-between items-start gap-3 mb-4 sm:mb-5">
+                      <div className="min-w-0">
+                        <span className="text-[9px] sm:text-xs font-black uppercase text-gray-400 tracking-[0.1em]">Order #</span>
+                        <h3 className="font-bold text-[#A31F24] text-sm sm:text-lg truncate">#{order._id.slice(-8).toUpperCase()}</h3>
+                        <p className="text-[11px] sm:text-sm text-gray-500 mt-0.5">{new Date(order.createdAt).toLocaleDateString()}</p>
                       </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold uppercase text-gray-400 tracking-widest">Total Amount</span>
-                        <h3 className="font-bold text-[#1A1A1A] text-xl">৳ {order.totalAmount.toLocaleString()}</h3>
-                        <span className="text-xs text-gray-500">{order.paymentMethod}</span>
+                      <div className="text-right shrink-0">
+                        <span className="text-[9px] sm:text-xs font-black uppercase text-gray-400 tracking-[0.1em]">Total</span>
+                        <h3 className="font-bold text-gray-900 text-base sm:text-xl">৳{order.totalAmount.toLocaleString()}</h3>
+                        <span className="text-[10px] sm:text-xs text-gray-500">{order.paymentMethod}</span>
                       </div>
                     </div>
 
-                    <div className="bg-[#F9F9F9] rounded p-4 flex flex-col gap-3 mb-6 border border-gray-100">
-                       {order.orderItems.map((item: any, idx: number) => (
-                         <div key={idx} className="flex justify-between items-center text-sm">
-                           <div className="flex items-center gap-3">
-                             <div className="w-10 h-10 bg-white border rounded overflow-hidden">
-                               <img src={item.image} alt="item" className="w-full h-full object-cover"/>
-                             </div>
-                             <span className="font-medium text-[#1A1A1A]">{item.quantity}x {item.title}</span>
-                           </div>
-                           <span className="text-gray-500 text-xs uppercase">{item.selectedSize} / {item.selectedColor}</span>
-                         </div>
-                       ))}
+                    {/* ── Items ── */}
+                    <div className="bg-gray-50 rounded-xl p-3 sm:p-4 flex flex-col gap-2 mb-4 sm:mb-5 border border-gray-100/80">
+                      {order.orderItems.map((item: any, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white border border-gray-100 rounded-lg overflow-hidden shrink-0">
+                              <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">{item.quantity}x {item.title}</span>
+                          </div>
+                          <span className="text-[9px] sm:text-xs text-gray-400 uppercase font-bold tracking-wider shrink-0">{item.selectedSize} / {item.selectedColor}</span>
+                        </div>
+                      ))}
                     </div>
 
                     <OrderTimeline status={order.orderStatus} />

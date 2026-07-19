@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Settings,
-  LogOut, Bell, Search, Tag, BarChart3, MessageSquare, UserCog,
+  LogOut, Bell, Search, Tag, BarChart3, MessageSquare, UserCog, FileText,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -17,15 +17,16 @@ import type { StaffRole } from '@/lib/staffPermissions';
 
 // Nav item definitions keyed by permission key
 const ALL_NAV_ITEMS = [
-  { key: 'dashboard',  name: 'Dashboard',  href: '/dashboard',  icon: LayoutDashboard },
-  { key: 'analytics',  name: 'Analytics',  href: '/analytics',  icon: BarChart3 },
-  { key: 'products',   name: 'Products',   href: '/products',   icon: Package },
-  { key: 'orders',     name: 'Orders',     href: '/orders',     icon: ShoppingCart },
-  { key: 'customers',  name: 'Customers',  href: '/users',      icon: Users },
-  { key: 'reviews',    name: 'Reviews',    href: '/reviews',    icon: MessageSquare },
-  { key: 'coupons',    name: 'Coupons',    href: '/coupons',    icon: Tag },
-  { key: 'staff',      name: 'Staff',      href: '/staff',      icon: UserCog },
-  { key: 'settings',   name: 'Settings',   href: '/settings',   icon: Settings },
+  { key: 'dashboard',     name: 'Dashboard',     href: '/dashboard',     icon: LayoutDashboard },
+  { key: 'analytics',     name: 'Analytics',     href: '/analytics',     icon: BarChart3 },
+  { key: 'products',      name: 'Products',      href: '/products',      icon: Package },
+  { key: 'orders',        name: 'Orders',        href: '/orders',        icon: ShoppingCart },
+  { key: 'customers',     name: 'Customers',     href: '/users',         icon: Users },
+  { key: 'landing-pages', name: 'Landing Pages', href: '/landing-pages', icon: FileText },
+  { key: 'reviews',       name: 'Reviews',       href: '/reviews',       icon: MessageSquare },
+  { key: 'coupons',       name: 'Coupons',       href: '/coupons',       icon: Tag },
+  { key: 'staff',         name: 'Staff',         href: '/staff',         icon: UserCog },
+  { key: 'settings',      name: 'Settings',      href: '/settings',      icon: Settings },
 ];
 
 const SUPER_ADMIN_EMAILS = ['niyamulhasanbd@gmail.com', 'niyamulhasan1089@gmail.com'];
