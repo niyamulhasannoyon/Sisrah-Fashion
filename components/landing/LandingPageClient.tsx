@@ -253,10 +253,14 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   const [selectedColors, setSelectedColors] = useState<Record<string, string>>({});
   const [bundleSelections, setBundleSelections] = useState<Record<string, boolean>>({});
   const [activeImage, setActiveImage] = useState(0);
-  // Track LP page view once mounted
+  // Track LP page view once mounted & store campaign slug for order attribution
   useEffect(() => {
     setMounted(true);
     trackLpEvent(page.slug, 'pageview');
+    // Store campaign slug so checkout can attribute orders to this campaign
+    try {
+      sessionStorage.setItem('loomra_campaign_slug', page.slug);
+    } catch {}
   }, [page.slug]);
 
   // Initialize bundle selections & size/color defaults

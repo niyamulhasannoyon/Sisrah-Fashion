@@ -76,6 +76,11 @@ export async function POST(req: Request) {
     const lastOrder = await Order.findOne().sort({ orderId: -1 });
     const nextOrderId = lastOrder && lastOrder.orderId ? lastOrder.orderId + 1 : 100001;
 
+    // Campaign slug (for LP order attribution)
+    const campaignSlug = typeof body.campaignSlug === 'string'
+      ? body.campaignSlug.replace(/[^a-z0-9-]/g, '').trim()
+      : undefined;
+
     // Sanitize and validate coupon data
     const couponCode = typeof body.couponCode === 'string'
       ? body.couponCode.replace(/<[^>]*>/g, '').trim().toUpperCase()
@@ -94,7 +99,8 @@ export async function POST(req: Request) {
       paidAmount: typeof body.paidAmount === 'number' ? Math.max(0, body.paidAmount) : undefined,
       couponCode,
       couponDiscount,
-      orderId: nextOrderId
+      orderId: nextOrderId,
+      campaignSlug
     });
 
     // Increment coupon usage count if a coupon was applied

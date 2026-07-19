@@ -29,6 +29,7 @@ export interface IOrder extends Document {
   courier?: string;
   trackingNumber?: string;
   internalNotes?: string;
+  campaignSlug?: string;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -63,6 +64,7 @@ const OrderSchema: Schema = new Schema(
     courier: { type: String, default: '' },
     trackingNumber: { type: String, default: '' },
     internalNotes: { type: String, default: '' },
+    campaignSlug: { type: String, index: true },
   },
   { timestamps: true }
 );

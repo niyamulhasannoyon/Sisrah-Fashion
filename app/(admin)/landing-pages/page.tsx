@@ -6,9 +6,10 @@ import {
   Plus, Loader2, Edit, Trash2, Search,
   X, Eye, Clock, Monitor, Copy,
   AlertTriangle, BarChart3, UploadCloud,
-  Sparkles, ImageOff, CheckCircle2
+  Sparkles, ImageOff, CheckCircle2, TrendingUp
 } from 'lucide-react';
 import LandingPagePreviewModal from '@/components/landing/LandingPagePreviewModal';
+import LandingPageAnalyticsPanel from '@/components/landing/LandingPageAnalyticsPanel';
 
 interface Testimonial {
   name: string;
@@ -111,6 +112,9 @@ export default function AdminLandingPages() {
   // Preview modal
   const [previewPage, setPreviewPage] = useState<any>(null);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Analytics panel
+  const [analyticsPanel, setAnalyticsPanel] = useState<{ slug: string; title: string } | null>(null);
 
   // Duplicate state
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
@@ -529,6 +533,13 @@ export default function AdminLandingPages() {
                             className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
                           >
                             <Monitor size={18} />
+                          </button>
+                          <button
+                            onClick={() => setAnalyticsPanel({ slug: page.slug, title: page.pageTitle })}
+                            title="Analytics"
+                            className="p-2 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                          >
+                            <TrendingUp size={18} />
                           </button>
                           {page.isActive && (
                             <a
@@ -1044,6 +1055,15 @@ export default function AdminLandingPages() {
             setShowPreview(false);
             setPreviewPage(null);
           }}
+        />
+      )}
+
+      {/* ── Analytics Panel ── */}
+      {analyticsPanel && (
+        <LandingPageAnalyticsPanel
+          slug={analyticsPanel.slug}
+          pageTitle={analyticsPanel.title}
+          onClose={() => setAnalyticsPanel(null)}
         />
       )}
 

@@ -176,6 +176,11 @@ export default function CheckoutPage() {
     }
 
     try {
+      // Read campaign slug from sessionStorage (set by landing pages for order attribution)
+      const campaignSlug = (() => {
+        try { return sessionStorage.getItem('loomra_campaign_slug') || undefined; } catch { return undefined; }
+      })();
+
       const orderPayload = {
         shippingInfo,
         orderItems: cart,
@@ -185,8 +190,12 @@ export default function CheckoutPage() {
         transactionId: isMobilePayment ? txnId : undefined,
         paidAmount: isMobilePayment ? parsedPaidAmount : undefined,
         couponCode: appliedCoupon?.code,
-        couponDiscount: calculateDiscount()
+        couponDiscount: calculateDiscount(),
+        campaignSlug,
       };
+
+      // Clear campaign attribution after order placement
+      try { sessionStorage.removeItem('loomra_campaign_slug'); } catch {}
 
       const res = await fetch('/api/orders', {
         method: 'POST',
