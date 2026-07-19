@@ -319,7 +319,7 @@ export default function LandingPagePreviewModal({ page, pageId, onClose }: Landi
   }
 
   return (
-    <div className="fixed inset-0 z-[300] flex flex-col p-2 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+    <div className="fixed inset-0 z-[300] flex flex-col p-2 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in overflow-hidden">
       {/* ── Toolbar ── */}
       <div className="shrink-0 bg-white rounded-t-xl sm:rounded-xl px-4 py-3 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3 min-w-0">
@@ -392,14 +392,14 @@ export default function LandingPagePreviewModal({ page, pageId, onClose }: Landi
       </div>
 
       {/* ── Preview Frame ── */}
-      <div className="flex-1 flex items-start justify-center overflow-y-auto mt-2 sm:mt-3 pb-4">
+      <div className="flex-1 min-h-0 flex items-start justify-center overflow-y-auto mt-2 sm:mt-3 pb-4">
         <div
-          className={`w-full ${deviceWidth} bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 transition-all duration-300`}
-          style={{ minHeight: '60vh' }}
+          className={`w-full ${deviceWidth} bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 transition-all duration-300 flex flex-col`}
+          style={{ minHeight: '60vh', maxHeight: '100%' }}
         >
           {/* Device chrome indicator */}
           {deviceView !== 'desktop' && (
-            <div className="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center justify-between text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+            <div className="shrink-0 bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center justify-between text-[9px] text-slate-400 font-bold uppercase tracking-wider">
               <span className="flex items-center gap-1.5">
                 <DeviceIcon size={12} /> {deviceLabel}
               </span>
@@ -408,7 +408,7 @@ export default function LandingPagePreviewModal({ page, pageId, onClose }: Landi
           )}
 
           {/* Scrollable preview content */}
-          <div className="overflow-y-auto" style={{ maxHeight: deviceView === 'mobile' ? '70vh' : '75vh' }}>
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <MiniLandingPreview page={pageData} />
           </div>
         </div>
