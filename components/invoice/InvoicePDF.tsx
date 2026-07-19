@@ -65,30 +65,13 @@ const styles = StyleSheet.create({
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
     marginBottom: 4,
   },
   logoImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 6,
-  },
-  logoFallback: {
-    width: 44,
-    height: 44,
-    borderRadius: 6,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-  },
-  logoFallbackText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-    lineHeight: 1.3,
-    textAlign: 'center',
+    width: 50,
+    height: 50,
+    objectFit: 'contain',
   },
   brandName: {
     fontSize: 20,
@@ -457,16 +440,12 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
           {/* Left — Brand Logo & Name */}
           <View style={styles.headerLeft}>
             <View style={styles.logoContainer}>
-              {data.logoUrl ? (
-                <Image
-                  style={styles.logoImage}
-                  src={data.logoUrl}
-                />
-              ) : (
-                <View style={styles.logoFallback}>
-                  <Text style={styles.logoFallbackText}>AS</Text>
-                </View>
-              )}
+              {/* Place logo.png (or .jpg/.webp/.svg) in the /public folder for auto-detection,
+                  or provide a full URL via the logoUrl prop/settings. */}
+              <Image
+                style={styles.logoImage}
+                src={data.logoUrl || '/logo.png'}
+              />
               <View style={{ flexDirection: 'column', gap: 2 }}>
                 <Text style={styles.brandName}>{brandName}</Text>
                 <Text style={styles.brandTagline}>{brandTagline}</Text>
@@ -706,6 +685,34 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
 }
 
 // ─────────────────────────── Data Builder ────────────────────────────
+/**
+ * Resolve the brand logo to a path compatible with @react-pdf/renderer.
+ * - If a logoUrl is already provided, use it as-is.
+ * - Otherwise, try to resolve the local public/logo.png for server-side PDF rendering.
+ */
+function resolveLogoUrl(order: any): string | undefined {
+  if (order.logoUrl) return order.logoUrl;
+  // Attempt server-side file resolution for the default logo
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const path = require('path');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fs = require('fs');
+    const possiblePaths = [
+      path.join(process.cwd(), 'public', 'logo.png'),
+      path.join(process.cwd(), 'public', 'logo.jpg'),
+      path.join(process.cwd(), 'public', 'logo.webp'),
+      path.join(process.cwd(), 'public', 'logo.svg'),
+    ];
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) return p;
+    }
+  } catch {
+    // Not running in Node.js or file not found — fall through
+  }
+  return undefined;
+}
+
 export function buildInvoiceData(
   order: any,
   overrides?: Partial<InvoiceData>
@@ -743,6 +750,7 @@ export function buildInvoiceData(
     paidAmount: order.paidAmount,
     couponCode: order.couponCode,
     notes: order.internalNotes,
+    logoUrl: resolveLogoUrl(order),
     ...overrides,
   };
 }
