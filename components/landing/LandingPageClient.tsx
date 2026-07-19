@@ -264,7 +264,10 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   }, [page.slug]);
 
   // Initialize bundle selections & size/color defaults
-  const products = page.productIds || [];
+  // Filter out any null products (deleted from DB but still referenced)
+  const products = (page.productIds || []).filter((p): p is ProductData =>
+    p !== null && typeof p === 'object' && '_id' in p
+  );
 
   useEffect(() => {
     if (page.layoutType === 'multi-product') {
@@ -298,14 +301,14 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
   // Images for hero section
   const heroImage =
-    page.customHero?.customBannerImage ||
+    (page.customHero?.customBannerImage && page.customHero.customBannerImage.trim()) ||
     primaryProduct?.images?.[activeImage]?.url ||
     products[0]?.images?.[0]?.url ||
     '/images/placeholder.jpg';
 
   // Heading / subheading
-  const heading = page.customHero?.customHeading || primaryProduct?.title || page.pageTitle;
-  const subheading = page.customHero?.customSubheading || primaryProduct?.description || '';
+  const heading = (page.customHero?.customHeading && page.customHero.customHeading.trim()) || primaryProduct?.title || page.pageTitle;
+  const subheading = (page.customHero?.customSubheading && page.customHero.customSubheading.trim()) || primaryProduct?.description || '';
 
   // Price calculation
   const totalPrice = useMemo(() => {
