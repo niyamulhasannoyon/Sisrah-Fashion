@@ -160,8 +160,9 @@ export default function CheckoutPage() {
         setLoading(false);
         return;
       }
-      if (amt < 200) {
-        setPaidAmountError("Minimum advance payment is ৳200");
+      const minAdvancePayment = settings?.freeShippingMinAmount ? Math.min(200, settings.freeShippingMinAmount * 0.1) : 200;
+      if (amt < minAdvancePayment) {
+        setPaidAmountError(`Minimum advance payment is ৳${minAdvancePayment}`);
         setLoading(false);
         return;
       }
@@ -182,7 +183,8 @@ export default function CheckoutPage() {
         paymentStatus: 'Pending',
         transactionId: isMobilePayment ? txnId : undefined,
         paidAmount: isMobilePayment ? parsedPaidAmount : undefined,
-        couponCode: appliedCoupon?.code
+        couponCode: appliedCoupon?.code,
+        couponDiscount: calculateDiscount()
       };
 
       const res = await fetch('/api/orders', {
@@ -491,7 +493,7 @@ export default function CheckoutPage() {
                         </div>
                         <div className="flex flex-col">
                           <span className="font-black text-sm uppercase tracking-tight">Due / Baki (বাকি)</span>
-                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Buy on Credit / Due</span>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Pay Later / Credit</span>
                         </div>
                       </div>
                       <Clock className={paymentMethod === 'Due (Baki)' ? 'text-black' : 'text-gray-300'} size={24} />

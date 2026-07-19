@@ -81,9 +81,10 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
       const file = e.target.files[0];
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'loomra_preset'); 
-      const CLOUD_NAME = 'dj3uym3gv'; 
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+      const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'loomra_preset';
+      const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dj3uym3gv';
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
       const data = await res.json();
       if (data.secure_url) {
         setReviewImages(prev => [...prev, { url: data.secure_url, public_id: data.public_id }]);

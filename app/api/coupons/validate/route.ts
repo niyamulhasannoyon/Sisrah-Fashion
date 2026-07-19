@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Coupon from '@/models/Coupon';
+import { couponLimiter } from '@/lib/rateLimiter';
 
 export async function POST(req: Request) {
   try {
+    // Apply rate limiting: 10 coupon validation attempts per minute (prevent brute-forcing)
+    const limitCheck = couponLimiter.check(req);
+    if (limitCheck.blocked) {
+      return limitCheck.response!;
+    }
+
     await dbConnect();
     const { code, totalAmount } = await req.json();
 

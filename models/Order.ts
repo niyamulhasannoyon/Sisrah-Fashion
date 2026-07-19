@@ -22,6 +22,8 @@ export interface IOrder extends Document {
   orderId: number;
   transactionId?: string;
   paidAmount?: number;
+  couponCode?: string;
+  couponDiscount?: number;
   deliveredAt?: Date;
   courier?: string;
   trackingNumber?: string;
@@ -53,6 +55,8 @@ const OrderSchema: Schema = new Schema(
     orderId: { type: Number, unique: true },
     transactionId: { type: String },
     paidAmount: { type: Number },
+    couponCode: { type: String, uppercase: true },
+    couponDiscount: { type: Number, default: 0 },
     deliveredAt: { type: Date },
     courier: { type: String, default: '' },
     trackingNumber: { type: String, default: '' },

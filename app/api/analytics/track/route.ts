@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
+import { createHash } from 'crypto';
 import dbConnect from '@/lib/dbConnect';
 import AnalyticsEvent from '@/models/AnalyticsEvent';
+
+/**
+ * Anonymizes an IP address for privacy compliance (GDPR).
+ * In production, IPs should be hashed or truncated before storage.
+ */
+function anonymizeIp(ip: string): string {
+  if (!ip || ip === '127.0.0.1') return ip;
+  
+  // Hash the IP with a salt for privacy while maintaining uniqueness per visitor
+  const salt = process.env.ANALYTICS_IP_SALT || 'default-salt';
+  return createHash('sha256').update(ip + salt).digest('hex').substring(0, 16);
+}
 
 // Simple user-agent parser to avoid extra dependency overhead
 function parseUA(ua: string) {
@@ -66,7 +79,9 @@ export async function POST(req: Request) {
     const serverIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
                      req.headers.get('x-real-ip') || 
                      '';
-    const finalIp = clientIp || serverIp || '127.0.0.1';
+    const rawIp = clientIp || serverIp || '127.0.0.1';
+    // Anonymize IP for privacy compliance
+    const finalIp = anonymizeIp(rawIp);
 
     // Parse browser, OS, and device from User-Agent
     const userAgent = req.headers.get('user-agent') || '';

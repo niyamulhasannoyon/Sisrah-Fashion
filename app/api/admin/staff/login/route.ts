@@ -3,10 +3,17 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import Staff from '@/models/Staff';
+import { staffLoginLimiter } from '@/lib/rateLimiter';
 
 // Staff login — called from the same /login page; detected by `staffLogin: true` flag
 export async function POST(req: Request) {
   try {
+    // Apply rate limiting: 5 staff login attempts per minute
+    const limitCheck = staffLoginLimiter.check(req);
+    if (limitCheck.blocked) {
+      return limitCheck.response!;
+    }
+
     await dbConnect();
     const { email, password } = await req.json();
 

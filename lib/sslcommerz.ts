@@ -5,9 +5,16 @@ export interface SslCommerzConfig {
 }
 
 export function getSslCommerzConfig(): SslCommerzConfig {
+  const storeId = process.env.SSLCOMMERZ_STORE_ID;
+  const storePassword = process.env.SSLCOMMERZ_STORE_PASSWORD;
+
+  if (!storeId || !storePassword) {
+    throw new Error('SSLCommerz credentials not configured. Set SSLCOMMERZ_STORE_ID and SSLCOMMERZ_STORE_PASSWORD environment variables.');
+  }
+
   return {
-    storeId: process.env.SSLCOMMERZ_STORE_ID || 'your_store_id',
-    storePassword: process.env.SSLCOMMERZ_STORE_PASSWORD || 'your_store_password',
+    storeId,
+    storePassword,
     isSandbox: process.env.SSLCOMMERZ_ENV !== 'production'
   };
 }

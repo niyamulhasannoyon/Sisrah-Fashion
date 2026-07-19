@@ -3,9 +3,16 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
+import { registerLimiter } from '@/lib/rateLimiter';
 
 export async function POST(req: Request) {
   try {
+    // Apply rate limiting: 3 registration attempts per minute
+    const limitCheck = registerLimiter.check(req);
+    if (limitCheck.blocked) {
+      return limitCheck.response!;
+    }
+
     await dbConnect();
     const { name, email, password, phone } = await req.json();
 
@@ -24,6 +31,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Invalid Bangladeshi phone number' }, { status: 400 });
     }
 
+    // Password strength validation
+    if (password.length < 8) {
+      return NextResponse.json({ success: false, error: 'Password must be at least 8 characters long' }, { status: 400 });
+    }
+    if (!/[A-Z]/.test(password)) {
+      return NextResponse.json({ success: false, error: 'Password must contain at least one uppercase letter' }, { status: 400 });
+    }
+    if (!/[a-z]/.test(password)) {
+      return NextResponse.json({ success: false, error: 'Password must contain at least one lowercase letter' }, { status: 400 });
+    }
+    if (!/[0-9]/.test(password)) {
+      return NextResponse.json({ success: false, error: 'Password must contain at least one number' }, { status: 400 });
+    }
+
+    // Sanitize name to prevent XSS
+    const sanitizedName = name.replace(/<[^>]*>/g, '').trim();
+    if (!sanitizedName) {
+      return NextResponse.json({ success: false, error: 'Invalid name provided' }, { status: 400 });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json({ success: false, error: 'Email already exists' }, { status: 400 });
@@ -33,7 +60,7 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await User.create({
-      name,
+      name: sanitizedName,
       email,
       phone,
       password: hashedPassword,

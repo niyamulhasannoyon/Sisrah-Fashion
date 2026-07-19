@@ -3,13 +3,29 @@ import { OAuth2Client } from 'google-auth-library';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
+import { loginLimiter } from '@/lib/rateLimiter';
 
 const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
 export async function POST(req: Request) {
   try {
+    // Apply rate limiting: 5 auth attempts per minute
+    const limitCheck = loginLimiter.check(req);
+    if (limitCheck.blocked) {
+      return limitCheck.response!;
+    }
+
     await dbConnect();
     const { credential, phone } = await req.json();
+
+    if (!credential) {
+      return NextResponse.json({ error: 'Google credential token is required' }, { status: 400 });
+    }
+
+    if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+      console.error('[Google Auth] NEXT_PUBLIC_GOOGLE_CLIENT_ID is not configured');
+      return NextResponse.json({ error: 'Google authentication is not configured' }, { status: 500 });
+    }
 
     const ticket = await client.verifyIdToken({
       idToken: credential,

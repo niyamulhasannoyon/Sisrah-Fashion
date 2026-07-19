@@ -11,33 +11,107 @@ export async function POST(req: Request) {
     await dbConnect();
     const body = await req.json();
     
+    // Validate required fields
+    if (!body.shippingInfo || !body.orderItems || !body.totalAmount) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Missing required fields: shippingInfo, orderItems, totalAmount' 
+      }, { status: 400 });
+    }
+
+    // Sanitize shipping info to prevent XSS
+    const sanitizedShipping = {
+      name: (body.shippingInfo.name || '').replace(/<[^>]*>/g, '').trim(),
+      phone: (body.shippingInfo.phone || '').replace(/<[^>]*>/g, '').trim(),
+      address: (body.shippingInfo.address || '').replace(/<[^>]*>/g, '').trim(),
+      city: (body.shippingInfo.city || '').replace(/<[^>]*>/g, '').trim(),
+    };
+
+    if (!sanitizedShipping.name || !sanitizedShipping.phone || !sanitizedShipping.address || !sanitizedShipping.city) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'All shipping fields are required' 
+      }, { status: 400 });
+    }
+
+    // Validate phone number format (Bangladesh)
+    const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+    if (!bdPhoneRegex.test(sanitizedShipping.phone)) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Invalid Bangladeshi phone number format' 
+      }, { status: 400 });
+    }
+
+    // Sanitize order items
+    const sanitizedItems = body.orderItems.map((item: any) => ({
+      title: (item.title || '').replace(/<[^>]*>/g, '').trim(),
+      price: typeof item.price === 'number' ? item.price : 0,
+      image: (item.image || '').replace(/<[^>]*>/g, '').trim(),
+      selectedSize: (item.selectedSize || '').replace(/<[^>]*>/g, '').trim(),
+      selectedColor: (item.selectedColor || '').replace(/<[^>]*>/g, '').trim(),
+      quantity: typeof item.quantity === 'number' ? Math.max(1, Math.floor(item.quantity)) : 1,
+    }));
+
+    if (sanitizedItems.length === 0) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'At least one order item is required' 
+      }, { status: 400 });
+    }
+
+    // Validate total amount
+    const totalAmount = typeof body.totalAmount === 'number' ? Math.max(0, body.totalAmount) : 0;
+    if (totalAmount <= 0) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Invalid total amount' 
+      }, { status: 400 });
+    }
+
     // Find the latest order to get the next orderId
     const lastOrder = await Order.findOne().sort({ orderId: -1 });
     const nextOrderId = lastOrder && lastOrder.orderId ? lastOrder.orderId + 1 : 100001;
 
+    // Sanitize and validate coupon data
+    const couponCode = typeof body.couponCode === 'string'
+      ? body.couponCode.replace(/<[^>]*>/g, '').trim().toUpperCase()
+      : undefined;
+    const couponDiscount = typeof body.couponDiscount === 'number'
+      ? Math.max(0, body.couponDiscount)
+      : 0;
+
     const newOrder = await Order.create({
-      ...body,
+      shippingInfo: sanitizedShipping,
+      orderItems: sanitizedItems,
+      totalAmount,
+      paymentMethod: typeof body.paymentMethod === 'string' ? body.paymentMethod : 'Cash on Delivery',
+      paymentStatus: typeof body.paymentStatus === 'string' ? body.paymentStatus : 'Pending',
+      transactionId: typeof body.transactionId === 'string' ? body.transactionId.replace(/<[^>]*>/g, '').trim() : undefined,
+      paidAmount: typeof body.paidAmount === 'number' ? Math.max(0, body.paidAmount) : undefined,
+      couponCode,
+      couponDiscount,
       orderId: nextOrderId
     });
 
-    console.log('New Order Created:', JSON.stringify(newOrder, null, 2));
+    console.log('[Order] Created:', JSON.stringify({ orderId: nextOrderId, totalAmount }, null, 2));
 
     try {
       await Notification.create({
         title: 'New Order Placed',
-        message: `Order #${nextOrderId} of ৳${(body.totalAmount || 0).toLocaleString()} has been placed by ${body.shippingInfo?.name || 'Customer'}.`,
+        message: `Order #${nextOrderId} of ৳${totalAmount.toLocaleString()} has been placed by ${sanitizedShipping.name}.`,
         type: 'order',
         link: `/orders/${newOrder._id}`,
         isRead: false
       });
     } catch (notifError) {
-      console.error('Failed to create new order notification:', notifError);
+      console.error('[Order] Failed to create notification:', notifError);
     }
 
     return NextResponse.json({ 
       success: true, 
       orderId: nextOrderId, 
-      phone: body.shippingInfo.phone 
+      phone: sanitizedShipping.phone 
     }, { status: 201 });
   } catch (error: any) {
     console.error('Order creation failed:', error);

@@ -56,6 +56,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ loading: true });
     try {
       const res = await fetch('/api/admin/settings', { cache: 'no-store' });
+      // Note: GET /api/admin/settings is intentionally publicly accessible
+      // so the frontend can display settings. No sensitive data is exposed.
       const data = await res.json();
       if (data.success) {
         set({ settings: data.settings, loading: false });

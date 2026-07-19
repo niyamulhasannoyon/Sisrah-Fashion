@@ -11,20 +11,19 @@ export async function POST(req: Request) {
 
     // 1. Create the Order in MongoDB (Status: Pending)
     const newOrder = await Order.create({
-      items: items.map((item: any) => ({
-        product: item._id,
-        size: item.selectedSize,
-        color: item.selectedColor,
-        quantity: item.quantity,
-        price: item.price
+      orderItems: items.map((item: any) => ({
+        title: item.title || item.name || 'Product',
+        price: item.price,
+        image: item.image || '',
+        selectedSize: item.selectedSize || item.size || '',
+        selectedColor: item.selectedColor || item.color || '',
+        quantity: item.quantity || 1,
       })),
       shippingInfo: formData,
-      shippingFee,
-      totalAmount: total,
+      totalAmount: total + (shippingFee || 0),
       paymentMethod,
       paymentStatus: 'Pending',
       orderStatus: 'Processing',
-      // user: userId // (If using authentication, attach user ID here)
     });
 
     const tran_id = newOrder._id.toString();

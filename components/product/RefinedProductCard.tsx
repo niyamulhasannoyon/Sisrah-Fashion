@@ -8,9 +8,9 @@ export default function RefinedProductCard({ product }: { product: any }) {
       
       {/* 1:1 Image Component */}
       <ProductImage 
-        src={product.images[0].url} 
+        src={product.images?.[0]?.url || '/placeholder.jpg'} 
         alt={product.title} 
-        hoverSrc={product.images[1]?.url} 
+        hoverSrc={product.images?.[1]?.url} 
       />
 
       <div className="flex flex-col gap-8px px-4px">

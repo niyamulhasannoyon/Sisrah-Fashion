@@ -3,13 +3,34 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
+import { loginLimiter } from '@/lib/rateLimiter';
 
 export async function POST(req: Request) {
   try {
+    // Apply rate limiting: 5 attempts per minute
+    const limitCheck = loginLimiter.check(req);
+    if (limitCheck.blocked) {
+      return limitCheck.response!;
+    }
+
     await dbConnect();
     const { email, password } = await req.json();
 
-    const user = await User.findOne({ email });
+    // Validate input
+    if (!email || !password) {
+      return NextResponse.json({ success: false, error: 'Email and password are required' }, { status: 400 });
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ success: false, error: 'Invalid email format' }, { status: 400 });
+    }
+
+    if (password.length < 8) {
+      return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
       return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
     }

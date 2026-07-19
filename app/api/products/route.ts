@@ -28,8 +28,14 @@ export async function GET(request: Request) {
   }
 }
 
+import { isAdmin } from '@/lib/adminAuth';
+
 export async function POST(request: Request) {
   try {
+    if (!await isAdmin()) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     await dbConnect();
     const body = await request.json();
 

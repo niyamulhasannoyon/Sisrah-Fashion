@@ -35,6 +35,14 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin',
           },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+          },
+          {
+            key: 'X-Powered-By',
+            value: 'AS SIDRAT',
+          },
         ],
       },
     ];
