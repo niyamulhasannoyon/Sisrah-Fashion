@@ -50,8 +50,8 @@ export function HeroSection() {
         </div>
       ))}
       
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/35 to-black/60 z-0" />
+      {/* Bottom-heavy gradient overlay — darkens the text area without drowning the image top */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-0" />
       
       {/* Content */}
       <div className="relative z-10 mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-80px)] max-w-6xl gap-5 sm:gap-7 px-4 py-16 text-center">

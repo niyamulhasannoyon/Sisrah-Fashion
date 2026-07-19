@@ -462,9 +462,12 @@ export default function AdvancedProfilePage() {
                 ))}
               </div>
             ) : orders.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 bg-[#F9F9F9] rounded">
-                <Package size={48} className="mx-auto mb-4 opacity-50" />
-                <p>You haven't placed any orders yet.</p>
+              <div className="min-h-[50vh] flex flex-col items-center justify-center text-gray-500 bg-[#F9F9F9] rounded-lg p-12 text-center gap-3">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100">
+                  <Package size={28} className="text-gray-400" />
+                </div>
+                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">No Orders Yet</h3>
+                <p className="text-sm text-gray-400 max-w-xs">You haven&apos;t placed any orders yet. Start shopping to see them here.</p>
               </div>
             ) : (
               <div className="flex flex-col gap-8">

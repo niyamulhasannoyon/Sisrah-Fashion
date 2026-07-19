@@ -94,20 +94,19 @@ export default function ShopClient() {
           <div className="flex flex-col gap-8">
             <div>
               <h3 className="text-sm font-bold uppercase tracking-widest text-[#1A1A1A] mb-4">Category</h3>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap gap-2">
                 {categories.map(cat => (
-                  <label key={cat} className="flex items-center gap-3 cursor-pointer group">
-                    <input 
-                      type="radio" 
-                      name="category" 
-                      checked={selectedCategory === cat}
-                      onChange={() => setSelectedCategory(cat)}
-                      className="w-4 h-4 accent-[#1A1A1A]" 
-                    />
-                    <span className={`text-sm ${selectedCategory === cat ? 'font-bold text-[#1A1A1A]' : 'text-gray-500 group-hover:text-[#1A1A1A]'}`}>
-                      {cat}
-                    </span>
-                  </label>
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all ${
+                      selectedCategory === cat
+                        ? 'bg-black text-white border-black shadow-sm'
+                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700'
+                    }`}
+                  >
+                    {cat}
+                  </button>
                 ))}
               </div>
             </div>
