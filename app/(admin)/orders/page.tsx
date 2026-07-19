@@ -8,30 +8,32 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-const VALID_TRANSITIONS: Record<string, string[]> = {
-  'Pending': ['Confirmed', 'Cancelled'],
-  'Confirmed': ['Processing', 'Cancelled'],
-  'Processing': ['Shipped', 'Cancelled'],
-  'Shipped': ['Delivered', 'Cancelled'],
-  'Delivered': ['Completed', 'Refunded'],
-  'Completed': ['Refunded'],
-  'Cancelled': [],
-  'Refunded': []
+const ALL_STATUSES = [
+  'Pending',
+  'Confirmed',
+  'Processing',
+  'Shipped',
+  'Delivered',
+  'Completed',
+  'Cancelled',
+  'Refunded',
+] as const;
+
+type OrderStatus = (typeof ALL_STATUSES)[number];
+
+const STATUS_STYLES: Record<OrderStatus, string> = {
+  Pending:    'bg-amber-50 text-amber-700 border-amber-200',
+  Confirmed:  'bg-blue-50   text-blue-700   border-blue-200',
+  Processing: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  Shipped:    'bg-purple-50 text-purple-700 border-purple-200',
+  Delivered:  'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Completed:  'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Cancelled:  'bg-rose-50   text-rose-700   border-rose-200',
+  Refunded:   'bg-rose-50   text-rose-700   border-rose-200',
 };
 
-const getStatusColor = (status: string) => {
-  switch(status) {
-    case 'Pending': return 'bg-yellow-50 text-yellow-800 border-yellow-250';
-    case 'Confirmed': return 'bg-emerald-50 text-emerald-800 border-emerald-200';
-    case 'Processing': return 'bg-amber-50 text-amber-800 border-amber-200';
-    case 'Shipped': return 'bg-blue-50 text-blue-800 border-blue-200';
-    case 'Delivered': return 'bg-green-50 text-green-800 border-green-200';
-    case 'Completed': return 'bg-slate-100 text-slate-800 border-slate-300';
-    case 'Cancelled': return 'bg-rose-50 text-rose-800 border-rose-200';
-    case 'Refunded': return 'bg-purple-50 text-purple-800 border-purple-200';
-    default: return 'bg-gray-50 text-gray-800 border-gray-200';
-  }
-};
+const getStatusColor = (status: string): string =>
+  STATUS_STYLES[status as OrderStatus] || 'bg-gray-50 text-gray-700 border-gray-200';
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -43,6 +45,9 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  // Per-row inline update state
+  const [updatingRowId, setUpdatingRowId] = useState<string | null>(null);
 
   // Bulk Selection State
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -98,6 +103,10 @@ export default function AdminOrdersPage() {
   };
 
   const handleStatusChangeInline = async (order: any, newStatus: string) => {
+    // Skip if the same status is selected (no-op)
+    if (newStatus === order.orderStatus) return;
+
+    // Shipped requires courier info — open the modal
     if (newStatus === 'Shipped') {
       setShippedTargetOrder(order);
       setModalCourier(order.courier || '');
@@ -106,6 +115,7 @@ export default function AdminOrdersPage() {
       return;
     }
 
+    setUpdatingRowId(order._id);
     try {
       const res = await fetch(`/api/orders/${order._id}`, {
         method: 'PUT',
@@ -113,16 +123,23 @@ export default function AdminOrdersPage() {
         body: JSON.stringify({ orderStatus: newStatus }),
       });
       const data = await res.json();
-      
+
       if (data.success) {
-        setOrders(orders.map(o => o._id === order._id ? { ...o, orderStatus: newStatus } : o));
+        // Optimistic local update — instant UI feedback
+        setOrders(prev =>
+          prev.map(o =>
+            o._id === order._id ? { ...o, orderStatus: newStatus } : o
+          )
+        );
       } else {
-        alert(data.error || "Failed to update status");
-        fetchOrders(); // Reload to reset select dropdown
+        alert(data.error || 'Failed to update status');
+        fetchOrders(); // Hard-refresh to reset the select
       }
     } catch (error) {
-      alert("Failed to update status");
+      alert('Failed to update status');
       fetchOrders();
+    } finally {
+      setUpdatingRowId(null);
     }
   };
 
@@ -474,8 +491,6 @@ export default function AdminOrdersPage() {
                   </tr>
                 ) : (
                   orders.map((order) => {
-                    const currentStatus = order.orderStatus || 'Pending';
-                    const allowed = VALID_TRANSITIONS[currentStatus] || [];
                     const isSelected = selectedIds.includes(order._id);
                     return (
                       <tr 
@@ -522,22 +537,56 @@ export default function AdminOrdersPage() {
                           )}
                         </td>
                         <td className="p-4">
-                          <select 
-                            value={order.orderStatus}
-                            onChange={(e) => handleStatusChangeInline(order, e.target.value)}
-                            className={`text-xs font-bold px-2 py-1.5 rounded-lg outline-none border cursor-pointer ${getStatusColor(order.orderStatus)}`}
-                          >
-                            <option value={order.orderStatus}>{order.orderStatus}</option>
-                            {allowed.map(target => (
-                              <option key={target} value={target}>{target}</option>
-                            ))}
-                            {!allowed.includes('Cancelled') && order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Refunded' && order.orderStatus !== 'Completed' && (
-                              <option value="Cancelled">Cancelled</option>
+                          <div className="relative">
+                            {updatingRowId === order._id && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-lg z-10">
+                                <Loader2 size={14} className="animate-spin text-[#A31F24]" />
+                              </div>
                             )}
-                            {!allowed.includes('Refunded') && (order.orderStatus === 'Delivered' || order.orderStatus === 'Completed') && (
-                              <option value="Refunded">Refunded</option>
-                            )}
-                          </select>
+                            <div className="relative">
+                              {/* Decorative status pill (read-only look) */}
+                              <select
+                                value={order.orderStatus}
+                                disabled={updatingRowId === order._id}
+                                onChange={(e) =>
+                                  handleStatusChangeInline(order, e.target.value)
+                                }
+                                className={`appearance-none text-xs font-bold px-3 py-1.5 rounded-lg outline-none border cursor-pointer transition-all duration-150 disabled:opacity-60 disabled:cursor-wait ${getStatusColor(
+                                  order.orderStatus
+                                )}`}
+                                style={{
+                                  WebkitAppearance: 'none',
+                                  MozAppearance: 'none',
+                                }}
+                              >
+                                {ALL_STATUSES.map((status) => (
+                                  <option key={status} value={status}>
+                                    {status}
+                                  </option>
+                                ))}
+                              </select>
+                              {/* Chevron indicator */}
+                              <div className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center">
+                                <svg
+                                  className={`w-3 h-3 transition-colors ${
+                                    updatingRowId === order._id
+                                      ? 'text-slate-300'
+                                      : 'text-slate-400'
+                                  }`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
                         </td>
                         <td className="p-4 text-right pr-6">
                           <div className="flex justify-end gap-2">

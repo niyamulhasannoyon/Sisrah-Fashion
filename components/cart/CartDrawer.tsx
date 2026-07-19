@@ -59,17 +59,17 @@ export default function CartDrawer() {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — layered above navbar (z-[100]) */}
       {isCartOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] transition-opacity duration-300"
           onClick={toggleCart}
         />
       )}
 
-      {/* Drawer */}
+      {/* Drawer panel — above backdrop, starts from the very top */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[440px] bg-white shadow-2xl z-50 transform transition-all duration-500 ease-out flex flex-col ${
+        className={`fixed inset-y-0 right-0 h-screen w-full sm:w-[440px] bg-white shadow-2xl z-[210] transform transition-all duration-500 ease-out flex flex-col ${
           isCartOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >

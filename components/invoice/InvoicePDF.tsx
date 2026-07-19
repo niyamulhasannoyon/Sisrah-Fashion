@@ -4,102 +4,198 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
 } from '@react-pdf/renderer';
 
+// ─────────────────────────── Color Palette ───────────────────────────
+const COLORS = {
+  // Primary brand
+  primary: '#8B1A1A',        // Deep Crimson — main accent
+  primaryLight: '#A31F24',   // Slightly lighter crimson
+  primaryDark: '#6B1313',    // Darker for depth
+
+  // Neutrals
+  charcoal: '#1E1E1E',       // Near-black for body text
+  darkGray: '#3D3D3D',       // Secondary headings
+  mediumGray: '#6B7280',     // Labels, secondary text
+  lightGray: '#9CA3AF',      // Very subtle text
+
+  // Backgrounds & Surfaces
+  pageBg: '#FFFFFF',
+  cardBg: '#F8F6F3',         // Warm off-white / light cream
+  stripeBg: '#FDFBF7',       // Cream table stripe
+  border: '#E8E4DE',         // Warm border
+  borderLight: '#F0EDE8',    // Lighter border
+
+  // Functional
+  white: '#FFFFFF',
+  green: '#059669',
+  amber: '#D97706',
+  red: '#DC2626',
+  blue: '#2563EB',
+};
+
+// ─────────────────────────── Stylesheet ──────────────────────────────
 const styles = StyleSheet.create({
+  // ── Page Base ──
   page: {
-    padding: 40,
-    fontSize: 10,
+    padding: 36,
+    paddingBottom: 64,
+    fontSize: 9,
     fontFamily: 'Helvetica',
-    color: '#1A1A1A',
-    backgroundColor: '#FFFFFF',
+    color: COLORS.charcoal,
+    backgroundColor: COLORS.pageBg,
   },
+
+  // ── Header ──
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 30,
+    marginBottom: 28,
     paddingBottom: 20,
     borderBottomWidth: 2,
-    borderBottomColor: '#1A1A1A',
+    borderBottomColor: COLORS.primary,
   },
-  brandSection: {
+  headerLeft: {
     flexDirection: 'column',
-    gap: 4,
+    gap: 6,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
+  },
+  logoImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 6,
+  },
+  logoFallback: {
+    width: 44,
+    height: 44,
+    borderRadius: 6,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+  },
+  logoFallbackText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    lineHeight: 1.3,
+    textAlign: 'center',
   },
   brandName: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    letterSpacing: 4,
+    letterSpacing: 5,
     textTransform: 'uppercase',
+    color: COLORS.charcoal,
   },
   brandTagline: {
-    fontSize: 8,
-    color: '#666',
-    letterSpacing: 2,
+    fontSize: 7,
+    color: COLORS.mediumGray,
+    letterSpacing: 3,
     textTransform: 'uppercase',
   },
-  invoiceTitle: {
-    fontSize: 28,
+  headerRight: {
+    alignItems: 'flex-end',
+    flexDirection: 'column',
+    gap: 6,
+  },
+  invoiceBadge: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  invoiceBadgeText: {
+    color: COLORS.white,
+    fontSize: 18,
     fontWeight: 'bold',
     letterSpacing: 6,
     textTransform: 'uppercase',
-    color: '#A31F24',
   },
-  invoiceMeta: {
+  invoiceNumber: {
+    fontSize: 9,
+    color: COLORS.darkGray,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+
+  // ── Meta Cards (side-by-side) ──
+  metaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 25,
-    gap: 20,
+    gap: 14,
+    marginBottom: 24,
   },
-  metaBlock: {
+  metaCard: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: COLORS.cardBg,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  metaAccent: {
+    width: 4,
+    backgroundColor: COLORS.primary,
+  },
+  metaContent: {
     flex: 1,
     padding: 12,
-    backgroundColor: '#F8F8F8',
-    borderRadius: 4,
+    flexDirection: 'column',
+    gap: 3,
   },
   metaLabel: {
     fontSize: 7,
-    color: '#888',
+    color: COLORS.primary,
+    fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: 2,
-    marginBottom: 4,
-    fontWeight: 'bold',
+    marginBottom: 2,
   },
-  metaValue: {
+  metaName: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#1A1A1A',
+    color: COLORS.charcoal,
   },
-  metaValueSmall: {
+  metaText: {
     fontSize: 8,
-    color: '#555',
-    marginTop: 2,
+    color: COLORS.darkGray,
+    lineHeight: 1.4,
   },
+
+  // ── Section Title ──
   sectionTitle: {
     fontSize: 8,
     fontWeight: 'bold',
-    color: '#888',
+    color: COLORS.primary,
     textTransform: 'uppercase',
     letterSpacing: 2,
     marginBottom: 8,
   },
+
+  // ── Items Table ──
   table: {
-    marginBottom: 20,
+    marginBottom: 18,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: COLORS.border,
     borderRadius: 4,
     overflow: 'hidden',
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#1A1A1A',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    backgroundColor: COLORS.primary,
   },
   tableHeaderCell: {
-    color: '#FFFFFF',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    color: COLORS.white,
     fontSize: 7,
     fontWeight: 'bold',
     textTransform: 'uppercase',
@@ -107,100 +203,172 @@ const styles = StyleSheet.create({
   },
   tableRow: {
     flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: COLORS.borderLight,
     alignItems: 'center',
   },
+  tableRowLast: {
+    borderBottomWidth: 0,
+  },
   tableRowAlt: {
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.stripeBg,
   },
   tableCell: {
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     fontSize: 8,
-    color: '#374151',
+    color: COLORS.charcoal,
   },
   tableCellBold: {
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     fontSize: 8,
     fontWeight: 'bold',
-    color: '#1A1A1A',
+    color: COLORS.charcoal,
   },
-  totalsSection: {
-    marginLeft: 'auto',
-    width: '50%',
-    padding: 15,
-    backgroundColor: '#F8F8F8',
-    borderRadius: 4,
+  tableCellVariant: {
+    fontSize: 7,
+    color: COLORS.mediumGray,
+    marginTop: 1,
+  },
+
+  // ── Payment & Info Row ──
+  infoRow: {
+    flexDirection: 'row',
+    gap: 12,
     marginBottom: 20,
+  },
+  infoBlock: {
+    flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 4,
+    backgroundColor: COLORS.cardBg,
+    flexDirection: 'column',
+    gap: 2,
+  },
+  infoLabel: {
+    fontSize: 6,
+    color: COLORS.mediumGray,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    fontWeight: 'bold',
+  },
+  infoValue: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: COLORS.charcoal,
+  },
+
+  // ── Totals / Summary ──
+  totalsWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 20,
+  },
+  totalsCard: {
+    width: '55%',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  totalsHeader: {
+    backgroundColor: COLORS.cardBg,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  totalsHeaderText: {
+    fontSize: 7,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 3,
-    fontSize: 9,
+    paddingVertical: 5,
+    paddingHorizontal: 14,
   },
-  totalRowBold: {
+  totalRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderLight,
+  },
+  totalLabel: {
+    fontSize: 8,
+    color: COLORS.darkGray,
+  },
+  totalValue: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: COLORS.charcoal,
+  },
+  totalDiscountLabel: {
+    fontSize: 8,
+    color: COLORS.green,
+  },
+  totalDiscountValue: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: COLORS.green,
+  },
+  totalShipping: {
+    fontSize: 8,
+    color: COLORS.blue,
+  },
+  totalShippingValue: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: COLORS.blue,
+  },
+  grandTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 5,
-    borderTopWidth: 2,
-    borderTopColor: '#1A1A1A',
-    marginTop: 4,
-    fontSize: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: COLORS.primary,
+  },
+  grandTotalLabel: {
+    fontSize: 10,
     fontWeight: 'bold',
+    color: COLORS.white,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  grandTotalValue: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: COLORS.white,
+  },
+
+  // ── Footer ──
+  footerWrapper: {
+    position: 'absolute',
+    bottom: 28,
+    left: 36,
+    right: 36,
+  },
+  footerDivider: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    marginBottom: 10,
   },
   footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 40,
-    right: 40,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
   },
   footerText: {
     fontSize: 7,
-    color: '#999',
-    textTransform: 'uppercase',
+    color: COLORS.lightGray,
     letterSpacing: 1,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    fontSize: 7,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  paymentInfo: {
-    flexDirection: 'row',
-    gap: 20,
-    marginBottom: 20,
-  },
-  paymentBlock: {
-    flex: 1,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 4,
-  },
-  paymentLabel: {
-    fontSize: 7,
-    color: '#888',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 3,
-    fontWeight: 'bold',
-  },
-  paymentValue: {
-    fontSize: 9,
-    fontWeight: 'bold',
   },
 });
 
+// ─────────────────────────── Types ───────────────────────────────────
 interface InvoiceItem {
   title: string;
   price: number;
@@ -234,156 +402,314 @@ interface InvoiceData {
   brandAddress?: string;
   brandPhone?: string;
   brandEmail?: string;
+  logoUrl?: string;           // Optional brand logo image URL
 }
 
+// ─────────────────────────── Helpers ─────────────────────────────────
+const CURRENCY = 'Tk.';
+
+const formatCurrency = (val: number): string =>
+  `${CURRENCY} ${val.toLocaleString('en-BD')}`;
+
+const formatDate = (dateStr: string): string => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-BD', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+};
+
+const getStatusColor = (status: string): string => {
+  switch (status?.toLowerCase()) {
+    case 'paid':
+    case 'delivered':
+    case 'completed':
+      return COLORS.green;
+    case 'pending':
+    case 'processing':
+      return COLORS.amber;
+    case 'cancelled':
+    case 'refunded':
+    case 'failed':
+      return COLORS.red;
+    default:
+      return COLORS.mediumGray;
+  }
+};
+
+// ─────────────────────────── Document Component ──────────────────────
 export function InvoiceDocument({ data }: { data: InvoiceData }) {
   const subtotal = data.subtotal || data.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const discount = data.discount || 0;
   const shipping = data.shippingFee || 0;
-  const total = data.totalAmount || (subtotal - discount + shipping);
-
-  const formatCurrency = (val: number) => `৳ ${val.toLocaleString('en-BD')}`;
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-BD', { day: 'numeric', month: 'long', year: 'numeric' });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Paid': case 'Delivered': case 'Completed': return '#059669';
-      case 'Pending': return '#D97706';
-      case 'Cancelled': return '#DC2626';
-      default: return '#6B7280';
-    }
-  };
+  const total = data.totalAmount || subtotal - discount + shipping;
 
   const orderNum = data.orderNumber || `#${data.orderId}`;
+  const brandName = data.brandName || 'AS SIDRAT';
+  const brandTagline = 'PREMIUM FASHION & LIFESTYLE';
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
+        {/* ──────── HEADER ──────── */}
         <View style={styles.header}>
-          <View style={styles.brandSection}>
-            <Text style={styles.brandName}>{data.brandName || 'AS SIDRAT'}</Text>
-            <Text style={styles.brandTagline}>Premium Fashion & Lifestyle</Text>
+          {/* Left — Brand Logo & Name */}
+          <View style={styles.headerLeft}>
+            <View style={styles.logoContainer}>
+              {data.logoUrl ? (
+                <Image
+                  style={styles.logoImage}
+                  src={data.logoUrl}
+                />
+              ) : (
+                <View style={styles.logoFallback}>
+                  <Text style={styles.logoFallbackText}>AS</Text>
+                </View>
+              )}
+              <View style={{ flexDirection: 'column', gap: 2 }}>
+                <Text style={styles.brandName}>{brandName}</Text>
+                <Text style={styles.brandTagline}>{brandTagline}</Text>
+              </View>
+            </View>
           </View>
-          <View style={{ alignItems: 'flex-end' }}>
-            <Text style={styles.invoiceTitle}>Invoice</Text>
-            <Text style={{ fontSize: 8, color: '#666', marginTop: 4 }}>{orderNum}</Text>
+
+          {/* Right — Invoice Badge */}
+          <View style={styles.headerRight}>
+            <View style={styles.invoiceBadge}>
+              <Text style={styles.invoiceBadgeText}>Invoice</Text>
+            </View>
+            <Text style={styles.invoiceNumber}>{orderNum}</Text>
           </View>
         </View>
 
-        {/* Invoice Meta */}
-        <View style={styles.invoiceMeta}>
-          <View style={styles.metaBlock}>
-            <Text style={styles.metaLabel}>Bill To</Text>
-            <Text style={styles.metaValue}>{data.customerName}</Text>
-            <Text style={styles.metaValueSmall}>{data.customerPhone}</Text>
-            {data.customerEmail && <Text style={styles.metaValueSmall}>{data.customerEmail}</Text>}
-            <Text style={styles.metaValueSmall}>{data.customerAddress}</Text>
-            <Text style={styles.metaValueSmall}>{data.customerCity}</Text>
+        {/* ──────── BILL TO + INVOICE DETAILS (side-by-side cards) ──────── */}
+        <View style={styles.metaRow}>
+          {/* Bill To Card */}
+          <View style={styles.metaCard}>
+            <View style={styles.metaAccent} />
+            <View style={styles.metaContent}>
+              <Text style={styles.metaLabel}>Bill To</Text>
+              <Text style={styles.metaName}>{data.customerName}</Text>
+              <Text style={styles.metaText}>{data.customerPhone}</Text>
+              {data.customerEmail && (
+                <Text style={styles.metaText}>{data.customerEmail}</Text>
+              )}
+              <Text style={styles.metaText}>{data.customerAddress}</Text>
+              <Text style={styles.metaText}>{data.customerCity}</Text>
+            </View>
           </View>
-          <View style={styles.metaBlock}>
-            <Text style={styles.metaLabel}>Invoice Details</Text>
-            <Text style={styles.metaValue}>Date: {formatDate(data.createdAt)}</Text>
-            <Text style={[styles.metaValueSmall, { color: getStatusColor(data.paymentStatus), fontWeight: 'bold', marginTop: 4 }]}>
-              Payment: {data.paymentStatus}
-            </Text>
-            <Text style={[styles.metaValueSmall, { color: getStatusColor(data.orderStatus), marginTop: 2 }]}>
-              Status: {data.orderStatus}
-            </Text>
+
+          {/* Invoice Details Card */}
+          <View style={styles.metaCard}>
+            <View style={styles.metaAccent} />
+            <View style={styles.metaContent}>
+              <Text style={styles.metaLabel}>Invoice Details</Text>
+              <Text style={styles.metaText}>
+                Date:{' '}
+                <Text style={{ fontWeight: 'bold' }}>
+                  {formatDate(data.createdAt)}
+                </Text>
+              </Text>
+              <Text style={styles.metaText}>
+                Payment:{' '}
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    color: getStatusColor(data.paymentStatus),
+                  }}
+                >
+                  {data.paymentStatus}
+                </Text>
+              </Text>
+              <Text style={styles.metaText}>
+                Status:{' '}
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    color: getStatusColor(data.orderStatus),
+                  }}
+                >
+                  {data.orderStatus}
+                </Text>
+              </Text>
+              {data.paidAmount !== undefined && data.paidAmount > 0 && (
+                <Text style={styles.metaText}>
+                  Paid:{' '}
+                  <Text style={{ fontWeight: 'bold' }}>
+                    {formatCurrency(data.paidAmount)}
+                  </Text>
+                </Text>
+              )}
+            </View>
           </View>
         </View>
 
-        {/* Order Items Table */}
+        {/* ──────── ORDER ITEMS TABLE ──────── */}
         <Text style={styles.sectionTitle}>Order Items</Text>
         <View style={styles.table}>
+          {/* Table Header */}
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderCell, { flex: 3 }]}>Item</Text>
             <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'center' }]}>Qty</Text>
-            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Price</Text>
-            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Total</Text>
+            <Text style={[styles.tableHeaderCell, { flex: 1.2, textAlign: 'right' }]}>Price</Text>
+            <Text style={[styles.tableHeaderCell, { flex: 1.2, textAlign: 'right' }]}>Total</Text>
           </View>
-          {data.items.map((item, idx) => (
-            <View key={idx} style={[styles.tableRow, idx % 2 === 1 ? styles.tableRowAlt : {}]}>
-              <Text style={[styles.tableCellBold, { flex: 3 }]}>
-                {item.title}
-                {(item.selectedSize || item.selectedColor) && ` (${item.selectedSize || ''}${item.selectedSize && item.selectedColor ? ' / ' : ''}${item.selectedColor || ''})`}
-              </Text>
-              <Text style={[styles.tableCell, { flex: 1, textAlign: 'center' }]}>{item.quantity}</Text>
-              <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>{formatCurrency(item.price)}</Text>
-              <Text style={[styles.tableCellBold, { flex: 1, textAlign: 'right' }]}>{formatCurrency(item.price * item.quantity)}</Text>
-            </View>
-          ))}
+
+          {/* Table Rows */}
+          {data.items.map((item, idx) => {
+            const isLast = idx === data.items.length - 1;
+            return (
+              <View
+                key={idx}
+                style={[
+                  styles.tableRow,
+                  idx % 2 === 1 ? styles.tableRowAlt : {},
+                  isLast ? styles.tableRowLast : {},
+                ]}
+              >
+                <View style={{ flex: 3, paddingVertical: 7, paddingHorizontal: 10 }}>
+                  <Text style={{ fontSize: 8, fontWeight: 'bold', color: COLORS.charcoal }}>
+                    {item.title}
+                  </Text>
+                  {(item.selectedSize || item.selectedColor) && (
+                    <Text style={styles.tableCellVariant}>
+                      {[
+                        item.selectedSize ? `Size: ${item.selectedSize}` : '',
+                        item.selectedColor ? `Color: ${item.selectedColor}` : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' | ')}
+                    </Text>
+                  )}
+                </View>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    { flex: 1, textAlign: 'center', fontWeight: 'bold' },
+                  ]}
+                >
+                  {item.quantity}
+                </Text>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    { flex: 1.2, textAlign: 'right' },
+                  ]}
+                >
+                  {formatCurrency(item.price)}
+                </Text>
+                <Text
+                  style={[
+                    styles.tableCellBold,
+                    { flex: 1.2, textAlign: 'right' },
+                  ]}
+                >
+                  {formatCurrency(item.price * item.quantity)}
+                </Text>
+              </View>
+            );
+          })}
         </View>
 
-        {/* Payment Info */}
-        <View style={styles.paymentInfo}>
-          <View style={styles.paymentBlock}>
-            <Text style={styles.paymentLabel}>Payment Method</Text>
-            <Text style={styles.paymentValue}>{data.paymentMethod}</Text>
+        {/* ──────── PAYMENT / META INFO ROW ──────── */}
+        <View style={styles.infoRow}>
+          <View style={styles.infoBlock}>
+            <Text style={styles.infoLabel}>Payment Method</Text>
+            <Text style={styles.infoValue}>{data.paymentMethod}</Text>
           </View>
           {data.transactionId && (
-            <View style={styles.paymentBlock}>
-              <Text style={styles.paymentLabel}>Transaction ID</Text>
-              <Text style={styles.paymentValue}>{data.transactionId}</Text>
+            <View style={styles.infoBlock}>
+              <Text style={styles.infoLabel}>Transaction ID</Text>
+              <Text style={styles.infoValue}>{data.transactionId}</Text>
             </View>
           )}
           {data.couponCode && (
-            <View style={styles.paymentBlock}>
-              <Text style={styles.paymentLabel}>Coupon Applied</Text>
-              <Text style={[styles.paymentValue, { color: '#A31F24' }]}>{data.couponCode}</Text>
+            <View style={styles.infoBlock}>
+              <Text style={styles.infoLabel}>Coupon</Text>
+              <Text style={[styles.infoValue, { color: COLORS.primary }]}>
+                {data.couponCode}
+              </Text>
             </View>
           )}
           {data.notes && (
-            <View style={styles.paymentBlock}>
-              <Text style={styles.paymentLabel}>Notes</Text>
-              <Text style={[styles.paymentValue, { fontSize: 8 }]}>{data.notes}</Text>
+            <View style={styles.infoBlock}>
+              <Text style={styles.infoLabel}>Notes</Text>
+              <Text style={[styles.infoValue, { fontSize: 7 }]}>
+                {data.notes}
+              </Text>
             </View>
           )}
         </View>
 
-        {/* Totals */}
-        <View style={styles.totalsSection}>
-          <View style={styles.totalRow}>
-            <Text>Subtotal</Text>
-            <Text>{formatCurrency(subtotal)}</Text>
-          </View>
-          {discount > 0 && (
-            <View style={styles.totalRow}>
-              <Text style={{ color: '#059669' }}>Discount</Text>
-              <Text style={{ color: '#059669' }}>-{formatCurrency(discount)}</Text>
+        {/* ──────── TOTALS / SUMMARY ──────── */}
+        <View style={styles.totalsWrapper}>
+          <View style={styles.totalsCard}>
+            {/* Summary label bar */}
+            <View style={styles.totalsHeader}>
+              <Text style={styles.totalsHeaderText}>Order Summary</Text>
             </View>
-          )}
-          <View style={styles.totalRow}>
-            <Text>Shipping</Text>
-            <Text>{shipping === 0 ? 'FREE' : formatCurrency(shipping)}</Text>
-          </View>
-          <View style={styles.totalRowBold}>
-            <Text>Total</Text>
-            <Text style={{ color: '#A31F24' }}>{formatCurrency(total)}</Text>
+
+            {/* Subtotal */}
+            <View style={[styles.totalRow, styles.totalRowBorder]}>
+              <Text style={styles.totalLabel}>Subtotal</Text>
+              <Text style={styles.totalValue}>{formatCurrency(subtotal)}</Text>
+            </View>
+
+            {/* Discount (if any) */}
+            {discount > 0 && (
+              <View style={[styles.totalRow, styles.totalRowBorder]}>
+                <Text style={styles.totalDiscountLabel}>
+                  Discount
+                  {data.couponCode ? ` (${data.couponCode})` : ''}
+                </Text>
+                <Text style={styles.totalDiscountValue}>
+                  -{formatCurrency(discount)}
+                </Text>
+              </View>
+            )}
+
+            {/* Shipping */}
+            <View style={[styles.totalRow, styles.totalRowBorder]}>
+              <Text style={styles.totalShipping}>Shipping</Text>
+              <Text style={styles.totalShippingValue}>
+                {shipping === 0 ? 'FREE' : formatCurrency(shipping)}
+              </Text>
+            </View>
+
+            {/* Grand Total */}
+            <View style={styles.grandTotalRow}>
+              <Text style={styles.grandTotalLabel}>Total</Text>
+              <Text style={styles.grandTotalValue}>
+                {formatCurrency(total)}
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            {data.brandName || 'AS SIDRAT'} — {data.brandAddress || 'Dhaka, Bangladesh'}
-          </Text>
-          <Text style={styles.footerText}>
-            {data.brandPhone || '+880 1733 919 156'} | {data.brandEmail || 'info@assidrat.com'}
-          </Text>
+        {/* ──────── FOOTER ──────── */}
+        <View style={styles.footerWrapper}>
+          <View style={styles.footerDivider} />
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              {brandName} — {data.brandAddress || 'Dhaka, Bangladesh'}
+            </Text>
+            <Text style={styles.footerText}>
+              {data.brandPhone || '+880 1733 919 156'} |{' '}
+              {data.brandEmail || 'info@assidrat.com'}
+            </Text>
+          </View>
         </View>
       </Page>
     </Document>
   );
 }
 
-/**
- * Build invoice data payload from an order object (from DB or manual input).
- */
-export function buildInvoiceData(order: any, overrides?: Partial<InvoiceData>): InvoiceData {
+// ─────────────────────────── Data Builder ────────────────────────────
+export function buildInvoiceData(
+  order: any,
+  overrides?: Partial<InvoiceData>
+): InvoiceData {
   const items: InvoiceItem[] = (order.orderItems || []).map((item: any) => ({
     title: item.title || 'Item',
     price: item.price || 0,
@@ -394,7 +720,7 @@ export function buildInvoiceData(order: any, overrides?: Partial<InvoiceData>): 
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const discount = order.couponDiscount || 0;
-  const shipping = 0; // Shipping is baked into totalAmount in the DB, but we can allow override
+  const shipping = 0; // Shipping is baked into totalAmount in the DB
 
   return {
     orderId: order.orderId || order._id?.toString().slice(-6) || '',

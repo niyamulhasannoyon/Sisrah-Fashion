@@ -5,8 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { 
   ArrowLeft, Loader2, Save, Trash2, 
-  MapPin, User, CreditCard, Truck, FileText, CheckCircle2, AlertCircle, Download 
+  MapPin, User, CreditCard, Truck, FileText, CheckCircle2, AlertCircle, Download, Send, X, Mail, Eye 
 } from 'lucide-react';
+import InvoicePreviewModal from '@/components/invoice/InvoicePreviewModal';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   'Pending': ['Confirmed', 'Cancelled'],
@@ -52,6 +53,14 @@ export default function OrderDetailPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
   const [deleting, setDeleting] = useState(false);
+
+  // Invoice preview modal
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+
+  // Invoice email modal states
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailAddress, setEmailAddress] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -282,6 +291,12 @@ export default function OrderDetailPage() {
         {/* Top Actions */}
         <div className="flex items-center gap-3">
           <button 
+            onClick={() => setShowPreviewModal(true)}
+            className="px-4 py-2.5 bg-slate-900 text-white hover:bg-[#8B1A1A] font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 shadow-sm"
+          >
+            <Eye size={16} /> Preview Invoice
+          </button>
+          <button 
             onClick={async () => {
               try {
                 const res = await fetch(`/api/invoice/generate?orderId=${id}&download=true`);
@@ -299,7 +314,16 @@ export default function OrderDetailPage() {
             }}
             className="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2"
           >
-            <Download size={16} /> Invoice
+            <Download size={16} /> Download
+          </button>
+          <button 
+            onClick={() => {
+              setEmailAddress(order?.shippingInfo?.email || '');
+              setShowEmailModal(true);
+            }}
+            className="px-4 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2"
+          >
+            <Send size={16} /> Email Invoice
           </button>
           <button 
             onClick={() => setShowDeleteModal(true)}
@@ -664,6 +688,118 @@ export default function OrderDetailPage() {
         </div>
 
       </div>
+
+      {/* Invoice Preview Modal */}
+      {showPreviewModal && (
+        <InvoicePreviewModal
+          orderId={id}
+          orderNumber={order?.orderId}
+          customerEmail={order?.shippingInfo?.email}
+          onClose={() => setShowPreviewModal(false)}
+        />
+      )}
+
+      {/* Send Invoice via Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden flex flex-col shadow-2xl p-6 space-y-6">
+            <div className="space-y-2">
+              <div className="flex justify-between items-start">
+                <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <Mail size={22} className="text-blue-600" /> Send Invoice via Email
+                </h2>
+                <button 
+                  onClick={() => { setShowEmailModal(false); setEmailAddress(''); }}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <p className="text-xs text-slate-500">
+                Send the invoice PDF for Order <strong>#{order?.orderId || id.slice(-6).toUpperCase()}</strong> directly to a customer email address.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase text-slate-500 block">
+                Recipient Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="customer@example.com"
+                value={emailAddress}
+                onChange={(e) => setEmailAddress(e.target.value)}
+                className={`w-full border p-3 rounded-xl outline-none text-sm transition-all ${
+                  emailAddress && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)
+                    ? 'border-emerald-300 bg-emerald-50/30'
+                    : 'border-slate-200'
+                } focus:border-slate-400`}
+              />
+              {order?.shippingInfo?.email && (
+                <p className="text-[10px] text-slate-400 flex items-center gap-1.5">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  Order has email on file: <strong className="text-slate-600">{order.shippingInfo.email}</strong>
+                </p>
+              )}
+              {!order?.shippingInfo?.email && (
+                <p className="text-[10px] text-amber-600 flex items-center gap-1.5">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  This order has no email on file. Enter one manually to send.
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+              <button 
+                onClick={() => {
+                  setShowEmailModal(false);
+                  setEmailAddress('');
+                }}
+                disabled={sendingEmail}
+                className="px-5 py-2.5 bg-white border border-slate-200 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-slate-100 transition-all disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!emailAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)) {
+                    alert('Please enter a valid email address');
+                    return;
+                  }
+                  setSendingEmail(true);
+                  try {
+                    const res = await fetch('/api/admin/orders/send-invoice', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ orderId: id, customEmail: emailAddress }),
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                      alert('✅ Invoice sent successfully!');
+                      setShowEmailModal(false);
+                      setEmailAddress('');
+                    } else {
+                      alert(`❌ ${data.error || 'Failed to send invoice'}`);
+                    }
+                  } catch (err) {
+                    alert('❌ Network error. Please try again.');
+                  } finally {
+                    setSendingEmail(false);
+                  }
+                }}
+                disabled={sendingEmail || !emailAddress}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
+              >
+                {sendingEmail ? (
+                  <><Loader2 className="animate-spin" size={14} /> Sending...</>
+                ) : (
+                  <><Send size={14} /> Send Invoice</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
