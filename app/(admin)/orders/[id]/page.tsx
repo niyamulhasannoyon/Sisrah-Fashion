@@ -492,6 +492,22 @@ export default function OrderDetailPage() {
                     <span>Total Bill:</span>
                     <span className="font-bold">৳{order.totalAmount.toLocaleString()}</span>
                   </div>
+
+                  {/* Applied Coupon */}
+                  {order.couponCode && (
+                    <div className="flex justify-between items-center border-t border-dashed border-slate-200 pt-1.5">
+                      <span className="flex items-center gap-1.5">
+                        Coupon Applied
+                        <span className="bg-red-50 text-[#A31F24] font-black px-1.5 py-0.5 rounded text-[9px] border border-red-100">
+                          {order.couponCode}
+                        </span>
+                      </span>
+                      <span className="font-bold text-emerald-600">
+                        - ৳{(order.couponDiscount || 0).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between">
                     <span>Paid Amount:</span>
                     <span className="font-bold text-emerald-600">

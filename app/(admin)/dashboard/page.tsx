@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { DollarSign, ShoppingBag, Users, TrendingUp, MoreVertical, Loader2 } from 'lucide-react';
+import { DollarSign, ShoppingBag, Users, TrendingUp, MoreVertical, Loader2, Tag, BarChart3 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AdminDashboard() {
@@ -71,6 +71,105 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {/* ── Coupon Analytics Section ────────────────────────────────────────── */}
+      {data?.couponAnalytics && (
+        <>
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <Tag size={20} className="text-[#A31F24]" />
+              <h3 className="text-lg font-bold text-slate-900">Coupon Analytics</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-slate-50 rounded-lg p-4 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Orders with Coupons</p>
+                <p className="text-2xl font-black text-slate-900">{data.couponAnalytics.totalOrdersWithCoupon}</p>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-4 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Discount Given</p>
+                <p className="text-2xl font-black text-emerald-600">৳ {data.couponAnalytics.totalDiscountGiven.toLocaleString()}</p>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-4 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Coupon Usage Rate</p>
+                <p className="text-2xl font-black text-slate-900">{data.couponAnalytics.couponUsageRate}%</p>
+              </div>
+            </div>
+
+            {data.couponAnalytics.topCoupons?.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-100">
+                      <th className="pb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Coupon Code</th>
+                      <th className="pb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Orders</th>
+                      <th className="pb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Discount</th>
+                      <th className="pb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Revenue from Used</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {data.couponAnalytics.topCoupons.map((c: any, i: number) => (
+                      <tr key={c._id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-3">
+                          <span className="bg-red-50 text-[#A31F24] font-black px-2 py-1 rounded text-xs border border-red-100">
+                            {c._id}
+                          </span>
+                        </td>
+                        <td className="py-3 font-bold text-slate-800">{c.count}x</td>
+                        <td className="py-3 font-bold text-emerald-600">৳ {c.totalDiscount.toLocaleString()}</td>
+                        <td className="py-3 font-medium text-slate-600">৳ {c.totalRevenue.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {(!data.couponAnalytics.topCoupons || data.couponAnalytics.topCoupons.length === 0) && (
+              <p className="text-sm text-slate-400 italic text-center py-8">No coupon usage data yet. Coupons applied to orders will appear here.</p>
+            )}
+          </div>
+
+          {/* Coupon Discount Trend Chart */}
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <BarChart3 size={20} className="text-emerald-600" />
+              <h3 className="text-lg font-bold text-slate-900">Discount Trend</h3>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-auto">Last 7 Days</span>
+            </div>
+            <div className="h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data?.chartData || []}>
+                  <defs>
+                    <linearGradient id="colorDiscount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                  <Tooltip 
+                    contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
+                    itemStyle={{fontSize: '12px', fontWeight: 'bold', color: '#10B981'}}
+                    formatter={(value) => [`৳ ${value}`, 'Discount']}
+                  />
+                  <Area type="monotone" dataKey="couponDiscount" stroke="#10B981" strokeWidth={2} fillOpacity={1} fill="url(#colorDiscount)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-7 gap-1">
+              {(data?.chartData || []).map((day: any, i: number) => (
+                <div key={i} className="text-center">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase">{day.date}</p>
+                  <p className={`text-xs font-black mt-1 ${day.couponOrders > 0 ? 'text-emerald-600' : 'text-slate-300'}`}>
+                    {day.couponOrders}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Revenue Analytics Chart */}

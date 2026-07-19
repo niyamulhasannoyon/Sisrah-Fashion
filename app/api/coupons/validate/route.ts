@@ -26,6 +26,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: `Minimum purchase of ৳${coupon.minPurchase} required` });
     }
 
+    // Check if coupon has reached its maximum usage limit
+    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+      return NextResponse.json({ success: false, message: "Coupon usage limit reached" });
+    }
+
     return NextResponse.json({ success: true, coupon });
   } catch (error) {
     return NextResponse.json({ success: false, message: "Error validating coupon" });

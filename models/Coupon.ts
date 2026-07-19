@@ -6,6 +6,8 @@ const CouponSchema = new Schema({
   discountValue: { type: Number, required: true },
   minPurchase: { type: Number, default: 0 },
   expiryDate: { type: Date, required: true },
+  maxUses: { type: Number, default: null },   // null = unlimited uses
+  usedCount: { type: Number, default: 0 },     // incremented each time the coupon is applied
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 

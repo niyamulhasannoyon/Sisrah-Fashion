@@ -46,7 +46,25 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .limit(5);
 
-    // Get daily stats for last 7 days
+    // ── Coupon Analytics ──────────────────────────────────────────────────────
+    const couponStatsArray = await Order.aggregate([
+      { $match: { couponCode: { $exists: true, $nin: [null, ''] } } },
+      {
+        $group: {
+          _id: '$couponCode',
+          count: { $sum: 1 },
+          totalDiscount: { $sum: { $ifNull: ['$couponDiscount', 0] } },
+          totalRevenue: { $sum: { $cond: [{ $eq: ['$orderStatus', 'Cancelled'] }, 0, '$totalAmount'] } },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
+
+    const totalOrdersWithCoupon = couponStatsArray.reduce((sum, c) => sum + c.count, 0);
+    const totalDiscountGiven = couponStatsArray.reduce((sum, c) => sum + c.totalDiscount, 0);
+
+    // ── Daily Chart Data ───────────────────────────────────────────────────────
     const last7Days = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -64,7 +82,9 @@ export async function GET() {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
           revenue: { $sum: { $cond: [{ $eq: ["$orderStatus", "Cancelled"] }, 0, "$totalAmount"] } },
-          orders: { $sum: 1 }
+          orders: { $sum: 1 },
+          couponDiscount: { $sum: { $ifNull: ['$couponDiscount', 0] } },
+          couponOrders: { $sum: { $cond: [{ $and: [{ $ne: ['$couponCode', null] }, { $ne: ['$couponCode', ''] }] }, 1, 0] } },
         }
       }
     ]);
@@ -74,7 +94,9 @@ export async function GET() {
       return {
         date: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
         revenue: dayData ? dayData.revenue : 0,
-        orders: dayData ? dayData.orders : 0
+        orders: dayData ? dayData.orders : 0,
+        couponDiscount: dayData ? dayData.couponDiscount : 0,
+        couponOrders: dayData ? dayData.couponOrders : 0,
       };
     });
 
@@ -85,7 +107,13 @@ export async function GET() {
         netProfit,
         totalOrders, 
         totalCustomers,
-        conversionRate: 0 
+        conversionRate: 0
+      },
+      couponAnalytics: {
+        totalOrdersWithCoupon,
+        totalDiscountGiven,
+        couponUsageRate: totalOrders > 0 ? Math.round((totalOrdersWithCoupon / totalOrders) * 100) : 0,
+        topCoupons: couponStatsArray,
       },
       recentOrders,
       chartData

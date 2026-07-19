@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
+import Coupon from '@/models/Coupon';
 import Notification from '@/models/Notification';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
@@ -94,7 +95,19 @@ export async function POST(req: Request) {
       orderId: nextOrderId
     });
 
-    console.log('[Order] Created:', JSON.stringify({ orderId: nextOrderId, totalAmount }, null, 2));
+    // Increment coupon usage count if a coupon was applied
+    if (couponCode) {
+      try {
+        await Coupon.findOneAndUpdate(
+          { code: couponCode },
+          { $inc: { usedCount: 1 } }
+        );
+      } catch (couponErr) {
+        console.error('[Order] Failed to increment coupon usage:', couponErr);
+      }
+    }
+
+    console.log('[Order] Created:', JSON.stringify({ orderId: nextOrderId, totalAmount, couponCode }, null, 2));
 
     try {
       await Notification.create({

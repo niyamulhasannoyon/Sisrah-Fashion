@@ -7,7 +7,7 @@ export default function CouponManagement() {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    code: '', discountType: 'Percentage', discountValue: 0, minPurchase: 0, expiryDate: ''
+    code: '', discountType: 'Percentage', discountValue: 0, minPurchase: 0, maxUses: null as number | null, expiryDate: ''
   });
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function CouponManagement() {
     });
     if (res.ok) {
       fetchCoupons();
-      setFormData({ code: '', discountType: 'Percentage', discountValue: 0, minPurchase: 0, expiryDate: '' });
+      setFormData({ code: '', discountType: 'Percentage', discountValue: 0, minPurchase: 0, maxUses: null, expiryDate: '' });
     }
   };
 
@@ -98,6 +98,13 @@ export default function CouponManagement() {
             </div>
 
             <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Max Uses</label>
+              <input type="number" placeholder="Leave empty for unlimited" value={formData.maxUses ?? ''}
+                onChange={e => setFormData({...formData, maxUses: e.target.value ? Number(e.target.value) : null})}
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none text-sm transition-all" />
+            </div>
+
+            <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Expiry Date</label>
               <input type="date" required value={formData.expiryDate}
                 onChange={e => setFormData({...formData, expiryDate: e.target.value})}
@@ -121,6 +128,7 @@ export default function CouponManagement() {
                 <tr>
                   <th className="p-4">Code</th>
                   <th className="p-4">Discount</th>
+                  <th className="p-4">Usage</th>
                   <th className="p-4">Min. Spend</th>
                   <th className="p-4">Expiry</th>
                   <th className="p-4 text-right">Action</th>
@@ -129,38 +137,49 @@ export default function CouponManagement() {
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-400">
+                    <td colSpan={6} className="p-8 text-center text-slate-400">
                       <Loader2 className="animate-spin mx-auto mb-2" /> Loading coupons...
                     </td>
                   </tr>
                 ) : coupons.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-400 italic">
+                    <td colSpan={6} className="p-8 text-center text-slate-400 italic">
                       No coupons found. Create your first one!
                     </td>
                   </tr>
-                ) : coupons.map((c: any) => (
-                  <tr key={c._id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-4">
-                      <span className="bg-red-50 text-[#A31F24] font-black px-2 py-1 rounded text-xs border border-red-100">{c.code}</span>
-                    </td>
-                    <td className="p-4 font-bold text-slate-700">
-                      {c.discountValue}{c.discountType === 'Percentage' ? '%' : ' ৳'} OFF
-                    </td>
-                    <td className="p-4 text-slate-500 font-medium">৳ {c.minPurchase}</td>
-                    <td className="p-4 text-slate-500 font-medium">
-                      {new Date(c.expiryDate).toLocaleDateString()}
-                    </td>
-                    <td className="p-4 text-right">
-                      <button 
-                        onClick={() => handleDelete(c._id)}
-                        className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                ) : coupons.map((c: any) => {
+                  const isExhausted = c.maxUses && c.usedCount >= c.maxUses;
+                  return (
+                    <tr key={c._id} className={`hover:bg-slate-50 transition-colors ${isExhausted ? 'opacity-50' : ''}`}>
+                      <td className="p-4">
+                        <span className={`font-black px-2 py-1 rounded text-xs border ${isExhausted ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-red-50 text-[#A31F24] border-red-100'}`}>
+                          {c.code}
+                        </span>
+                        {isExhausted && <span className="ml-2 text-[9px] text-slate-400 font-bold uppercase tracking-wider">Exhausted</span>}
+                      </td>
+                      <td className="p-4 font-bold text-slate-700">
+                        {c.discountValue}{c.discountType === 'Percentage' ? '%' : ' ৳'} OFF
+                      </td>
+                      <td className="p-4">
+                        <span className={`text-xs font-black ${isExhausted ? 'text-red-500' : 'text-slate-500'}`}>
+                          {c.usedCount || 0}{c.maxUses ? ` / ${c.maxUses}` : ' ✓ Unlimited'}
+                        </span>
+                      </td>
+                      <td className="p-4 text-slate-500 font-medium">৳ {c.minPurchase}</td>
+                      <td className="p-4 text-slate-500 font-medium">
+                        {new Date(c.expiryDate).toLocaleDateString()}
+                      </td>
+                      <td className="p-4 text-right">
+                        <button 
+                          onClick={() => handleDelete(c._id)}
+                          className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
