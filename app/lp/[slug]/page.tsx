@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import LandingPage from '@/models/LandingPage';
+import Product from '@/models/Product';
 import LandingPageClient from '@/components/landing/LandingPageClient';
 import { getDirectImageLink } from '@/lib/utils';
 
