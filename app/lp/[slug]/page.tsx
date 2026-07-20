@@ -73,72 +73,73 @@ export default async function LpPage({ params }: LpPageProps) {
   await dbConnect();
   const { slug } = await params;
 
+  let raw;
   try {
-    const raw = await LandingPage.findOne({ slug, isActive: true })
+    raw = await LandingPage.findOne({ slug, isActive: true })
       .populate('productIds')
       .lean() as any;
-
-    if (!raw) {
-      notFound();
-    }
-
-    // Safe clone with null-filtered products
-    const products = safeProducts(raw.productIds);
-    const page = {
-      ...JSON.parse(JSON.stringify(raw)),
-      productIds: products,
-    };
-
-    // ── Build Schema.org markup for the landing page ──
-    const schemaMarkup = {
-      '@context': 'https://schema.org',
-      '@type': 'WebPage',
-      name: page.pageTitle,
-      description: page.customHero?.customSubheading || `Shop ${page.pageTitle} at AS SIDRAT`,
-      url: `https://assidrat.com/lp/${slug}`,
-      brand: { '@type': 'Brand', name: 'AS SIDRAT' },
-      ...(products.length > 0 && {
-        mainEntity: page.layoutType === 'single-product'
-          ? {
-              '@type': 'Product',
-              name: products[0]?.title || page.pageTitle,
-              offers: {
-                '@type': 'Offer',
-                priceCurrency: 'BDT',
-                price: safePrice(products[0]).toString(),
-                availability: 'https://schema.org/InStock',
-              },
-            }
-          : {
-              '@type': 'ItemList',
-              itemListElement: products.map((p: any, i: number) => ({
-                '@type': 'ListItem',
-                position: i + 1,
-                item: {
-                  '@type': 'Product',
-                  name: p.title || 'Product',
-                  offers: {
-                    '@type': 'Offer',
-                    priceCurrency: 'BDT',
-                    price: safePrice(p).toString(),
-                  },
-                },
-              })),
-            },
-      }),
-    };
-
-    return (
-      <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
-        />
-        <LandingPageClient page={page} />
-      </>
-    );
   } catch (err) {
-    console.error('[LP Page] Error:', err);
+    console.error('[LP Page] Database query failed:', err);
+    throw err; // Let Next.js handle this as a 500 Server Error
+  }
+
+  if (!raw) {
     notFound();
   }
+
+  // Safe clone with null-filtered products
+  const products = safeProducts(raw.productIds);
+  const page = {
+    ...JSON.parse(JSON.stringify(raw)),
+    productIds: products,
+  };
+
+  // ── Build Schema.org markup for the landing page ──
+  const schemaMarkup = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: page.pageTitle,
+    description: page.customHero?.customSubheading || `Shop ${page.pageTitle} at AS SIDRAT`,
+    url: `https://assidrat.com/lp/${slug}`,
+    brand: { '@type': 'Brand', name: 'AS SIDRAT' },
+    ...(products.length > 0 && {
+      mainEntity: page.layoutType === 'single-product'
+        ? {
+            '@type': 'Product',
+            name: products[0]?.title || page.pageTitle,
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: 'BDT',
+              price: safePrice(products[0]).toString(),
+              availability: 'https://schema.org/InStock',
+            },
+          }
+        : {
+            '@type': 'ItemList',
+            itemListElement: products.map((p: any, i: number) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              item: {
+                '@type': 'Product',
+                name: p.title || 'Product',
+                offers: {
+                  '@type': 'Offer',
+                  priceCurrency: 'BDT',
+                  price: safePrice(p).toString(),
+                },
+              },
+            })),
+          },
+    }),
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+      />
+      <LandingPageClient page={page} />
+    </>
+  );
 }
