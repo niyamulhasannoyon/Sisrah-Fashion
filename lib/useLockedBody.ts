@@ -3,11 +3,12 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * Global lock counter — tracks how many components have requested scroll locking.
- * Body overflow is only restored to '' when ALL locks are released (counter reaches 0).
- * This prevents conflicts when multiple overlays (menu + cart drawer + filter) are open simultaneously.
+ * Global active locks tracking set — keeps track of all active scroll locks by unique ID.
+ * Body scroll is only restored to '' when ALL locks are released (the set becomes empty).
+ * This prevents conflicts and race conditions when multiple overlay elements (mobile menus,
+ * cart drawer, modal filters) are opened and closed simultaneously.
  */
-let lockCount = 0;
+const activeLocks = new Set<string>();
 
 /**
  * useLockedBody — a shared hook for locking body scroll.
@@ -17,35 +18,43 @@ let lockCount = 0;
  *   useLockedBody(isOpen);
  * 
  * When `locked` is true, the body scroll is blocked (if not already blocked by another component).
- * When `locked` becomes false (or the component unmounts), the counter decrements.
- * Body scroll is only restored when the counter reaches 0.
+ * When `locked` becomes false (or the component unmounts), the lock is released.
+ * Body scroll is only restored when all active locks are cleared.
  */
 export function useLockedBody(locked: boolean) {
-  const lockedRef = useRef(locked);
+  // Generate a unique identifier for this hook instance to prevent cross-component state contamination
+  const idRef = useRef<string>('');
+  
+  if (!idRef.current) {
+    idRef.current = 'lock_' + Math.random().toString(36).substring(2, 9);
+  }
 
   useEffect(() => {
-    lockedRef.current = locked;
+    const id = idRef.current;
 
     if (locked) {
-      lockCount++;
+      activeLocks.add(id);
     } else {
-      lockCount = Math.max(0, lockCount - 1);
+      activeLocks.delete(id);
     }
 
-    if (lockCount > 0) {
+    if (activeLocks.size > 0) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
+  }, [locked]);
 
+  // Handle cleanup on component unmount
+  useEffect(() => {
     return () => {
-      // Cleanup: if this component was holding a lock, release it
-      if (lockedRef.current) {
-        lockCount = Math.max(0, lockCount - 1);
-        if (lockCount <= 0) {
+      const id = idRef.current;
+      if (activeLocks.has(id)) {
+        activeLocks.delete(id);
+        if (activeLocks.size === 0) {
           document.body.style.overflow = '';
         }
       }
     };
-  }, [locked]);
+  }, []);
 }
