@@ -42,6 +42,16 @@ export function Navbar() {
     return () => unsubscribe();
   }, [settings, fetchSettings, checkAuth]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     logout();
@@ -97,7 +107,7 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-8 md:flex">
           {menu.map(item => (
-            <Link key={item.href} href={item.href} className="text-sm font-medium text-loomra-black hover:text-loomra-red">
+            <Link key={item.href} href={item.href} className="text-sm font-medium text-loomra-black hover:text-loomra-red active:text-[#A31F24] transition-colors">
               {item.label}
             </Link>
           ))}
@@ -106,7 +116,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <Link 
             href="/track-order" 
-            className="hidden sm:flex items-center gap-2.5 px-4 h-12 border border-loomra-surface hover:border-loomra-red rounded-full text-xs font-bold uppercase tracking-widest text-[#1A1A1A] hover:text-[#A31F24] transition-all"
+            className="hidden sm:flex items-center gap-2.5 px-4 h-12 border border-loomra-surface hover:border-loomra-red active:bg-loomra-surface rounded-full text-xs font-bold uppercase tracking-widest text-[#1A1A1A] hover:text-[#A31F24] transition-all"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -115,7 +125,7 @@ export function Navbar() {
             Track Order
           </Link>
 
-          <button onClick={toggleCart} aria-label="Open Cart" className="relative hidden md:flex items-center justify-center w-12 h-12 border border-white/30 bg-white/50 hover:bg-white/80 rounded-full hover:border-loomra-red transition-all duration-300">
+          <button onClick={toggleCart} aria-label="Open Cart" className="relative hidden md:flex items-center justify-center w-12 h-12 border border-white/30 bg-white/50 hover:bg-white/80 active:bg-loomra-surface rounded-full hover:border-loomra-red transition-all duration-300">
             <ShoppingBag size={20} />
             {hydrated && cart.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-loomra-red text-loomra-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
@@ -224,7 +234,7 @@ export function Navbar() {
                       className={`flex items-center justify-between px-4 py-4 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200 group ${
                         isActive 
                           ? 'text-[#A31F24] bg-slate-50' 
-                          : 'text-slate-900 hover:text-[#A31F24] hover:bg-slate-50'
+                          : 'text-slate-900 hover:text-[#A31F24] hover:bg-slate-50 active:bg-slate-100 active:scale-[0.98]'
                       }`}
                     >
                       <span>{item.label}</span>
@@ -273,7 +283,7 @@ export function Navbar() {
                   </Link>
                   <button 
                     onClick={() => { handleLogout(); setOpen(false); }} 
-                    className="w-full text-center bg-black text-white py-4 text-xs font-black uppercase tracking-widest hover:bg-[#A31F24] transition-colors rounded-xl shadow-md"
+                    className="w-full text-center bg-black text-white py-4 text-xs font-black uppercase tracking-widest hover:bg-[#A31F24] active:scale-[0.98] transition-all rounded-xl shadow-md"
                   >
                     Logout
                   </button>

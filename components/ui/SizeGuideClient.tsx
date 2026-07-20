@@ -62,7 +62,7 @@ export default function SizeGuideClient() {
               <button
                 onClick={() => setActiveTab('shirts')}
                 className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                  activeTab === 'shirts' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+                  activeTab === 'shirts' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black active:bg-gray-200 active:scale-[0.97]'
                 }`}
               >
                 Linen Shirts
@@ -70,7 +70,7 @@ export default function SizeGuideClient() {
               <button
                 onClick={() => setActiveTab('panjabis')}
                 className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                  activeTab === 'panjabis' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+                  activeTab === 'panjabis' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black active:bg-gray-200 active:scale-[0.97]'
                 }`}
               >
                 Panjabis
@@ -78,7 +78,7 @@ export default function SizeGuideClient() {
               <button
                 onClick={() => setActiveTab('fusion')}
                 className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                  activeTab === 'fusion' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+                  activeTab === 'fusion' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black active:bg-gray-200 active:scale-[0.97]'
                 }`}
               >
                 Fusion Wear
@@ -92,7 +92,7 @@ export default function SizeGuideClient() {
                 <button
                   onClick={() => setUnit('inches')}
                   className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    unit === 'inches' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+                    unit === 'inches' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black active:bg-gray-200 active:scale-[0.97]'
                   }`}
                 >
                   Inches (in)
@@ -100,7 +100,7 @@ export default function SizeGuideClient() {
                 <button
                   onClick={() => setUnit('cm')}
                   className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    unit === 'cm' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+                    unit === 'cm' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black active:bg-gray-200 active:scale-[0.97]'
                   }`}
                 >
                   Centimeters (cm)

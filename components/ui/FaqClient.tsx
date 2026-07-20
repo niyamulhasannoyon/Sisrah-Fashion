@@ -110,7 +110,7 @@ export default function FaqClient() {
               className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all ${
                 activeCategory === cat.id
                   ? 'bg-black text-white border-black'
-                  : 'bg-white text-gray-500 border-gray-100 hover:text-black hover:border-gray-300'
+                  : 'bg-white text-gray-500 border-gray-100 hover:text-black hover:border-gray-300 active:bg-gray-50 active:scale-[0.97]'
               }`}
             >
               {cat.label}

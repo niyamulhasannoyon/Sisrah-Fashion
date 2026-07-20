@@ -17,6 +17,16 @@ export default function CartDrawer() {
   const [recommended, setRecommended] = useState<any[]>([]);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
+  // Lock body scroll when cart drawer is open
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isCartOpen]);
+
   // Fetch recommended products when cart opens
   useEffect(() => {
     if (isCartOpen) {
@@ -85,7 +95,7 @@ export default function CartDrawer() {
           <button
             onClick={toggleCart}
             aria-label="Close"
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors active:scale-95"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gray-100 rounded-xl transition-colors active:scale-95"
           >
             <X size={18} className="text-[#1A1A1A]" />
           </button>
@@ -138,7 +148,7 @@ export default function CartDrawer() {
                         <button
                           onClick={() => handleRemove(item._id, item.selectedSize, item.selectedColor)}
                           aria-label="Remove"
-                          className="p-1.5 hover:bg-red-50 rounded-lg text-gray-300 hover:text-red-500 transition-all shrink-0 active:scale-90"
+                          className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-50 rounded-lg text-gray-300 hover:text-red-500 transition-all shrink-0 active:scale-90"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -160,7 +170,7 @@ export default function CartDrawer() {
                           <button
                             onClick={() => handleQuantityChange(item._id, item.selectedSize, item.selectedColor, item.quantity - 1)}
                             aria-label="Decrease"
-                            className="p-2 hover:bg-gray-50 text-gray-500 transition-colors active:bg-gray-100"
+                            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gray-50 text-gray-500 transition-colors active:bg-gray-100"
                           >
                             <Minus size={12} strokeWidth={3} />
                           </button>
@@ -170,7 +180,7 @@ export default function CartDrawer() {
                           <button
                             onClick={() => handleQuantityChange(item._id, item.selectedSize, item.selectedColor, item.quantity + 1)}
                             aria-label="Increase"
-                            className="p-2 hover:bg-gray-50 text-gray-500 transition-colors active:bg-gray-100"
+                            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gray-50 text-gray-500 transition-colors active:bg-gray-100"
                           >
                             <Plus size={12} strokeWidth={3} />
                           </button>
@@ -213,7 +223,7 @@ export default function CartDrawer() {
                       <button
                         onClick={() => handleQuickAdd(product)}
                         aria-label="Quick add"
-                        className="w-7 h-7 bg-black text-white rounded-lg flex items-center justify-center hover:bg-[#A31F24] transition-colors shadow-lg active:scale-90"
+                        className="min-w-[44px] min-h-[44px] bg-black text-white rounded-lg flex items-center justify-center hover:bg-[#A31F24] transition-colors shadow-lg active:scale-90"
                       >
                         <Plus size={16} />
                       </button>

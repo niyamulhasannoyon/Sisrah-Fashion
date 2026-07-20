@@ -235,7 +235,7 @@ export default function CheckoutPage() {
           </div>
           <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 mb-2">Your cart is empty</h2>
           <p className="text-gray-500 text-sm mb-8">Add some premium essentials to your cart before checking out.</p>
-          <button onClick={() => router.push('/shop')} className="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-[#A31F24] transition-all">
+          <button onClick={() => router.push('/shop')}              className="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-[#A31F24] active:scale-[0.97] transition-all">
             Start Shopping
           </button>
         </div>
@@ -244,14 +244,14 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-[#F8F6F3] min-h-screen pb-24 font-sans">
+    <div className="bg-[#F8F6F3] min-h-screen pb-24 pb-[max(1rem,env(safe-area-inset-bottom))] font-sans overflow-x-hidden">
       <div className="mx-auto px-4 pt-6 sm:px-6 lg:px-8 max-w-7xl">
         <div className="max-w-7xl mx-auto">
           {/* ── Compact Header ── */}
           <div className="flex items-center gap-3 mb-8 lg:mb-12">
             <button 
               onClick={() => router.back()} 
-              className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all group bg-white/80"
+              className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black active:scale-95 transition-all group bg-white/80"
             >
               <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />

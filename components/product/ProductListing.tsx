@@ -68,6 +68,16 @@ export default function ProductListing({
     return result;
   }, [products, selectedCategory, maxPrice, selectedSize]);
 
+  // Lock body scroll when mobile filter is open
+  useEffect(() => {
+    if (isMobileFilterOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileFilterOpen]);
+
   const clearFilters = () => {
     setSelectedCategory('All');
     setSelectedSize('All');
@@ -114,7 +124,7 @@ export default function ProductListing({
             <h2 className="text-xl font-bold uppercase tracking-widest">
               Filters
             </h2>
-            <button onClick={() => setIsMobileFilterOpen(false)}>
+            <button onClick={() => setIsMobileFilterOpen(false)} className="min-w-[44px] min-h-[44px] flex items-center justify-center">
               <X size={24} />
             </button>
           </div>
@@ -133,7 +143,7 @@ export default function ProductListing({
                     className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all ${
                       selectedCategory === cat
                         ? 'bg-black text-white border-black shadow-sm'
-                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700'
+                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700 active:bg-gray-100 active:scale-[0.97]'
                     }`}
                   >
                     {cat}
@@ -175,7 +185,7 @@ export default function ProductListing({
                     className={`w-10 h-10 flex items-center justify-center text-xs font-bold border rounded transition-colors ${
                       selectedSize === s
                         ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white'
-                        : 'border-gray-200 text-gray-600 hover:border-[#1A1A1A]'
+                        : 'border-gray-200 text-gray-600 hover:border-[#1A1A1A] active:bg-gray-50 active:scale-[0.95]'
                     }`}
                   >
                     {s}
@@ -187,7 +197,7 @@ export default function ProductListing({
             {/* ── Clear Filters ── */}
             <button
               onClick={clearFilters}
-              className="mt-4 text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-800 underline text-left"
+              className="mt-4 text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-800 active:text-red-900 underline text-left"
             >
               Clear All Filters
             </button>

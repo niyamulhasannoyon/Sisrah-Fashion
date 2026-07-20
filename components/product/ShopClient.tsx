@@ -60,6 +60,16 @@ export default function ShopClient() {
     setFilteredProducts(result);
   }, [selectedCategory, maxPrice, selectedSize, products]);
 
+  // Lock body scroll when mobile filter is open
+  useEffect(() => {
+    if (isMobileFilterOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileFilterOpen]);
+
   const clearFilters = () => {
     setSelectedCategory('All');
     setSelectedSize('All');
@@ -88,7 +98,7 @@ export default function ShopClient() {
         <div className={`fixed inset-0 z-50 bg-white p-6 transform transition-transform duration-300 lg:relative lg:translate-x-0 lg:w-64 lg:p-0 lg:bg-transparent lg:z-0 lg:block ${isMobileFilterOpen ? 'translate-x-0 overflow-y-auto' : '-translate-x-full'}`}>
           <div className="flex justify-between items-center lg:hidden mb-6 border-b pb-4">
             <h2 className="text-xl font-bold uppercase tracking-widest">Filters</h2>
-            <button onClick={() => setIsMobileFilterOpen(false)}><X size={24} /></button>
+            <button onClick={() => setIsMobileFilterOpen(false)} className="min-w-[44px] min-h-[44px] flex items-center justify-center"><X size={24} /></button>
           </div>
 
           <div className="flex flex-col gap-8">
@@ -102,7 +112,7 @@ export default function ShopClient() {
                     className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all ${
                       selectedCategory === cat
                         ? 'bg-black text-white border-black shadow-sm'
-                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700'
+                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700 active:bg-gray-100 active:scale-[0.97]'
                     }`}
                   >
                     {cat}
@@ -135,7 +145,7 @@ export default function ShopClient() {
                   <button 
                     key={s}
                     onClick={() => setSelectedSize(s)}
-                    className={`w-10 h-10 flex items-center justify-center text-xs font-bold border rounded transition-colors ${selectedSize === s ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white' : 'border-gray-200 text-gray-600 hover:border-[#1A1A1A]'}`}
+                    className={`w-10 h-10 flex items-center justify-center text-xs font-bold border rounded transition-colors ${selectedSize === s ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white' : 'border-gray-200 text-gray-600 hover:border-[#1A1A1A] active:bg-gray-50 active:scale-[0.95]'}`}
                   >
                     {s}
                   </button>
@@ -145,7 +155,7 @@ export default function ShopClient() {
 
             <button 
               onClick={clearFilters}
-              className="mt-4 text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-800 underline text-left"
+              className="mt-4 text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-800 active:text-red-900 underline text-left"
             >
               Clear All Filters
             </button>
@@ -170,7 +180,7 @@ export default function ShopClient() {
               <SlidersHorizontal size={48} className="opacity-20 mb-4" />
               <h3 className="text-lg font-bold text-[#1A1A1A] mb-2">No products found</h3>
               <p className="text-sm mb-4">We couldn't find anything matching your current filters.</p>
-              <button onClick={clearFilters} className="bg-white border border-[#1A1A1A] text-[#1A1A1A] px-6 py-2 text-sm font-bold uppercase tracking-widest rounded hover:bg-[#1A1A1A] hover:text-white transition">
+              <button              onClick={clearFilters} className="bg-white border border-[#1A1A1A] text-[#1A1A1A] px-6 py-2 text-sm font-bold uppercase tracking-widest rounded hover:bg-[#1A1A1A] hover:text-white active:scale-[0.97] transition">
                 Clear Filters
               </button>
             </div>

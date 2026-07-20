@@ -46,7 +46,7 @@ export default function ProductCard({ product }: { product: any }) {
             toggleWishlist(product);
           }}
           aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
-          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-transform z-10"
+          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 active:scale-95 transition-transform z-10"
         >
           <Heart size={16} fill={isLiked ? "#A31F24" : "none"} color={isLiked ? "#A31F24" : "#1A1A1A"} />
         </button>
@@ -54,14 +54,13 @@ export default function ProductCard({ product }: { product: any }) {
         <div className="absolute bottom-0 left-0 w-full p-3 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300">
           <button 
             onClick={handleQuickAdd}
-            className="w-full bg-white/95 backdrop-blur text-black py-2.5 text-[11px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors shadow-lg rounded-lg"
+            className="w-full bg-white/95 backdrop-blur text-black py-2.5 text-[11px] font-black uppercase tracking-widest hover:bg-black hover:text-white active:bg-[#A31F24] active:text-white transition-colors shadow-lg rounded-lg"
           >
             Quick Add
           </button>
         </div>      </Link>
 
-      <Link href={`/product/${product.slug}`} className="flex flex-col gap-1 px-1">
-        <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-400">{product.category}</span>
+      <Link href={`/product/${product.slug}`} className="flex flex-col gap-1 px-1">          <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-400">{product.category}</span>
         {/* Star Rating */}
         <div className="flex items-center gap-1 my-0.5">
           <div className="flex text-amber-400 gap-0.5">

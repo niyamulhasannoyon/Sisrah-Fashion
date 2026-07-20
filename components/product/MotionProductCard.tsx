@@ -70,7 +70,7 @@ export default function MotionProductCard({ product, aspectRatio = 'portrait' }:
         <div className="absolute bottom-0 left-0 w-full p-3 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300 z-10">
           <button 
             onClick={handleQuickAdd}
-            className="w-full bg-white/95 backdrop-blur-sm text-loomra-black py-2.5 text-[11px] font-black uppercase tracking-widest hover:bg-loomra-red hover:text-white transition-colors shadow-lg rounded-lg"
+            className="w-full bg-white/95 backdrop-blur-sm text-loomra-black py-2.5 text-[11px] font-black uppercase tracking-widest hover:bg-loomra-red hover:text-white active:bg-[#A31F24] active:text-white active:scale-[0.97] transition-all shadow-lg rounded-lg"
           >
             Quick Add
           </button>
