@@ -3,9 +3,10 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Star, Clock, ShoppingBag, Check, Package, Truck, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Star, Clock, ShoppingBag, Check, Package, Truck, ShieldCheck, MapPin, User, Phone, Mail, HelpCircle, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
 
 // ── Types ──
@@ -50,10 +51,26 @@ interface LandingPageData {
   isActive: boolean;
 }
 
-// ── Props ──
 interface LandingPageClientProps {
   page: LandingPageData;
 }
+
+const districts = [
+  'Dhaka', 'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra', 'Brahmanbaria', 'Chandpur', 'Chapainawabganj', 'Chittagong', 'Chuadanga', 'Comilla', "Cox's Bazar", 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jessore', 'Jhalokati', 'Jhenaidah', 'Joypurhat', 'Khagrachari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Maulvibazar', 'Meherpur', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet', 'Tangail', 'Thakurgaon'
+];
+
+const HOTSPOTS = [
+  { id: 1, top: '25%', left: '52%', title: 'Premium Structured Collar', desc: 'Stays sharp and holds shape after multiple washes.' },
+  { id: 2, top: '55%', left: '38%', title: '100% Breathable Fabric', desc: 'Premium cotton/linen blend designed to keep you cool in South Asian heat.' },
+  { id: 3, top: '75%', left: '68%', title: 'Fine Double-Stitched Seams', desc: 'Crafted with high-strength threads for ultimate longevity.' }
+];
+
+const FAQ_ITEMS = [
+  { q: "অর্ডার করার নিয়ম কি?", a: "সাইজ ও কালার সিলেক্ট করে উপরে দেওয়া অর্ডার ফর্মে আপনার নাম, মোবাইল নাম্বার এবং ঠিকানা দিয়ে 'Confirm Order' বাটনে ক্লিক করুন। আপনার অর্ডারটি সফলভাবে সাবমিট হয়ে যাবে।" },
+  { q: "ডেলিভারি চার্জ কত?", a: "ঢাকা সিটির ভেতরে ডেলিভারি চার্জ ৬০ টাকা, এবং ঢাকা সিটির বাইরে ১২০ টাকা। আমাদের ফ্রি শিপিং শর্ত পূরণ করলে ডেলিভারি চার্জ সম্পূর্ণ ফ্রি!" },
+  { q: "পণ্য হাতে পেতে কতদিন সময় লাগবে?", a: "ঢাকা সিটির ভেতরে অর্ডার কনফার্ম করার ১-২ কর্মদিবস এবং ঢাকা সিটির বাইরে ৩-৪ কর্মদিবসের মধ্যে হোম ডেলিভারি করা হয়।" },
+  { q: "সাইজ বা অন্য কোনো সমস্যা হলে পরিবর্তন করা যাবে কি?", a: "হ্যাঁ, যেকোনো সাইজ বা কালার সংক্রান্ত সমস্যায় ডেলিভারি পাওয়ার ৭ দিনের মধ্যে আপনি সহজেই পরিবর্তন (Exchange) করতে পারবেন। আমাদের হোয়াটসঅ্যাপে যোগাযোগ করলেই হবে।" }
+];
 
 // ── Countdown Timer ──
 function CountdownTimer({ targetDate }: { targetDate: string }) {
@@ -118,13 +135,11 @@ function CountdownTimer({ targetDate }: { targetDate: string }) {
 
 // ── Sticky CTA Bar ──
 function StickyCtaBar({
-  onAddToCart,
-  productCount,
+  onCtaClick,
   disabled,
   buttonText,
 }: {
-  onAddToCart: () => void;
-  productCount: number;
+  onCtaClick: () => void;
   disabled: boolean;
   buttonText: string;
 }) {
@@ -135,17 +150,17 @@ function StickyCtaBar({
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
     >
-      <div className="max-w-2xl mx-auto flex items-center gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-gray-900 uppercase tracking-wider truncate">
-            {productCount > 1 ? `${productCount} Items in Bundle` : 'Limited Offer'}
+      <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-black text-gray-900 uppercase tracking-wider truncate">
+            Limited Offer
           </p>
-          <p className="text-[10px] text-gray-500 font-medium">Free shipping on all orders</p>
+          <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Cash on Delivery</p>
         </div>
         <button
-          onClick={onAddToCart}
+          onClick={onCtaClick}
           disabled={disabled}
-          className="bg-gray-900 hover:bg-[#A31F24] text-white px-8 py-3.5 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2.5 shadow-lg active:scale-[0.97] shrink-0"
+          className="bg-[#A31F24] hover:bg-[#8D181D] text-white px-8 py-3.5 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2.5 shadow-lg active:scale-[0.97] shrink-0"
         >
           <ShoppingBag size={16} />
           {buttonText}
@@ -191,10 +206,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 function LandingPageSkeleton() {
   return (
     <div className="animate-pulse">
-      {/* Announcement bar skeleton */}
       <div className="h-10 bg-gray-100" />
-
-      {/* Hero skeleton */}
       <div className="aspect-[4/3] sm:aspect-[4/2] bg-gray-100 relative">
         <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3">
           <div className="h-4 bg-gray-200 rounded w-1/3" />
@@ -202,8 +214,6 @@ function LandingPageSkeleton() {
           <div className="h-5 bg-gray-200 rounded w-1/4" />
         </div>
       </div>
-
-      {/* Content skeleton */}
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <div className="h-6 bg-gray-100 rounded w-1/2" />
         <div className="h-4 bg-gray-100 rounded w-full" />
@@ -214,8 +224,6 @@ function LandingPageSkeleton() {
         </div>
         <div className="h-14 bg-gray-100 rounded-xl" />
       </div>
-
-      {/* Sticky CTA skeleton */}
       <div className="h-20 bg-gray-100 mt-8" />
     </div>
   );
@@ -246,30 +254,45 @@ function trackLpEvent(slug: string, eventType: 'pageview' | 'click', clickText?:
 
 // ── Main Component ──
 export default function LandingPageClient({ page }: LandingPageClientProps) {
-  const addToCart = useCartStore((state) => state.addToCart);
-  const toggleCart = useCartStore((state) => state.toggleCart);
-
+  const { settings, fetchSettings } = useSettingsStore();
   const [mounted, setMounted] = useState(false);
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
   const [selectedColors, setSelectedColors] = useState<Record<string, string>>({});
   const [bundleSelections, setBundleSelections] = useState<Record<string, boolean>>({});
   const [activeImage, setActiveImage] = useState(0);
-  // Track LP page view once mounted & store campaign slug for order attribution
+  const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // Direct Order Form State
+  const [shippingInfo, setShippingInfo] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    city: 'Dhaka',
+  });
+  const [phoneError, setPhoneError] = useState('');
+  const [formError, setFormError] = useState('');
+  const [isOrdering, setIsOrdering] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState<any>(null);
+
+  // Fetch settings & track view
   useEffect(() => {
     setMounted(true);
+    fetchSettings();
     trackLpEvent(page.slug, 'pageview');
-    // Store campaign slug so checkout can attribute orders to this campaign
     try {
       sessionStorage.setItem('loomra_campaign_slug', page.slug);
     } catch {}
-  }, [page.slug]);
+  }, [page.slug, fetchSettings]);
 
-  // Initialize bundle selections & size/color defaults
-  // Filter out any null products (deleted from DB but still referenced)
-  const products = (page.productIds || []).filter((p): p is ProductData =>
-    p !== null && typeof p === 'object' && '_id' in p
-  );
+  const products = useMemo(() => {
+    return (page.productIds || []).filter((p): p is ProductData =>
+      p !== null && typeof p === 'object' && '_id' in p
+    );
+  }, [page.productIds]);
 
+  // Init selections
   useEffect(() => {
     if (page.layoutType === 'multi-product') {
       const initial: Record<string, boolean> = {};
@@ -278,7 +301,6 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       });
       setBundleSelections(initial);
     }
-    // Init size/color for each product
     const sizes: Record<string, string> = {};
     const colors: Record<string, string> = {};
     products.forEach((p) => {
@@ -290,28 +312,24 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
     });
     setSelectedSizes(sizes);
     setSelectedColors(colors);
-  }, [page.layoutType, products.length]);
+  }, [page.layoutType, products]);
 
   const hasCountdown = page.promotionalElements?.countdownTimerToggle && page.promotionalElements?.countdownTargetDate;
   const announcementText = page.promotionalElements?.announcementText;
   const testimonials = page.socialProof || [];
   const isSingle = page.layoutType === 'single-product';
-
-  // Primary product for single layout
   const primaryProduct = isSingle ? products[0] : null;
 
-  // Images for hero section
-  const heroImage =
-    (page.customHero?.customBannerImage && getDirectImageLink(page.customHero.customBannerImage.trim())) ||
-    primaryProduct?.images?.[activeImage]?.url ||
-    products[0]?.images?.[0]?.url ||
-    '/images/placeholder.jpg';
+  const heroImage = useMemo(() => {
+    return (page.customHero?.customBannerImage && getDirectImageLink(page.customHero.customBannerImage.trim())) ||
+      primaryProduct?.images?.[activeImage]?.url ||
+      products[0]?.images?.[0]?.url ||
+      '/images/placeholder.jpg';
+  }, [page.customHero, primaryProduct, products, activeImage]);
 
-  // Heading / subheading
-  const heading = (page.customHero?.customHeading && page.customHero.customHeading.trim()) || primaryProduct?.title || page.pageTitle;
-  const subheading = (page.customHero?.customSubheading && page.customHero.customSubheading.trim()) || primaryProduct?.description || '';
+  const heading = page.customHero?.customHeading?.trim() || primaryProduct?.title || page.pageTitle;
+  const subheading = page.customHero?.customSubheading?.trim() || primaryProduct?.description || '';
 
-  // Price calculation
   const totalPrice = useMemo(() => {
     if (isSingle && primaryProduct) {
       return primaryProduct.offerPrice || primaryProduct.basePrice;
@@ -341,61 +359,215 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   const savings = totalOriginalPrice - totalPrice;
   const hasSavings = savings > 0;
 
-  // Count selected products in bundle
-  const selectedCount = useMemo(
-    () => Object.values(bundleSelections).filter(Boolean).length,
-    [bundleSelections]
-  );
+  const selectedCount = useMemo(() => {
+    if (isSingle) return 1;
+    return Object.values(bundleSelections).filter(Boolean).length;
+  }, [isSingle, bundleSelections]);
 
-  // ── Add to Cart Handler ──
-  const handleAddToCart = useCallback(() => {
+  const isShippingFree = useCallback(() => {
+    if (!settings) return false;
+    const trigger = settings.freeShippingTrigger;
+    if (trigger === 'quantity') {
+      const minQty = settings.freeShippingMinQuantity ?? 2;
+      return selectedCount >= minQty;
+    }
+    if (trigger === 'amount') {
+      const minAmount = settings.freeShippingMinAmount ?? 3000;
+      return totalPrice >= minAmount;
+    }
+    return false;
+  }, [settings, selectedCount, totalPrice]);
+
+  const getShippingCost = useCallback(() => {
+    if (isShippingFree()) return 0;
+    if (!shippingInfo.city) return 0;
+    const isDhaka = shippingInfo.city.toLowerCase().includes('dhaka');
+    if (isDhaka) {
+      return settings?.shippingInsideDhaka ?? 60;
+    }
+    return settings?.shippingOutsideDhaka ?? 120;
+  }, [isShippingFree, shippingInfo.city, settings]);
+
+  // Scroll to Order Form Handler
+  const handleScrollToForm = useCallback(() => {
+    trackLpEvent(page.slug, 'click', 'lp_sticky_cta_scroll');
+    const formElement = document.getElementById('lp-checkout-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [page.slug]);
+
+  // Order Placement Handler
+  const handlePlaceDirectOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPhoneError('');
+    setFormError('');
+    setIsOrdering(true);
+
+    if (!shippingInfo.name.trim()) {
+      setFormError('Please enter your name');
+      setIsOrdering(false);
+      return;
+    }
+
+    const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+    if (!bdPhoneRegex.test(shippingInfo.phone.trim())) {
+      setPhoneError('Please enter a valid 11-digit phone number (e.g. 017XXXXXXXX)');
+      setIsOrdering(false);
+      return;
+    }
+
+    if (!shippingInfo.address.trim()) {
+      setFormError('Please enter your detailed shipping address');
+      setIsOrdering(false);
+      return;
+    }
+
+    let orderItems: any[] = [];
     if (isSingle && primaryProduct) {
-      const image = primaryProduct.images?.[0]?.url || '/images/placeholder.jpg';
-      addToCart({
-        _id: primaryProduct._id,
+      const imgUrl = primaryProduct.images?.[0]?.url || '/images/placeholder.jpg';
+      orderItems.push({
         title: primaryProduct.title,
         price: primaryProduct.offerPrice || primaryProduct.basePrice,
-        image,
+        image: imgUrl,
         selectedSize: selectedSizes[primaryProduct._id] || 'M',
         selectedColor: selectedColors[primaryProduct._id] || 'Black',
+        quantity: 1,
       });
     } else {
-      // Bundle: add all selected products
       products.forEach((p) => {
         if (bundleSelections[p._id]) {
-          const image = p.images?.[0]?.url || '/images/placeholder.jpg';
-          addToCart({
-            _id: p._id,
+          const imgUrl = p.images?.[0]?.url || '/images/placeholder.jpg';
+          orderItems.push({
             title: p.title,
             price: p.offerPrice || p.basePrice,
-            image,
+            image: imgUrl,
             selectedSize: selectedSizes[p._id] || 'M',
             selectedColor: selectedColors[p._id] || 'Black',
+            quantity: 1,
           });
         }
       });
     }
 
-    // Track conversion
-    trackLpEvent(page.slug, 'click', 'lp_add_to_cart');
+    if (orderItems.length === 0) {
+      setFormError('Please select at least one product to order');
+      setIsOrdering(false);
+      return;
+    }
 
-    toggleCart();
-  }, [isSingle, primaryProduct, products, selectedSizes, selectedColors, bundleSelections, addToCart, toggleCart, page.slug]);
+    const finalTotal = totalPrice + getShippingCost();
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shippingInfo,
+          orderItems,
+          totalAmount: finalTotal,
+          paymentMethod: 'Cash on Delivery',
+          paymentStatus: 'Pending',
+          campaignSlug: page.slug,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        trackLpEvent(page.slug, 'click', 'lp_direct_order_success');
+        setOrderSuccess({
+          orderId: data.orderId,
+          name: shippingInfo.name,
+          phone: data.phone,
+          total: finalTotal,
+        });
+      } else {
+        setFormError(data.error || 'Failed to place order. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error placing direct order:', err);
+      setFormError('Failed to place order due to network issue.');
+    } finally {
+      setIsOrdering(false);
+    }
+  };
 
   const disabled = selectedCount === 0;
   const ctaText = !mounted
     ? 'Loading...'
-    : isSingle
-    ? 'Add to Cart'
-    : `Add ${selectedCount} Item${selectedCount !== 1 ? 's' : ''} to Cart`;
+    : 'Order Now (Cash on Delivery)';
 
   if (!mounted) {
     return <LandingPageSkeleton />;
   }
 
-  // ── RENDER ──
+  // ── ORDER SUCCESS SCREEN ──
+  if (orderSuccess) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full bg-white border border-gray-100 rounded-3xl p-8 shadow-xl text-center space-y-6 font-sans"
+        >
+          <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
+            <CheckCircle2 size={36} strokeWidth={2.5} className="animate-bounce" />
+          </div>
+          
+          <div className="space-y-2">
+            <h2 className="text-xl sm:text-2xl font-black text-gray-900 uppercase tracking-wide">
+              অর্ডারটি সফল হয়েছে!
+            </h2>
+            <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider">
+              Order Placed Successfully
+            </p>
+            <p className="text-[11px] text-gray-500">
+              আপনার সাথে খুব শীঘ্রই যোগাযোগ করে অর্ডারটি কনফার্ম করা হবে।
+            </p>
+          </div>
+
+          <div className="bg-gray-50 rounded-2xl p-5 text-left border border-gray-100 space-y-3.5">
+            <div className="flex justify-between items-center text-xs font-bold text-gray-600 border-b border-gray-200/60 pb-2">
+              <span>অর্ডার আইডি:</span>
+              <span className="text-gray-900">#{orderSuccess.orderId}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs font-bold text-gray-600 border-b border-gray-200/60 pb-2">
+              <span>গ্রাহকের নাম:</span>
+              <span className="text-gray-900">{orderSuccess.name}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs font-bold text-gray-600 border-b border-gray-200/60 pb-2">
+              <span>মোবাইল নাম্বার:</span>
+              <span className="text-gray-900">{orderSuccess.phone}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs font-bold text-gray-600">
+              <span>মোট পরিশোধযোগ্য মূল্য:</span>
+              <span className="text-[#A31F24] font-black text-sm">৳{orderSuccess.total.toLocaleString()}</span>
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Link
+              href="/shop"
+              className="w-full bg-[#1A1A1A] hover:bg-gray-800 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all block text-center shadow-md"
+            >
+              Continue Shopping
+            </Link>
+            <a
+              href={`https://wa.me/${settings?.whatsappNumber || '8801700000000'}?text=Hello,%20I%20have%20placed%20order%20%23${orderSuccess.orderId}%20on%20AS%20SIDRAT.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-md"
+            >
+              Contact on WhatsApp
+            </a>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pb-24">
+    <div className="min-h-screen bg-[#FAFAFA] pb-24 font-sans">
       {/* ── Announcement Bar ── */}
       {announcementText && (
         <div className="bg-gray-900 text-white text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] py-2.5 text-center">
@@ -407,18 +579,18 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       )}
 
       {/* ── Hero Section ── */}
-      <div className="relative bg-gray-100">
+      <div className="relative bg-gray-100 overflow-hidden">
         <div className="aspect-[4/3] sm:aspect-[4/2] md:aspect-[21/9] relative">
           <Image
             src={heroImage}
             alt={heading}
             fill
             priority
+            fetchPriority="high"
             sizes="100vw"
             className="object-cover object-top"
           />
-          {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
 
           {/* Hero Text */}
           <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 md:p-12 max-w-2xl mx-auto">
@@ -429,11 +601,11 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
               className="text-center"
             >
               {subheading && (
-                <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-white/80 mb-2">
+                <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-white/80 mb-2 font-bengali">
                   {subheading}
                 </p>
               )}
-              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-white uppercase tracking-[0.02em] leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-white uppercase tracking-[0.02em] leading-tight font-bengali">
                 {heading}
               </h1>
 
@@ -472,13 +644,14 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
       {/* ── Main Content ── */}
       <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 space-y-8">
+        
         {/* ── Single Product Layout ── */}
         {isSingle && primaryProduct && (
           <div className="space-y-6">
-            {/* Image Gallery */}
+            {/* Image Gallery with interactive hotspots */}
             {primaryProduct.images && primaryProduct.images.length > 0 && (
               <div className="space-y-3">
-                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group">
                   <Image
                     src={primaryProduct.images[activeImage]?.url || heroImage}
                     alt={primaryProduct.title}
@@ -487,7 +660,42 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                     className="object-cover object-top"
                     priority
                   />
+                  
+                  {/* Hotspots overlay */}
+                  {HOTSPOTS.map((hotspot) => (
+                    <div
+                      key={hotspot.id}
+                      className="absolute z-20 cursor-pointer"
+                      style={{ top: hotspot.top, left: hotspot.left }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveHotspot(activeHotspot === hotspot.id ? null : hotspot.id);
+                      }}
+                    >
+                      <span className="relative flex h-5 w-5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A31F24] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-5 w-5 bg-[#A31F24] border-2 border-white flex items-center justify-center text-[9px] font-black text-white">
+                          +
+                        </span>
+                      </span>
+                      
+                      <AnimatePresence>
+                        {activeHotspot === hotspot.id && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                            className="absolute bottom-7 left-1/2 transform -translate-x-1/2 w-48 p-3 bg-white/95 backdrop-blur-md border border-gray-150 rounded-xl shadow-xl z-30 pointer-events-auto"
+                          >
+                            <p className="text-[10px] font-black text-gray-900 uppercase tracking-wide">{hotspot.title}</p>
+                            <p className="text-[9px] text-gray-500 font-medium mt-1 leading-relaxed">{hotspot.desc}</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
                 </div>
+                
                 {primaryProduct.images.length > 1 && (
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {primaryProduct.images.map((img, idx) => (
@@ -518,29 +726,28 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                 {primaryProduct.title}
               </h2>
 
-              {products.length > 0 && primaryProduct.rating && primaryProduct.rating > 0 && (
+              {primaryProduct.rating && primaryProduct.rating > 0 && (
                 <div className="flex items-center gap-2">
                   <div className="flex text-amber-400">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star key={i} size={16} fill={i < Math.round(primaryProduct.rating || 0) ? 'currentColor' : 'none'} className={i < Math.round(primaryProduct.rating || 0) ? 'text-amber-400' : 'text-gray-200'} />
                     ))}
                   </div>
-                  <span className="text-xs text-gray-500 font-medium">
+                  <span className="text-xs text-gray-500 font-medium font-sans">
                     ({primaryProduct.numReviews || 0} reviews)
                   </span>
                 </div>
               )}
 
               {primaryProduct.description && (
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-600 leading-relaxed font-bengali">
                   {primaryProduct.description}
                 </p>
               )}
 
-              {/* Size & Color Selector (single product) */}
+              {/* Size & Color Selector */}
               {primaryProduct.variants && primaryProduct.variants.length > 0 && (
                 <div className="space-y-4 pt-2">
-                  {/* Size selector */}
                   <div className="space-y-2">
                     <span className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500">
                       Size: <span className="text-gray-900">{selectedSizes[primaryProduct._id] || 'Select'}</span>
@@ -549,9 +756,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                       {[...new Set(primaryProduct.variants.map((v) => v.size))].map((size) => (
                         <button
                           key={size}
-                          onClick={() =>
-                            setSelectedSizes({ ...selectedSizes, [primaryProduct._id]: size })
-                          }
+                          onClick={() => setSelectedSizes({ ...selectedSizes, [primaryProduct._id]: size })}
                           className={`min-w-[44px] min-h-[44px] rounded-lg border text-xs font-bold transition-all duration-200 ${
                             selectedSizes[primaryProduct._id] === size
                               ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
@@ -564,7 +769,6 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                     </div>
                   </div>
 
-                  {/* Color selector */}
                   <div className="space-y-2">
                     <span className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500">
                       Color: <span className="text-gray-900">{selectedColors[primaryProduct._id] || 'Select'}</span>
@@ -573,9 +777,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                       {[...new Set(primaryProduct.variants.map((v) => v.color))].map((color) => (
                         <button
                           key={color}
-                          onClick={() =>
-                            setSelectedColors({ ...selectedColors, [primaryProduct._id]: color })
-                          }
+                          onClick={() => setSelectedColors({ ...selectedColors, [primaryProduct._id]: color })}
                           className={`px-3.5 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                             selectedColors[primaryProduct._id] === color
                               ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
@@ -620,7 +822,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
             </div>
 
             <div className="space-y-3">
-              {products.map((product, idx) => {
+              {products.map((product) => {
                 const isSelected = bundleSelections[product._id] ?? true;
                 const productImage = product.images?.[0]?.url || '/images/placeholder.jpg';
 
@@ -634,7 +836,6 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                     }`}
                   >
                     <div className="flex items-start gap-4">
-                      {/* Checkbox */}
                       <button
                         onClick={() =>
                           setBundleSelections({
@@ -651,7 +852,6 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                         )}
                       </button>
 
-                      {/* Thumbnail */}
                       <div className="relative w-16 h-20 sm:w-20 sm:h-24 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
                         <Image
                           src={productImage}
@@ -662,12 +862,10 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                         />
                       </div>
 
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-bold text-gray-900 truncate">{product.title}</h3>
                         <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">{product.category}</p>
 
-                        {/* Size & Color chips (inline) */}
                         {product.variants && product.variants.length > 0 && isSelected && (
                           <div className="flex gap-3 mt-2">
                             <select
@@ -712,7 +910,6 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
               })}
             </div>
 
-            {/* Bundle Total */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500 font-medium">Bundle Total</span>
@@ -733,6 +930,177 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
             </div>
           </div>
         )}
+
+        {/* ── Embedded Direct Checkout Form ── */}
+        <div id="lp-checkout-form" className="bg-white border border-gray-100 rounded-2xl p-6 shadow-md scroll-mt-24 space-y-6">
+          <div className="border-b border-gray-100 pb-4 text-center">
+            <span className="bg-[#A31F24]/5 text-[#A31F24] px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest inline-block mb-2">
+              Confirm Your Order
+            </span>
+            <h3 className="text-lg font-black text-gray-900 uppercase tracking-wider">
+              হাতে পেয়ে টাকা পরিশোধ করুন (Cash on Delivery)
+            </h3>
+            <p className="text-[11px] text-gray-500 mt-1">
+              অর্ডারটি সম্পন্ন করতে নিচের ফর্মটি পূরণ করুন
+            </p>
+          </div>
+
+          {formError && (
+            <div className="bg-red-50 border border-red-100 text-red-700 text-xs font-semibold px-4 py-3 rounded-xl">
+              {formError}
+            </div>
+          )}
+
+          <form onSubmit={handlePlaceDirectOrder} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 flex items-center gap-1.5">
+                <User size={13} /> Your Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="আপনার নাম লিখুন"
+                value={shippingInfo.name}
+                onChange={(e) => setShippingInfo({ ...shippingInfo, name: e.target.value })}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-gray-900 focus:bg-white transition-all font-medium text-gray-900"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 flex items-center gap-1.5">
+                <Phone size={13} /> Phone Number *
+              </label>
+              <input
+                type="tel"
+                required
+                placeholder="মোবাইল নাম্বার লিখুন (যেমন: 017XXXXXXXX)"
+                value={shippingInfo.phone}
+                onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-gray-900 focus:bg-white transition-all font-medium text-gray-900"
+              />
+              {phoneError && <p className="text-[10px] text-red-500 font-bold">{phoneError}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 flex items-center gap-1.5">
+                  <MapPin size={13} /> City / District *
+                </label>
+                <select
+                  value={shippingInfo.city}
+                  onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-gray-900 focus:bg-white transition-all font-bold text-gray-900 uppercase"
+                >
+                  {districts.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 flex items-center gap-1.5">
+                  <Mail size={13} /> Email Address (Optional)
+                </label>
+                <input
+                  type="email"
+                  placeholder="ইমেইল এড্রেস (ঐচ্ছিক)"
+                  value={shippingInfo.email}
+                  onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-gray-900 focus:bg-white transition-all font-medium text-gray-900"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 flex items-center gap-1.5">
+                <MapPin size={13} /> Detailed Delivery Address *
+              </label>
+              <textarea
+                required
+                rows={2}
+                placeholder="আপনার বিস্তারিত ঠিকানা লিখুন (যেমন: বাসা/রোড/সেক্টর ইত্যাদি)"
+                value={shippingInfo.address}
+                onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-gray-900 focus:bg-white transition-all font-medium text-gray-900 resize-none"
+              />
+            </div>
+
+            {/* Pricing Details */}
+            <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 space-y-2">
+              <div className="flex justify-between items-center text-[11px] text-gray-500 font-bold uppercase">
+                <span>Selected Items ({selectedCount})</span>
+                <span>৳{totalPrice.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center text-[11px] text-gray-500 font-bold uppercase">
+                <span>Delivery Cost ({shippingInfo.city})</span>
+                <span>{getShippingCost() === 0 ? 'FREE' : `৳${getShippingCost()}`}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-gray-900 font-black uppercase pt-2 border-t border-gray-200">
+                <span>Total Payable</span>
+                <span className="text-[#A31F24] text-sm">৳{(totalPrice + getShippingCost()).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isOrdering}
+              className="w-full bg-[#A31F24] hover:bg-[#8D181D] text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-[0.98]"
+            >
+              {isOrdering ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Placing Your Order...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={16} />
+                  Confirm Order — ৳{(totalPrice + getShippingCost()).toLocaleString()} (হাতে পেয়ে মূল্য দিন)
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* ── Collapsible FAQ Accordion ── */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="text-base font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
+            <HelpCircle size={18} className="text-[#A31F24]" /> Frequently Asked Questions (জিজ্ঞাসিত প্রশ্নাবলী)
+          </h3>
+          <div className="divide-y divide-gray-100">
+            {FAQ_ITEMS.map((faq, idx) => (
+              <div key={idx} className="py-3">
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full flex items-center justify-between text-left py-2 font-bold text-xs sm:text-sm text-gray-800 hover:text-[#A31F24] transition-colors"
+                >
+                  <span>{faq.q}</span>
+                  {openFaq === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+                
+                <AnimatePresence initial={false}>
+                  {openFaq === idx && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-[11px] sm:text-xs text-gray-500 leading-relaxed pt-1.5 pb-2 font-medium font-bengali">
+                        {faq.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* ── Social Proof ── */}
         {testimonials.length > 0 && (
@@ -765,8 +1133,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
       {/* ── Sticky CTA Bar ── */}
       <StickyCtaBar
-        onAddToCart={handleAddToCart}
-        productCount={selectedCount}
+        onCtaClick={handleScrollToForm}
         disabled={disabled}
         buttonText={ctaText}
       />
