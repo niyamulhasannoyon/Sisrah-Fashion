@@ -5,6 +5,7 @@ import { X, Plus, Minus, Trash2, ShoppingBag, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
+import { useLockedBody } from '@/lib/useLockedBody';
 
 /**
  * Mobile-optimized Cart Drawer
@@ -17,15 +18,7 @@ export default function CartDrawer() {
   const [recommended, setRecommended] = useState<any[]>([]);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  // Lock body scroll when cart drawer is open
-  useEffect(() => {
-    if (isCartOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isCartOpen]);
+  useLockedBody(isCartOpen);
 
   // Fetch recommended products when cart opens
   useEffect(() => {

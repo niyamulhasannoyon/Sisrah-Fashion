@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import ProductCard from '@/components/product/ProductCard';
 import { Loader2, SlidersHorizontal, X } from 'lucide-react';
+import { useLockedBody } from '@/lib/useLockedBody';
 
 export default function ShopClient() {
   const [products, setProducts] = useState<any[]>([]);
@@ -60,15 +61,7 @@ export default function ShopClient() {
     setFilteredProducts(result);
   }, [selectedCategory, maxPrice, selectedSize, products]);
 
-  // Lock body scroll when mobile filter is open
-  useEffect(() => {
-    if (isMobileFilterOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isMobileFilterOpen]);
+  useLockedBody(isMobileFilterOpen);
 
   const clearFilters = () => {
     setSelectedCategory('All');

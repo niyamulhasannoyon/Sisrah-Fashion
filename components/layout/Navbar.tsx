@@ -10,6 +10,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useEffect } from 'react';
+import { useLockedBody } from '@/lib/useLockedBody';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getDirectImageLink } from '@/lib/utils';
 
@@ -42,15 +43,7 @@ export function Navbar() {
     return () => unsubscribe();
   }, [settings, fetchSettings, checkAuth]);
 
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [open]);
+  useLockedBody(open);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });

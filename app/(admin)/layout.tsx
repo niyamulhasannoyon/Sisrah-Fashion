@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { getDirectImageLink } from '@/lib/utils';
 import { ROLE_PERMISSIONS, ROLE_LABELS, ROLE_COLORS } from '@/lib/staffPermissions';
+import { useLockedBody } from '@/lib/useLockedBody';
 import type { StaffRole } from '@/lib/staffPermissions';
 
 // Nav item definitions keyed by permission key
@@ -41,15 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
 
-  // Lock body scroll when notification dropdown is open (on mobile)
-  useEffect(() => {
-    if (showNotifDropdown) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [showNotifDropdown]);
+  useLockedBody(showNotifDropdown);
 
   const fetchNotifications = async () => {
     try {
