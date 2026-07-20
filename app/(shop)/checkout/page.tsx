@@ -244,7 +244,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-[#F8F6F3] min-h-screen pb-24 pb-[max(1rem,env(safe-area-inset-bottom))] font-sans overflow-x-hidden">
+    <div className="bg-[#F8F6F3] min-h-screen pb-[max(6rem,env(safe-area-inset-bottom))] font-sans overflow-x-hidden">
       <div className="mx-auto px-4 pt-6 sm:px-6 lg:px-8 max-w-7xl">
         <div className="max-w-7xl mx-auto">
           {/* ── Compact Header ── */}

@@ -16,7 +16,7 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="border-t border-slate-100 bg-[#0F0F10] text-[#E4E4E7] pt-16 pb-32 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-12">
+    <footer className="border-t border-slate-100 bg-[#0F0F10] text-[#E4E4E7] pt-16 pb-[max(8rem,env(safe-area-inset-bottom))] md:pb-12">
       <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
         {/* Core Links Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
