@@ -137,11 +137,13 @@ function CountdownTimer({ targetDate }: { targetDate: string }) {
 function StickyCtaBar({
   onCtaClick,
   disabled,
-  buttonText,
+  totalPrice,
+  shippingCost,
 }: {
   onCtaClick: () => void;
   disabled: boolean;
-  buttonText: string;
+  totalPrice: number;
+  shippingCost: number;
 }) {
   return (
     <motion.div
@@ -150,20 +152,28 @@ function StickyCtaBar({
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
     >
-      <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-black text-gray-900 uppercase tracking-wider truncate">
+      <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 text-center sm:text-left">
+        <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-1 sm:flex-col">
+          <p className="text-[10px] font-black text-gray-900 uppercase tracking-wider">
             Limited Offer
           </p>
-          <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Cash on Delivery</p>
+          <span className="hidden sm:inline text-gray-300">|</span>
+          <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-wider whitespace-nowrap">
+            Cash on Delivery (হাতে পেয়ে মূল্য দিন)
+          </p>
         </div>
         <button
           onClick={onCtaClick}
           disabled={disabled}
-          className="bg-[#A31F24] hover:bg-[#8D181D] text-white px-8 py-3.5 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2.5 shadow-lg active:scale-[0.97] shrink-0"
+          className="bg-[#A31F24] hover:bg-[#8D181D] hover:scale-[1.02] active:scale-[0.97] text-white py-3 px-8 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5 shadow-[0_6px_20px_rgba(163,31,36,0.3)] hover:shadow-[0_8px_25px_rgba(163,31,36,0.45)] w-full sm:w-auto font-sans"
         >
-          <ShoppingBag size={16} />
-          {buttonText}
+          <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.05em] leading-none">
+            <ShoppingBag size={14} className="shrink-0" />
+            ORDER NOW — ৳{(totalPrice + shippingCost).toLocaleString()}
+          </span>
+          <span className="text-[8px] font-bold text-white/80 lowercase tracking-wide font-bengali leading-none mt-0.5">
+            অর্ডার করতে এখানে ক্লিক করুন
+          </span>
         </button>
       </div>
     </motion.div>
@@ -1046,20 +1056,25 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
             <button
               type="submit"
               disabled={isOrdering}
-              className="w-full bg-[#A31F24] hover:bg-[#8D181D] text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-[0.98]"
+              className="w-full bg-[#A31F24] hover:bg-[#8D181D] hover:scale-[1.01] active:scale-[0.98] text-white py-4 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5 shadow-[0_6px_20px_rgba(163,31,36,0.3)] hover:shadow-[0_8px_25px_rgba(163,31,36,0.45)] font-sans"
             >
               {isOrdering ? (
-                <>
+                <div className="flex items-center gap-2 py-0.5">
                   <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Placing Your Order...
-                </>
+                  <span className="text-xs font-black uppercase tracking-wider">Placing Your Order...</span>
+                </div>
               ) : (
                 <>
-                  <CheckCircle2 size={16} />
-                  Confirm Order — ৳{(totalPrice + getShippingCost()).toLocaleString()} (হাতে পেয়ে মূল্য দিন)
+                  <span className="flex items-center gap-1.5 font-black text-sm tracking-[0.05em] leading-none">
+                    <CheckCircle2 size={16} className="shrink-0" />
+                    CONFIRM ORDER — ৳{(totalPrice + getShippingCost()).toLocaleString()}
+                  </span>
+                  <span className="text-[9px] font-bold text-white/80 lowercase tracking-wide font-bengali leading-none mt-1">
+                    হাতে পেয়ে মূল্য দিন (Cash on Delivery)
+                  </span>
                 </>
               )}
             </button>
@@ -1135,7 +1150,8 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       <StickyCtaBar
         onCtaClick={handleScrollToForm}
         disabled={disabled}
-        buttonText={ctaText}
+        totalPrice={totalPrice}
+        shippingCost={getShippingCost()}
       />
     </div>
   );

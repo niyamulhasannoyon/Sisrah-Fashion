@@ -710,23 +710,42 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                {/* ── Mobile CTA (Bold, High-Contrast) ── */}
-                <div className="lg:hidden">
-                  <button
-                    form="checkout-form"
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gray-900 text-white py-4.5 text-sm font-black uppercase tracking-[0.22em] rounded-xl hover:bg-[#A31F24] transition-all flex justify-center items-center gap-3 active:scale-[0.97] shadow-lg shadow-black/10"
-                  >
-                    {loading ? (
-                      <><Loader2 size={18} className="animate-spin" /> Processing...</>
-                    ) : (
-                      <>
-                        <ShieldCheck size={18} />
-                        {paymentMethod === 'bKash' || paymentMethod === 'Nagad' ? 'Confirm Order' : 'Place My Order'}
-                      </>
-                    )}
-                  </button>
+                {/* ── Mobile Sticky CTA Bar ── */}
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
+                  <div className="max-w-md mx-auto flex items-center justify-between gap-4">
+                    <div className="flex flex-col text-left">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none">
+                        Total Payable
+                      </span>
+                      <span className="text-lg font-black text-[#A31F24] mt-1.5 leading-none">
+                        ৳{finalTotal.toLocaleString()}
+                      </span>
+                    </div>
+                    
+                    <button
+                      form="checkout-form"
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 bg-[#A31F24] hover:bg-[#8D181D] active:scale-[0.97] text-white py-3.5 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5 shadow-[0_6px_20px_rgba(163,31,36,0.3)] font-sans"
+                    >
+                      {loading ? (
+                        <div className="flex items-center gap-2 py-0.5">
+                          <Loader2 size={14} className="animate-spin" />
+                          <span className="text-xs font-black uppercase tracking-wider">Processing...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider leading-none">
+                            <ShieldCheck size={14} className="shrink-0" />
+                            {paymentMethod === 'bKash' || paymentMethod === 'Nagad' ? 'Confirm Order' : 'Place My Order'}
+                          </span>
+                          <span className="text-[9px] font-bold text-white/80 lowercase tracking-wide font-bengali leading-none mt-0.5">
+                            {paymentMethod === 'Cash on Delivery' ? 'হাতে পেয়ে মূল্য দিন' : 'নিরাপদ পেমেন্ট (SSL)'}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
@@ -820,11 +839,22 @@ export default function CheckoutPage() {
                   form="checkout-form"
                   type="submit" 
                   disabled={loading} 
-                  className="w-full bg-white text-black py-6 mt-10 font-black uppercase tracking-[0.2em] text-sm rounded-[24px] hover:bg-[#A31F24] hover:text-white transition-all duration-700 flex justify-center items-center gap-3 group shadow-[0_15px_40px_rgba(255,255,255,0.1)] active:scale-[0.98]"
+                  className="w-full bg-[#A31F24] hover:bg-[#8D181D] active:scale-[0.98] text-white py-5 mt-10 font-black uppercase transition-all duration-300 flex flex-col justify-center items-center gap-0.5 group shadow-[0_10px_30px_rgba(163,31,36,0.35)] disabled:opacity-50 disabled:cursor-not-allowed rounded-[20px] relative overflow-hidden"
                 >
-                  {loading ? <Loader2 className="animate-spin" /> : (
+                  {loading ? (
+                    <div className="flex items-center gap-2.5 py-1">
+                      <Loader2 className="animate-spin" size={18} />
+                      <span className="text-xs font-black tracking-[0.1em] uppercase">Processing Order...</span>
+                    </div>
+                  ) : (
                     <>
-                      {(paymentMethod === 'bKash' || paymentMethod === 'Nagad') ? 'Verify & Confirm Order' : 'Place My Order'} <ShieldCheck size={20} className="group-hover:scale-125 transition-transform duration-500" />
+                      <span className="flex items-center gap-2 text-sm font-black tracking-[0.15em] leading-none">
+                        {(paymentMethod === 'bKash' || paymentMethod === 'Nagad') ? 'Verify & Confirm Order' : 'Place My Order'}
+                        <ShieldCheck size={18} className="group-hover:scale-110 transition-transform duration-300 shrink-0" />
+                      </span>
+                      <span className="text-[10px] font-bold text-white/70 lowercase tracking-wide font-bengali leading-none mt-1">
+                        {paymentMethod === 'Cash on Delivery' ? 'হাতে পেয়ে মূল্য দিন (Cash on Delivery)' : 'নিরাপদ পেমেন্ট (Secure Checkout)'}
+                      </span>
                     </>
                   )}
                 </button>
