@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/dbConnect';
-import { isAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 import Staff from '@/models/Staff';
 import { isValidResource } from '@/lib/staffPermissions';
 import { cookies } from 'next/headers';
@@ -10,7 +10,7 @@ import { jwtVerify } from 'jose';
 // GET — List all staff (Super Admin only)
 export async function GET() {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('staff')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -29,7 +29,7 @@ export async function GET() {
 // POST — Create new staff member (Super Admin only)
 export async function POST(req: Request) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('staff')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Review from '@/models/Review';
 import Product from '@/models/Product';
-import { isAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('reviews')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import LandingPage from '@/models/LandingPage';
-import { isStaffOrAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
-// GET /api/admin/landing-pages/[id] — Get single landing page
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isStaffOrAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!await isAdmin() && !await hasAccessTo('landing-pages')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await dbConnect();
   const { id } = await params;
@@ -26,9 +25,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-// PUT /api/admin/landing-pages/[id] — Update a landing page
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isStaffOrAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!await isAdmin() && !await hasAccessTo('landing-pages')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await dbConnect();
   const { id } = await params;
@@ -104,9 +102,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-// DELETE /api/admin/landing-pages/[id] — Delete a landing page
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isStaffOrAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!await isAdmin() && !await hasAccessTo('landing-pages')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await dbConnect();
   const { id } = await params;

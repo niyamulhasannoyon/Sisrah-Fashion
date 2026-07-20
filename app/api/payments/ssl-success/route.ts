@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     const amount = formData.get('amount') as string;
 
     if (!tran_id) {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout?error=InvalidTransaction`);
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout?error=InvalidTransaction`, 303);
     }
 
     // Validate that the request is genuinely from SSLCommerz
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     const expectedStoreId = process.env.SSLCOMMERZ_STORE_ID;
     if (expectedStoreId && store_id && store_id !== expectedStoreId) {
       console.error(`[SSLCommerz] Store ID mismatch: expected ${expectedStoreId}, got ${store_id}`);
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout?error=InvalidMerchant`);
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout?error=InvalidMerchant`, 303);
     }
 
     // Verify payment status from gateway
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         transactionId: val_id || '',
         paidAmount: 0,
       });
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout?error=PaymentFailed`);
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout?error=PaymentFailed`, 303);
     }
 
     // Update order status in MongoDB
@@ -88,10 +88,10 @@ export async function POST(req: Request) {
     }
 
     // Redirect user back to frontend success page
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/order-success?orderId=${tran_id}`);
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/order-success?orderId=${tran_id}`, 303);
 
   } catch (error) {
     console.error('[SSLCommerz] Payment success handler error:', error);
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout?error=PaymentFailed`);
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout?error=PaymentFailed`, 303);
   }
 }

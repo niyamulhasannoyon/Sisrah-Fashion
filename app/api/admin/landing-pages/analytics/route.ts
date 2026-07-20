@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import AnalyticsEvent from '@/models/AnalyticsEvent';
 import Order from '@/models/Order';
-import { isStaffOrAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
 // ── GET /api/admin/landing-pages/analytics — Per-campaign aggregate stats ──
 // ── GET /api/admin/landing-pages/analytics?slug=... — Detailed per-slug data ──
 export async function GET(req: Request) {
-  if (!(await isStaffOrAdmin())) {
+  if (!await isAdmin() && !await hasAccessTo('landing-pages')) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 

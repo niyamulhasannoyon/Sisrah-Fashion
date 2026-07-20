@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import { isAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 import StaffActivityLog from '@/models/StaffActivityLog';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 // Query params: staffId, targetType, limit (default 100)
 export async function GET(req: Request) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('staff')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 

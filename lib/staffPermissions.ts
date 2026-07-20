@@ -14,6 +14,7 @@ export const ROLE_PERMISSIONS: Record<StaffRole, string[]> = {
     'coupons',
     'staff',
     'settings',
+    'landing-pages',
   ],
   manager: [
     'dashboard',
@@ -21,6 +22,7 @@ export const ROLE_PERMISSIONS: Record<StaffRole, string[]> = {
     'orders',
     'customers',
     'reviews',
+    'landing-pages',
   ],
   support: [
     'dashboard',

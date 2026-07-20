@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import LandingPage from '@/models/LandingPage';
-import { isStaffOrAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
-// GET /api/admin/landing-pages — List all landing pages
 export async function GET(req: NextRequest) {
-  if (!(await isStaffOrAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!await isAdmin() && !await hasAccessTo('landing-pages')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await dbConnect();
 
@@ -22,9 +21,8 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/admin/landing-pages — Create a new landing page
 export async function POST(req: NextRequest) {
-  if (!(await isStaffOrAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!await isAdmin() && !await hasAccessTo('landing-pages')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await dbConnect();
 

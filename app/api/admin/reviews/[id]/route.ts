@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Review from '@/models/Review';
 import Product from '@/models/Product';
-import { isAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
 async function updateProductRating(productId: string) {
   const approvedReviews = await Review.find({ product: productId, status: 'approved' });
@@ -16,7 +16,7 @@ async function updateProductRating(productId: string) {
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('reviews')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();
@@ -50,7 +50,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('reviews')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();

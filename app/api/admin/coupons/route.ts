@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Coupon from '@/models/Coupon';
 import Order from '@/models/Order';
-import { isAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('coupons')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();
@@ -51,7 +51,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('coupons')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('coupons')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();

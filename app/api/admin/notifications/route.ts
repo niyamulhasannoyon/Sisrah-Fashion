@@ -3,14 +3,14 @@ import dbConnect from '@/lib/dbConnect';
 import Notification from '@/models/Notification';
 import Coupon from '@/models/Coupon';
 import Product from '@/models/Product';
-import { isAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
 // GET all notifications (dynamic check for stock & coupon expiry)
 export async function GET(req: Request) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('dashboard')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();
@@ -82,7 +82,7 @@ export async function GET(req: Request) {
 // PUT to mark as read or delete
 export async function PUT(req: Request) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('dashboard')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     await dbConnect();

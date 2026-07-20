@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     await dbConnect();
@@ -28,11 +30,11 @@ export async function GET(request: Request) {
   }
 }
 
-import { isAdmin } from '@/lib/adminAuth';
+import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
 export async function POST(request: Request) {
   try {
-    if (!await isAdmin()) {
+    if (!await isAdmin() && !await hasAccessTo('products')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 

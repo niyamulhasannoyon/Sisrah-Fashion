@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import LandingPage from '@/models/LandingPage';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/lp/[slug] — Public endpoint to fetch an active landing page with populated products
 export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   await dbConnect();
