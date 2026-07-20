@@ -115,7 +115,7 @@ export default function CustomerManagement() {
                       <td className="p-4 text-right">
                         <button
                           onClick={() => setSelectedCustomer(customer)}
-                          className="px-3.5 py-1.5 bg-slate-50 border border-slate-200 hover:bg-slate-800 hover:text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-250 flex items-center gap-1.5 ml-auto shadow-sm"
+                          className="px-3.5 py-1.5 bg-slate-50 border border-slate-200 hover:bg-slate-800 hover:text-white active:bg-slate-900 active:scale-[0.97] rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-250 flex items-center gap-1.5 ml-auto shadow-sm"
                         >
                           <Eye size={12} /> Details
                         </button>
@@ -146,7 +146,7 @@ export default function CustomerManagement() {
               </div>
               <button 
                 onClick={() => setSelectedCustomer(null)} 
-                className="text-slate-400 hover:text-black p-2 bg-white rounded-full border border-slate-200 transition"
+                className="text-slate-400 hover:text-black active:text-slate-600 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white rounded-full border border-slate-200 transition"
               >
                 <X size={20} />
               </button>
@@ -271,7 +271,7 @@ export default function CustomerManagement() {
             <div className="p-6 border-t bg-slate-50 flex justify-end gap-3 shrink-0">
               <button 
                 onClick={() => setSelectedCustomer(null)} 
-                className="px-5 py-2 bg-white border border-slate-200 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-slate-100 transition"
+                className="px-5 py-2 bg-white border border-slate-200 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-all"
               >
                 Close details
               </button>

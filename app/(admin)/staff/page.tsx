@@ -265,7 +265,7 @@ export default function StaffManagementPage() {
         </div>
         <button
           onClick={() => setDrawerOpen(true)}
-          className="flex items-center gap-2 bg-[#1A1A1A] text-white px-5 py-2.5 rounded-lg text-sm font-bold uppercase tracking-widest hover:bg-[#A31F24] transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-[#1A1A1A] text-white px-5 py-2.5 rounded-lg text-sm font-bold uppercase tracking-widest hover:bg-[#A31F24] active:scale-[0.97] transition-all shadow-sm"
         >
           <Plus size={18} />
           Add Staff
@@ -301,7 +301,7 @@ export default function StaffManagementPage() {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-5 py-2 rounded-lg transition-all ${
-              activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'hover:text-slate-900'
+              activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'hover:text-slate-900 active:text-slate-700'
             }`}
           >
             {tab === 'team' ? '👥 Team' : '📋 Activity Log'}
@@ -373,7 +373,7 @@ export default function StaffManagementPage() {
                               ))}
                             </select>
                             {savingRole && <Loader2 size={14} className="animate-spin text-slate-400" />}
-                            <button onClick={() => setEditingRoleId(null)} className="text-slate-400 hover:text-slate-600">
+                            <button onClick={() => setEditingRoleId(null)} className="text-slate-400 hover:text-slate-600 active:text-slate-800">
                               <X size={14} />
                             </button>
                           </div>
@@ -435,7 +435,7 @@ export default function StaffManagementPage() {
                           <button
                             onClick={() => { setResetModal({ staffId: member._id, name: member.name }); setNewPassword(''); }}
                             title="Reset Password"
-                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 active:bg-blue-100 rounded-lg transition-colors"
                           >
                             <KeyRound size={16} />
                           </button>
@@ -444,7 +444,7 @@ export default function StaffManagementPage() {
                           <button
                             onClick={() => setDeleteModal(member)}
                             title="Delete Staff"
-                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100 rounded-lg transition-colors"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -491,7 +491,7 @@ export default function StaffManagementPage() {
               <button
                 onClick={() => fetchLogs(logFilter)}
                 disabled={loadingLogs}
-                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:bg-slate-200 rounded-lg transition-colors"
               >
                 <RefreshCw size={14} className={loadingLogs ? 'animate-spin' : ''} />
               </button>
@@ -578,7 +578,7 @@ export default function StaffManagementPage() {
               </div>
               <button
                 onClick={() => { setDrawerOpen(false); setFormError(''); }}
-                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:bg-slate-200 rounded-lg transition-colors"
               >
                 <X size={18} />
               </button>
@@ -632,7 +632,7 @@ export default function StaffManagementPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(s => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 active:text-slate-800"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -701,14 +701,14 @@ export default function StaffManagementPage() {
               <button
                 type="button"
                 onClick={() => { setDrawerOpen(false); setFormError(''); }}
-                className="flex-1 px-4 py-3 text-sm font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                className="flex-1 px-4 py-3 text-sm font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddStaff}
                 disabled={submitting}
-                className="flex-1 px-4 py-3 text-sm font-bold text-white bg-[#1A1A1A] rounded-lg hover:bg-[#A31F24] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 px-4 py-3 text-sm font-bold text-white bg-[#1A1A1A] rounded-lg hover:bg-[#A31F24] active:scale-[0.97] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {submitting ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                 {submitting ? 'Adding...' : 'Add Staff Member'}
@@ -727,7 +727,7 @@ export default function StaffManagementPage() {
                 <KeyRound size={18} className="text-blue-500" />
                 Reset Password
               </h3>
-              <button onClick={() => setResetModal(null)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setResetModal(null)} className="text-slate-400 hover:text-slate-600 active:text-slate-800">
                 <X size={18} />
               </button>
             </div>
@@ -755,14 +755,14 @@ export default function StaffManagementPage() {
             <div className="flex gap-3 p-5 border-t border-slate-100">
               <button
                 onClick={() => setResetModal(null)}
-                className="flex-1 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                className="flex-1 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePasswordReset}
                 disabled={savingPwd || newPassword.length < 6}
-                className="flex-1 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.97] rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {savingPwd ? <Loader2 size={14} className="animate-spin" /> : null}
                 {savingPwd ? 'Saving...' : 'Update Password'}
@@ -781,7 +781,7 @@ export default function StaffManagementPage() {
                 <Trash2 size={18} />
                 Delete Staff Member
               </h3>
-              <button onClick={() => setDeleteModal(null)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setDeleteModal(null)} className="text-slate-400 hover:text-slate-600 active:text-slate-800">
                 <X size={18} />
               </button>
             </div>
@@ -796,14 +796,14 @@ export default function StaffManagementPage() {
             <div className="flex gap-3 p-5 border-t border-slate-100">
               <button
                 onClick={() => setDeleteModal(null)}
-                className="flex-1 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                className="flex-1 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 active:scale-[0.97] rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                 {deleting ? 'Deleting...' : 'Yes, Delete'}

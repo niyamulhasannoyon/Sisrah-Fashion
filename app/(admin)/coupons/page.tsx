@@ -83,7 +83,7 @@ export default function CouponManagement() {
             <p className="text-sm text-slate-500">Create and manage promotional discount codes.</p>
           </div>
           <a href="/coupons/report"
-            className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-wider text-slate-600 hover:text-[#A31F24] hover:border-[#A31F24]/30 transition-all shadow-sm">
+            className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-wider text-slate-600 hover:text-[#A31F24] hover:border-[#A31F24]/30 active:text-[#A31F24] active:scale-[0.97] transition-all shadow-sm">
             <BarChart3 size={14} />
             Report
             <ArrowUpRight size={12} />
@@ -141,7 +141,7 @@ export default function CouponManagement() {
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none text-sm transition-all" />
             </div>
 
-            <button type="submit" className="w-full bg-black text-white py-4 rounded-xl font-bold text-sm hover:bg-[#A31F24] transition-all shadow-lg flex justify-center items-center gap-2">
+            <button type="submit" className="w-full bg-black text-white py-4 rounded-xl font-bold text-sm hover:bg-[#A31F24] active:scale-[0.97] transition-all shadow-lg flex justify-center items-center gap-2">
               <Plus size={18} /> Create Coupon
             </button>
           </div>
@@ -213,14 +213,14 @@ export default function CouponManagement() {
                       <td className="p-4 text-right flex items-center justify-end gap-1">
                         <button 
                           onClick={() => openHistory(c.code)}
-                          className="p-2 text-slate-300 hover:text-blue-500 transition-colors"
+                          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-300 hover:text-blue-500 active:text-blue-700 transition-colors"
                           title="View usage history"
                         >
                           <Clock size={16} />
                         </button>
                         <button 
                           onClick={() => handleDelete(c._id)}
-                          className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-300 hover:text-red-500 active:text-red-700 transition-colors"
                           title="Delete coupon"
                         >
                           <Trash2 size={16} />
@@ -253,7 +253,7 @@ export default function CouponManagement() {
               </div>
               <button 
                 onClick={() => setHistoryModal({ open: false, code: '' })}
-                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 active:bg-slate-200 rounded-full transition-colors"
               >
                 <X size={18} className="text-slate-400" />
               </button>

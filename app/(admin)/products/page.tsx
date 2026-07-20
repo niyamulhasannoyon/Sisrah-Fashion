@@ -338,7 +338,7 @@ export default function AdminProductsList() {
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Products Inventory</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your catalog, edit details, and preview products.</p>
         </div>
-        <Link href="/products/new" className="bg-[#1A1A1A] text-white px-5 py-2.5 rounded-md text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-[#A31F24] transition-colors shadow-sm">
+        <Link href="/products/new" className="bg-[#1A1A1A] text-white px-5 py-2.5 rounded-md text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-[#A31F24] active:scale-[0.97] transition-all shadow-sm">
           <Plus size={18} /> Add Product
         </Link>
       </div>
@@ -373,9 +373,9 @@ export default function AdminProductsList() {
         <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
           <div className="flex flex-wrap gap-3 items-center">
             <span className="text-xs font-bold uppercase tracking-[0.28em] text-slate-500">Filter</span>
-            <button onClick={() => setAlertMode('all')} className={`px-3 py-2 rounded-lg text-xs font-semibold ${alertMode === 'all' ? 'bg-[#1A1A1A] text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>All</button>
-            <button onClick={() => setAlertMode('low')} className={`px-3 py-2 rounded-lg text-xs font-semibold ${alertMode === 'low' ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}>Low Stock</button>
-            <button onClick={() => setAlertMode('out')} className={`px-3 py-2 rounded-lg text-xs font-semibold ${alertMode === 'out' ? 'bg-rose-600 text-white' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'}`}>Out of Stock</button>
+            <button onClick={() => setAlertMode('all')} className={`px-3 py-2 rounded-lg text-xs font-semibold ${alertMode === 'all' ? 'bg-[#1A1A1A] text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'}`}>All</button>
+            <button onClick={() => setAlertMode('low')} className={`px-3 py-2 rounded-lg text-xs font-semibold ${alertMode === 'low' ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-700 hover:bg-amber-200 active:bg-amber-300'}`}>Low Stock</button>
+            <button onClick={() => setAlertMode('out')} className={`px-3 py-2 rounded-lg text-xs font-semibold ${alertMode === 'out' ? 'bg-rose-600 text-white' : 'bg-rose-100 text-rose-700 hover:bg-rose-200 active:bg-rose-300'}`}>Out of Stock</button>
           </div>
           <div className="flex flex-wrap gap-3 items-center text-sm text-slate-500">
             <span>{selectedIds.length} selected</span>
@@ -386,10 +386,10 @@ export default function AdminProductsList() {
         </div>
 
         <div className="flex flex-wrap gap-2 justify-end">
-          <button onClick={downloadCsv} disabled={exporting} className="inline-flex items-center gap-2 rounded-xl bg-[#1A1A1A] px-4 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#A31F24] transition disabled:opacity-50">
+          <button onClick={downloadCsv} disabled={exporting} className="inline-flex items-center gap-2 rounded-xl bg-[#1A1A1A] px-4 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#A31F24] active:scale-[0.97] transition-all disabled:opacity-50">
             <Upload size={16} /> {exporting ? 'Exporting...' : 'Export CSV'}
           </button>
-          <button onClick={triggerImport} disabled={importing} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-100 transition disabled:opacity-50">
+          <button onClick={triggerImport} disabled={importing} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition-all disabled:opacity-50">
             <Upload size={16} /> {importing ? 'Importing...' : 'Import CSV'}
           </button>
           <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
@@ -420,10 +420,10 @@ export default function AdminProductsList() {
           </div>
 
           <div className="flex flex-wrap gap-2 justify-end">
-            <button onClick={handleBulkAction} disabled={selectedIds.length === 0 || bulkAction === 'none'} className="rounded-xl bg-[#1A1A1A] px-4 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#A31F24] transition disabled:opacity-50">
+            <button onClick={handleBulkAction} disabled={selectedIds.length === 0 || bulkAction === 'none'} className="rounded-xl bg-[#1A1A1A] px-4 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#A31F24] active:scale-[0.97] transition-all disabled:opacity-50">
               Apply action
             </button>
-            <button onClick={handleBulkCategory} disabled={selectedIds.length === 0 || !bulkCategory.trim()} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-100 transition disabled:opacity-50">
+            <button onClick={handleBulkCategory} disabled={selectedIds.length === 0 || !bulkCategory.trim()} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition-all disabled:opacity-50">
               Update category
             </button>
           </div>
@@ -498,18 +498,18 @@ export default function AdminProductsList() {
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Link href={`/product/${product.slug}`} target="_blank" title="Preview" className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
+                          <Link href={`/product/${product.slug}`} target="_blank" title="Preview" className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 active:bg-blue-100 rounded-md transition-colors">
                             <Eye size={18} />
                           </Link>
-                          <Link href={`/products/edit/${product._id}`} title="Edit" className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors">
+                          <Link href={`/products/edit/${product._id}`} title="Edit" className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-green-600 hover:bg-green-50 active:bg-green-100 rounded-md transition-colors">
                             <Edit size={18} />
                           </Link>
                           <button 
                             type="button"
                             onClick={() => handleDuplicate(product)} 
                             disabled={duplicatingId !== null}
-                            title="Duplicate" 
-                            className="p-2 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors disabled:opacity-50"
+                title="Duplicate" 
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-amber-600 hover:bg-amber-50 active:bg-amber-100 rounded-md transition-colors disabled:opacity-50"
                           >
                             {duplicatingId === product._id ? (
                               <Loader2 className="animate-spin text-amber-600" size={18} />
@@ -517,7 +517,7 @@ export default function AdminProductsList() {
                               <Copy size={18} />
                             )}
                           </button>
-                          <button onClick={() => confirmDelete(product)} title="Delete" className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                          <button onClick={() => confirmDelete(product)} title="Delete" className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 active:bg-red-100 rounded-md transition-colors">
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -538,7 +538,7 @@ export default function AdminProductsList() {
               <h3 className="text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
                 <AlertTriangle className="text-red-500" size={20} /> Delete Product
               </h3>
-              <button onClick={() => setIsDeleteModalOpen(false)} className="text-gray-400 hover:text-[#1A1A1A]">
+              <button onClick={() => setIsDeleteModalOpen(false)} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-[#1A1A1A] active:text-gray-600">
                 <X size={20} />
               </button>
             </div>
@@ -548,10 +548,10 @@ export default function AdminProductsList() {
               </p>
             </div>
             <div className="p-4 bg-gray-50 flex justify-end gap-3 border-t border-gray-100">
-              <button onClick={() => setIsDeleteModalOpen(false)} disabled={isDeleting} className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 rounded-md transition-colors">
+              <button onClick={() => setIsDeleteModalOpen(false)} disabled={isDeleting} className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 active:bg-gray-300 rounded-md transition-all">
                 Cancel
               </button>
-              <button onClick={handleDelete} disabled={isDeleting} className="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors flex items-center gap-2 disabled:opacity-50">
+              <button onClick={handleDelete} disabled={isDeleting} className="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 active:scale-[0.97] rounded-md transition-all flex items-center gap-2 disabled:opacity-50">
                 {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                 {isDeleting ? 'Deleting...' : 'Yes, Delete'}
               </button>
