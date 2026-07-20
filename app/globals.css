@@ -9,7 +9,6 @@
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -17,8 +16,6 @@ body {
   min-height: 100dvh;
   background-color: #FFFFFF;
   color: #1A1A1A;
-  overflow-x: hidden;
-  overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
 }
 

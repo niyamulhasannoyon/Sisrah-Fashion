@@ -32,16 +32,22 @@ export function useLockedBody(locked: boolean) {
   useEffect(() => {
     const id = idRef.current;
 
+    console.log(`[useLockedBody] ID: ${id}, locked parameter: ${locked}, before update Set size: ${activeLocks.size}`);
+
     if (locked) {
       activeLocks.add(id);
     } else {
       activeLocks.delete(id);
     }
 
+    console.log(`[useLockedBody] ID: ${id}, after update Set size: ${activeLocks.size}, Set content:`, Array.from(activeLocks));
+
     if (activeLocks.size > 0) {
       document.body.style.overflow = 'hidden';
+      console.log(`[useLockedBody] Set body overflow to 'hidden' due to active locks`);
     } else {
       document.body.style.overflow = '';
+      console.log(`[useLockedBody] Restored body overflow to ''`);
     }
   }, [locked]);
 
@@ -49,10 +55,13 @@ export function useLockedBody(locked: boolean) {
   useEffect(() => {
     return () => {
       const id = idRef.current;
+      console.log(`[useLockedBody Cleanup] Component unmounted. ID: ${id}, existed in Set: ${activeLocks.has(id)}`);
       if (activeLocks.has(id)) {
         activeLocks.delete(id);
+        console.log(`[useLockedBody Cleanup] Released lock for ID: ${id}. Remaining active locks:`, Array.from(activeLocks));
         if (activeLocks.size === 0) {
           document.body.style.overflow = '';
+          console.log(`[useLockedBody Cleanup] Restored body overflow to ''`);
         }
       }
     };
