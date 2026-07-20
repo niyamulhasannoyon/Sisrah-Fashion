@@ -309,7 +309,7 @@ export default function LandingPagePreviewModal({ page, pageId, onClose }: Landi
           <p className="text-xs text-slate-500">{error || 'Could not load landing page data.'}</p>
           <button
             onClick={onClose}
-            className="mt-2 px-5 py-2.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-slate-800 transition"
+            className="mt-2 px-5 py-2.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-slate-800 active:scale-[0.97] transition-all"
           >
             Close
           </button>
@@ -345,7 +345,7 @@ export default function LandingPagePreviewModal({ page, pageId, onClose }: Landi
                   className={`p-2 rounded-md transition-all ${
                     deviceView === view
                       ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-600'
+                      : 'text-slate-400 hover:text-slate-600 active:bg-slate-200 active:scale-[0.95]'
                   }`}
                   title={`${DEVICE_LABELS[view]} view`}
                 >
@@ -372,7 +372,7 @@ export default function LandingPagePreviewModal({ page, pageId, onClose }: Landi
               href={previewUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 active:text-blue-900 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 rounded-lg transition-colors"
             >
               <ExternalLink size={14} /> Open Live
             </a>
@@ -383,7 +383,7 @@ export default function LandingPagePreviewModal({ page, pageId, onClose }: Landi
           {/* Close button */}
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:bg-slate-200 rounded-lg transition-all"
             title="Close preview"
           >
             <X size={18} />

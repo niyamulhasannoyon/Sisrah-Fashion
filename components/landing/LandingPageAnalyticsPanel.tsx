@@ -162,7 +162,7 @@ export default function LandingPageAnalyticsPanel({ slug, pageTitle, onClose }: 
           </div>
           <p className="text-sm font-bold text-slate-900">{error || 'No analytics data available'}</p>
           <p className="text-xs text-slate-500">No events have been tracked for this campaign yet.</p>
-          <button onClick={onClose} className="mt-2 px-5 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-slate-800 transition">
+          <button onClick={onClose} className="mt-2 px-5 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-slate-800 active:scale-[0.97] transition-all min-w-[44px] min-h-[44px] flex items-center justify-center">
             Close
           </button>
         </div>
@@ -256,7 +256,7 @@ export default function LandingPageAnalyticsPanel({ slug, pageTitle, onClose }: 
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all shrink-0"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:bg-slate-200 rounded-lg transition-all shrink-0"
           >
             <X size={18} />
           </button>
@@ -304,7 +304,7 @@ export default function LandingPageAnalyticsPanel({ slug, pageTitle, onClose }: 
                 className={`flex items-center gap-1.5 px-4 py-3 text-[10px] font-bold uppercase tracking-wider border-b-2 transition-all ${
                   activeTab === tab.key
                     ? 'border-slate-900 text-slate-900'
-                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                    : 'border-transparent text-slate-400 hover:text-slate-600 active:text-slate-800'
                 }`}
               >
                 <tab.icon size={14} />
@@ -315,7 +315,7 @@ export default function LandingPageAnalyticsPanel({ slug, pageTitle, onClose }: 
         </div>
 
         {/* ── Scrollable Content Area ── */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 pb-20">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 pb-[max(5rem,env(safe-area-inset-bottom))]">
 
           {/* ═══ TIMELINE TAB ═══ */}
           {activeTab === 'timeline' && (

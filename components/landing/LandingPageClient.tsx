@@ -132,7 +132,7 @@ function StickyCtaBar({
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
     >
       <div className="max-w-2xl mx-auto flex items-center gap-3">
         <div className="flex-1 min-w-0">
@@ -494,7 +494,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                         key={idx}
                         onClick={() => setActiveImage(idx)}
                         className={`relative w-16 h-20 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
-                          activeImage === idx ? 'border-gray-900 opacity-100' : 'border-transparent opacity-50 hover:opacity-75'
+                          activeImage === idx ? 'border-gray-900 opacity-100' : 'border-transparent opacity-50 hover:opacity-75 active:opacity-100'
                         }`}
                       >
                         <Image
@@ -551,10 +551,10 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                           onClick={() =>
                             setSelectedSizes({ ...selectedSizes, [primaryProduct._id]: size })
                           }
-                          className={`w-12 h-12 rounded-lg border text-xs font-bold transition-all duration-200 ${
+                          className={`min-w-[44px] min-h-[44px] rounded-lg border text-xs font-bold transition-all duration-200 ${
                             selectedSizes[primaryProduct._id] === size
                               ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
-                              : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 active:bg-gray-100 active:scale-[0.95]'
                           }`}
                         >
                           {size}
@@ -575,10 +575,10 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                           onClick={() =>
                             setSelectedColors({ ...selectedColors, [primaryProduct._id]: color })
                           }
-                          className={`px-3.5 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                          className={`px-3.5 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                             selectedColors[primaryProduct._id] === color
                               ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
-                              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 active:bg-gray-100 active:scale-[0.97]'
                           }`}
                         >
                           {color}
@@ -756,7 +756,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
         {/* ── Footer Links ── */}
         <div className="text-center pt-4 border-t border-gray-100">
-          <Link href="/shop" className="text-[10px] sm:text-xs text-gray-400 hover:text-gray-700 transition-colors uppercase tracking-wider font-medium">
+          <Link href="/shop" className="text-[10px] sm:text-xs text-gray-400 hover:text-gray-700 active:text-gray-900 transition-colors uppercase tracking-wider font-medium">
             View Full Collection →
           </Link>
         </div>

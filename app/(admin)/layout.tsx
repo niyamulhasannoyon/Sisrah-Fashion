@@ -41,6 +41,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
 
+  // Lock body scroll when notification dropdown is open (on mobile)
+  useEffect(() => {
+    if (showNotifDropdown) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showNotifDropdown]);
+
   const fetchNotifications = async () => {
     try {
       const res = await fetch('/api/admin/notifications');
@@ -228,11 +238,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  href={item.href}                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? 'bg-[#1E293B] text-white shadow-sm ring-1 ring-slate-700'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50 active:bg-slate-700/50 active:scale-[0.98]'
                   }`}
                 >
                   <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-400'} />
@@ -252,7 +261,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 w-full text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 w-full text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 active:scale-[0.98] rounded-lg transition-all"
           >
             <LogOut size={18} />
             Sign Out
@@ -280,7 +289,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="relative">
               <button 
                 onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-                className="relative text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100/80 cursor-pointer"
+                className="relative text-slate-400 hover:text-slate-600 active:text-slate-800 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center p-1 rounded-full hover:bg-slate-100/80 active:bg-slate-200 cursor-pointer"
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
@@ -298,7 +307,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     {unreadCount > 0 && (
                       <button 
                         onClick={handleMarkAllRead}
-                        className="text-[10px] font-bold text-[#A31F24] hover:underline cursor-pointer"
+                        className="text-[10px] font-bold text-[#A31F24] hover:underline active:text-red-700 cursor-pointer"
                       >
                         Mark all as read
                       </button>
