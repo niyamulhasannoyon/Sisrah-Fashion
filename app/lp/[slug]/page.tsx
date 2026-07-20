@@ -27,6 +27,9 @@ export async function generateMetadata({ params }: LpPageProps): Promise<Metadat
   await dbConnect();
   const { slug } = await params;
 
+  // Prevent compiler tree-shaking of Product model
+  const _forceRegister = Product.modelName;
+
   try {
     const raw = await LandingPage.findOne({ slug, isActive: true })
       .populate('productIds', 'title description basePrice offerPrice images')
@@ -72,6 +75,9 @@ export async function generateMetadata({ params }: LpPageProps): Promise<Metadat
 export default async function LpPage({ params }: LpPageProps) {
   await dbConnect();
   const { slug } = await params;
+
+  // Prevent compiler tree-shaking of Product model
+  const _forceRegister = Product.modelName;
 
   let raw;
   try {
