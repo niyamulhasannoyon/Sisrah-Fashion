@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { X, Smartphone, Tablet, Monitor, ExternalLink, Loader2, Star, Clock, Package, Truck, ShieldCheck, AlertCircle } from 'lucide-react';
+import { getDirectImageLink } from '@/lib/utils';
 
 // ── Types (matching LandingPageClient) ──
 interface ProductPreview {
@@ -81,7 +82,7 @@ function MiniLandingPreview({ page }: { page: PageData }) {
 
   const heading = page.customHero?.customHeading || primaryProduct?.title || page.pageTitle;
   const subheading = page.customHero?.customSubheading || primaryProduct?.description || '';
-  const heroImage = page.customHero?.customBannerImage || products[0]?.images?.[0]?.url || '/images/placeholder.jpg';
+  const heroImage = (page.customHero?.customBannerImage && getDirectImageLink(page.customHero.customBannerImage.trim())) || products[0]?.images?.[0]?.url || '/images/placeholder.jpg';
 
   const totalPrice = isSingle
     ? (primaryProduct?.offerPrice || primaryProduct?.basePrice || 0)

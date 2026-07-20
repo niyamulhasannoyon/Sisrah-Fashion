@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import LandingPagePreviewModal from '@/components/landing/LandingPagePreviewModal';
 import LandingPageAnalyticsPanel from '@/components/landing/LandingPageAnalyticsPanel';
+import { getDirectImageLink } from '@/lib/utils';
 
 interface Testimonial {
   name: string;
@@ -53,7 +54,7 @@ function ImagePreview({ url, alt, onRemove }: { url: string; alt: string; onRemo
   return (
     <div className="relative w-full aspect-[21/9] rounded-xl overflow-hidden border border-slate-200 bg-slate-50 group">
       <img
-        src={url}
+        src={getDirectImageLink(url)}
         alt={alt}
         className="w-full h-full object-cover"
         onError={() => setHasError(true)}

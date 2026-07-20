@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Star, Clock, ShoppingBag, Check, Package, Truck, ShieldCheck } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
+import { getDirectImageLink } from '@/lib/utils';
 
 // ── Types ──
 interface ProductData {
@@ -173,7 +174,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
       <div className="flex items-center gap-2.5">
         {testimonial.image ? (
           <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-            <Image src={testimonial.image} alt={testimonial.name} fill sizes="32px" className="object-cover" />
+            <Image src={getDirectImageLink(testimonial.image)} alt={testimonial.name} fill sizes="32px" className="object-cover" />
           </div>
         ) : (
           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-500 uppercase">
@@ -301,7 +302,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
   // Images for hero section
   const heroImage =
-    (page.customHero?.customBannerImage && page.customHero.customBannerImage.trim()) ||
+    (page.customHero?.customBannerImage && getDirectImageLink(page.customHero.customBannerImage.trim())) ||
     primaryProduct?.images?.[activeImage]?.url ||
     products[0]?.images?.[0]?.url ||
     '/images/placeholder.jpg';

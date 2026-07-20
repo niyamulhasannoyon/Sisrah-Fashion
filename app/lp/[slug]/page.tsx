@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import LandingPage from '@/models/LandingPage';
 import LandingPageClient from '@/components/landing/LandingPageClient';
+import { getDirectImageLink } from '@/lib/utils';
 
 interface LpPageProps {
   params: Promise<{ slug: string }>;
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }: LpPageProps): Promise<Metadat
     const product = products[0];
     const heading = raw.customHero?.customHeading || product?.title || raw.pageTitle;
     const description = raw.customHero?.customSubheading || product?.description || 'Shop the latest collection at AS SIDRAT.';
-    const bannerImage = raw.customHero?.customBannerImage || product?.images?.[0]?.url || '/og-image.jpg';
+    const bannerImage = (raw.customHero?.customBannerImage && getDirectImageLink(raw.customHero.customBannerImage.trim())) || product?.images?.[0]?.url || '/og-image.jpg';
 
     return {
       title: `${heading} — AS SIDRAT`,
