@@ -4,6 +4,7 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 import { useEffect } from 'react';
 import { Camera, Image as ImageIcon } from 'lucide-react';
 import { getDirectImageLink } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function CommunityClient() {
   const { settings, fetchSettings } = useSettingsStore();
@@ -43,10 +44,12 @@ export default function CommunityClient() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {images.map((img, idx) => (
             <div key={idx} className="relative aspect-[4/5] rounded-3xl overflow-hidden group cursor-pointer shadow-md bg-white border border-slate-100">
-              <img 
+              <Image 
                 src={getDirectImageLink(img.url)} 
                 alt="Community Style" 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1000ms] group-hover:scale-105"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                className="object-cover transition-transform duration-[1000ms] group-hover:scale-105" 
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 z-10">
                 <ImageIcon className="text-white" size={32} />

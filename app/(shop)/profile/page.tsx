@@ -247,7 +247,7 @@ export default function AdvancedProfilePage() {
         <div className="bg-gray-900 p-5 md:p-6 rounded-xl md:rounded-lg text-white flex md:flex-col items-center md:text-center gap-4 md:gap-3">
           <div className="relative w-12 h-12 md:w-16 md:h-16 shrink-0">
             {user.image ? (
-              <img src={user.image} alt={user.name} className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-white/20 shadow-sm" />
+              <img src={user.image} alt={user.name} width="64" height="64" className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-white/20 shadow-sm" />
             ) : (
               <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center text-lg md:text-2xl font-bold uppercase select-none">
                 {user.name.charAt(0)}
@@ -309,7 +309,7 @@ export default function AdvancedProfilePage() {
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 pb-5 sm:pb-6 border-b border-gray-100">
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0">
                 {user.image ? (
-                  <img src={user.image} alt={user.name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border shadow-sm" />
+                  <img src={user.image} alt={user.name} width="80" height="80" className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border shadow-sm" />
                 ) : (
                   <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 border border-gray-200 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold uppercase text-gray-400 select-none">
                     {user.name.charAt(0)}
@@ -512,7 +512,7 @@ export default function AdvancedProfilePage() {
                         <div key={idx} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white border border-gray-100 rounded-lg overflow-hidden shrink-0">
-                              <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                              <img src={item.image} alt={item.title} width="40" height="40" className="w-full h-full object-cover" />
                             </div>
                             <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">{item.quantity}x {item.title}</span>
                           </div>

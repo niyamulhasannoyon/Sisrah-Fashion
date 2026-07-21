@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ export function Button({ children, className = '', href, variant = 'primary', ..
     ghost: 'bg-transparent text-[#1A1A1A] hover:bg-gray-50',
   };
 
-  const styles = `${baseStyles} ${variants[variant]} ${className}`;
+  const styles = cn(baseStyles, variants[variant], className);
 
   if (href) {
     return (

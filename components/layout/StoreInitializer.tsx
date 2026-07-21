@@ -10,19 +10,20 @@ interface StoreInitializerProps {
 export default function StoreInitializer({ settings }: StoreInitializerProps) {
   const initialized = useRef(false);
   const fetchSettings = useSettingsStore((state) => state.fetchSettings);
+
+  // Synchronous server/client render hydration
+  if (settings && !initialized.current) {
+    useSettingsStore.setState({ settings, loading: false });
+    initialized.current = true;
+  }
   
-  // Hydration-safe: useEffect runs only on client
+  // Hydration-safe client-side backup
   useEffect(() => {
-    if (settings && !initialized.current) {
-      // Server-preloaded settings — apply immediately
-      useSettingsStore.setState({ settings, loading: false });
-      initialized.current = true;
-    } else if (!initialized.current) {
-      // No server data — fetch on client
+    if (!initialized.current) {
       fetchSettings();
       initialized.current = true;
     }
-  }, [settings, fetchSettings]);
+  }, [fetchSettings]);
   
   return null;
 }

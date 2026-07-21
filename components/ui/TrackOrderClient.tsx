@@ -238,7 +238,7 @@ function TrackOrderContent() {
                 {order.orderItems.map((item: any, idx: number) => (
                   <div key={idx} className="flex gap-4 items-center">
                     <div className="w-12 h-16 bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
-                      <img src={item.images?.[0]?.url || item.image} alt={item.title} className="w-full h-full object-cover" />
+                      <img src={item.images?.[0]?.url || item.image} alt={item.title} width="48" height="64" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-bold text-gray-900 line-clamp-1">{item.title}</p>

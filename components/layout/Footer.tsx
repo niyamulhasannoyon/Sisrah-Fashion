@@ -73,7 +73,7 @@ export function Footer() {
               <li><Link href="/category/men" className="hover:text-white transition-colors">Men's Collection</Link></li>
               <li><Link href="/category/women" className="hover:text-white transition-colors">Women's Collection</Link></li>
               <li><Link href="/category/fusion" className="hover:text-white transition-colors">Fusion Wear</Link></li>
-              <li><Link href="/products" className="hover:text-white transition-colors">All New Arrivals</Link></li>
+              <li><Link href="/shop" className="hover:text-white transition-colors">All New Arrivals</Link></li>
               <li><Link href="/community" className="hover:text-white transition-colors">Community Gallery</Link></li>
             </ul>
           </div>

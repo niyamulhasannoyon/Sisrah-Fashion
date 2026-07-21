@@ -44,8 +44,9 @@ export function HeroSection() {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px"
             priority={index === 0}
+            fetchPriority={index === 0 ? "high" : "auto"}
             className="object-cover object-center"
-            quality={90}
+            quality={75}
           />
         </div>
       ))}

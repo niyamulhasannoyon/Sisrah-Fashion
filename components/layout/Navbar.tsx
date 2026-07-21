@@ -141,7 +141,7 @@ export function Navbar() {
                   <>
                     <Link href="/profile" aria-label="View Profile" className="flex items-center justify-center w-9 h-9 border border-loomra-surface rounded-full hover:border-loomra-red transition overflow-hidden shadow-sm">
                       {user?.image ? (
-                        <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                        <img src={user.image} alt={user.name} width="36" height="36" className="w-full h-full object-cover" />
                       ) : (
                         <User size={16} />
                       )}
@@ -152,8 +152,8 @@ export function Navbar() {
                   </>
                 ) : (
                   <>
-                    <Button href="/login" variant="secondary">Login</Button>
-                    <Button href="/login?register=true">Sign Up</Button>
+                    <Button href="/login" variant="secondary" className="py-2 px-4 text-xs h-9 w-20">Login</Button>
+                    <Button href="/login?register=true" className="py-2 px-4 text-xs h-9 w-24">Sign Up</Button>
                   </>
                 )}
               </div>
@@ -200,7 +200,7 @@ export function Navbar() {
               {/* Drawer Header */}
               <div className="flex justify-between items-center border-b border-slate-100 pb-4">
                 {settings?.logo ? (
-                  <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" className="h-8 w-auto object-contain" />
+                  <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" width="120" height="32" className="h-8 w-auto object-contain" />
                 ) : (
                   <span className="text-sm font-black tracking-widest text-slate-800 uppercase">AS SIDRAT</span>
                 )}
@@ -268,7 +268,7 @@ export function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-[0.15em] text-slate-700 hover:bg-slate-50 transition-colors"
                   >
                     {user?.image ? (
-                      <img src={user.image} alt={user.name} className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-100 shadow-sm" />
+                      <img src={user.image} alt={user.name} width="24" height="24" className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-100 shadow-sm" />
                     ) : (
                       <User size={16} className="text-slate-400" />
                     )}

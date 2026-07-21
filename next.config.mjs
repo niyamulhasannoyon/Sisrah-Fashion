@@ -1,7 +1,9 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  compress: true,
   images: {
+    formats: ['image/avif', 'image/webp'],
     qualities: [75, 90],
     remotePatterns: [
       {

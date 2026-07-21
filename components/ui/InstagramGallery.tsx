@@ -2,6 +2,7 @@
 
 import { Camera } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import Image from 'next/image';
 
 export default function InstagramGallery() {
   const { settings } = useSettingsStore();
@@ -29,7 +30,13 @@ export default function InstagramGallery() {
       <div className="grid grid-cols-2 md:grid-cols-4 w-full">
         {galleryImages.map((post) => (
           <div key={post.id} className="relative group aspect-square overflow-hidden bg-loomra-surface">
-            <img src={post.image} alt={post.handle} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+            <Image 
+              src={post.image} 
+              alt={post.handle} 
+              fill
+              sizes="(max-width: 640px) 50vw, 25vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-110" 
+            />
             
             {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface Hotspot {
   id: string;
@@ -23,8 +24,14 @@ export default function ShopTheLook() {
     <section className="container mx-auto py-64px">
       <h2 className="text-heading font-bold mb-40px text-center">Shop the Look</h2>
       
-      <div className="relative max-w-2xl mx-auto">
-        <img src="/images/lifestyle-outfit.jpg" alt="Summer Outfit" className="w-full h-auto object-cover" />
+      <div className="relative aspect-[4/3] max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-sm">
+        <Image 
+          src="/images/lifestyle-outfit.jpg" 
+          alt="Summer Outfit" 
+          fill 
+          sizes="(max-width: 768px) 100vw, 672px"
+          className="object-cover" 
+        />
 
         {hotspots.map((spot) => (
           <div 

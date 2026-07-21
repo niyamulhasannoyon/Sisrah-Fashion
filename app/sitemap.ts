@@ -77,8 +77,32 @@ const STATIC_PAGES = [
     lastModDaysAgo: 14,
   },
   {
-    url: '/about',
+    url: '/faq',
     priority: 0.6,
+    changefreq: 'weekly' as const,
+    lastModDaysAgo: 7,
+  },
+  {
+    url: '/size-guide',
+    priority: 0.6,
+    changefreq: 'monthly' as const,
+    lastModDaysAgo: 15,
+  },
+  {
+    url: '/shipping-returns',
+    priority: 0.5,
+    changefreq: 'monthly' as const,
+    lastModDaysAgo: 30,
+  },
+  {
+    url: '/privacy-policy',
+    priority: 0.4,
+    changefreq: 'monthly' as const,
+    lastModDaysAgo: 30,
+  },
+  {
+    url: '/terms-of-service',
+    priority: 0.4,
     changefreq: 'monthly' as const,
     lastModDaysAgo: 30,
   },

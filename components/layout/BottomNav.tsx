@@ -53,6 +53,8 @@ export default function BottomNav() {
                   <img 
                     src={user.image} 
                     alt="Profile" 
+                    width="24"
+                    height="24"
                     className={`w-6 h-6 rounded-full object-cover border ${isActive ? 'border-loomra-black' : 'border-transparent'}`} 
                   />
                 ) : (
