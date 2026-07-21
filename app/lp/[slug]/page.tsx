@@ -10,7 +10,7 @@ interface LpPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 // ── Helper: filter out null products from populated array ──
 function safeProducts(products: any[]): any[] {

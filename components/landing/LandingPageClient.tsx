@@ -266,9 +266,41 @@ function trackLpEvent(slug: string, eventType: 'pageview' | 'click', clickText?:
 export default function LandingPageClient({ page }: LandingPageClientProps) {
   const { settings, fetchSettings } = useSettingsStore();
   const [mounted, setMounted] = useState(false);
-  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
-  const [selectedColors, setSelectedColors] = useState<Record<string, string>>({});
-  const [bundleSelections, setBundleSelections] = useState<Record<string, boolean>>({});
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>(() => {
+    const sizes: Record<string, string> = {};
+    (page.productIds || []).forEach((p) => {
+      if (p && typeof p === 'object' && '_id' in p) {
+        const first = p.variants?.[0];
+        if (first) {
+          sizes[p._id] = first.size;
+        }
+      }
+    });
+    return sizes;
+  });
+  const [selectedColors, setSelectedColors] = useState<Record<string, string>>(() => {
+    const colors: Record<string, string> = {};
+    (page.productIds || []).forEach((p) => {
+      if (p && typeof p === 'object' && '_id' in p) {
+        const first = p.variants?.[0];
+        if (first) {
+          colors[p._id] = first.color;
+        }
+      }
+    });
+    return colors;
+  });
+  const [bundleSelections, setBundleSelections] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    if (page.layoutType === 'multi-product') {
+      (page.productIds || []).forEach((p) => {
+        if (p && typeof p === 'object' && '_id' in p) {
+          initial[p._id] = true;
+        }
+      });
+    }
+    return initial;
+  });
   const [activeImage, setActiveImage] = useState(0);
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -301,28 +333,6 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       p !== null && typeof p === 'object' && '_id' in p
     );
   }, [page.productIds]);
-
-  // Init selections
-  useEffect(() => {
-    if (page.layoutType === 'multi-product') {
-      const initial: Record<string, boolean> = {};
-      products.forEach((p) => {
-        initial[p._id] = true;
-      });
-      setBundleSelections(initial);
-    }
-    const sizes: Record<string, string> = {};
-    const colors: Record<string, string> = {};
-    products.forEach((p) => {
-      const first = p.variants?.[0];
-      if (first) {
-        sizes[p._id] = first.size;
-        colors[p._id] = first.color;
-      }
-    });
-    setSelectedSizes(sizes);
-    setSelectedColors(colors);
-  }, [page.layoutType, products]);
 
   const hasCountdown = page.promotionalElements?.countdownTimerToggle && page.promotionalElements?.countdownTargetDate;
   const announcementText = page.promotionalElements?.announcementText;
@@ -503,14 +513,6 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   };
 
   const disabled = selectedCount === 0;
-  const ctaText = !mounted
-    ? 'Loading...'
-    : 'Order Now (Cash on Delivery)';
-
-  if (!mounted) {
-    return <LandingPageSkeleton />;
-  }
-
   // ── ORDER SUCCESS SCREEN ──
   if (orderSuccess) {
     return (

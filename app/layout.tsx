@@ -71,11 +71,35 @@ export const metadata: Metadata = {
 };
 
 import StoreInitializer from '@/components/layout/StoreInitializer';
+import dbConnect from '@/lib/dbConnect';
+import Settings from '@/models/Settings';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const revalidate = 60;
+
+async function getSettings() {
+  try {
+    await dbConnect();
+    let settings = await Settings.findOne().lean();
+    if (!settings) {
+      // Prevent compiler tree-shaking and create empty document if not present
+      const doc = new Settings({});
+      await doc.save();
+      settings = doc.toObject();
+    }
+    return JSON.parse(JSON.stringify(settings));
+  } catch (error) {
+    console.error('Error fetching settings in layout:', error);
+    return null;
+  }
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSettings();
+
   return (
     <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://lh3.googleusercontent.com" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -90,7 +114,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans" suppressHydrationWarning>
-        <StoreInitializer />
+        <StoreInitializer settings={settings} />
         {children}
       </body>
     </html>

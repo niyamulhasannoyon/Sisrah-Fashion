@@ -1,53 +1,94 @@
-import { Suspense } from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { WhyChooseUs } from '@/components/home/WhyChooseUs';
 import { ReviewMarquee } from '@/components/home/ReviewMarquee';
 import { Newsletter } from '@/components/home/Newsletter';
-import nextDynamic from 'next/dynamic';
-import { Loader2 } from 'lucide-react';
+import { NewDrop } from '@/components/home/NewDrop';
+import { TrendingSlider } from '@/components/home/TrendingSlider';
+import { LifestyleBanner } from '@/components/home/LifestyleBanner';
+import { SocialGallery } from '@/components/home/SocialGallery';
+import dbConnect from '@/lib/dbConnect';
+import Product from '@/models/Product';
 
-const NewDrop = nextDynamic(() => import('@/components/home/NewDrop').then(mod => mod.NewDrop));
-const TrendingSlider = nextDynamic(() => import('@/components/home/TrendingSlider').then(mod => mod.TrendingSlider));
-const LifestyleBanner = nextDynamic(() => import('@/components/home/LifestyleBanner').then(mod => mod.LifestyleBanner));
-const SocialGallery = nextDynamic(() => import('@/components/home/SocialGallery').then(mod => mod.SocialGallery));
+export const revalidate = 60;
 
-// Loading skeleton for dynamic sections
-function SectionSkeleton() {
-  return (
-    <div className="py-20 flex justify-center items-center">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="animate-spin text-loomra-red" size={28} />
-        <span className="text-[10px] font-black uppercase tracking-[3px] text-gray-400">Loading...</span>
-      </div>
-    </div>
-  );
+async function getNewDropProducts() {
+  try {
+    await dbConnect();
+    // 1. Get products explicitly marked as New Arrival
+    let newDropProducts = await Product.find({ isNewArrival: true })
+                                         .sort({ createdAt: -1 })
+                                         .limit(8)
+                                         .lean(); 
+    
+    // 2. Fallback: If we have fewer than 8 marked products, fill with latest arrivals
+    if (newDropProducts.length < 8) {
+      const dropIds = newDropProducts.map(p => p._id);
+      const additionalProducts = await Product.find({ _id: { $nin: dropIds } })
+                                               .sort({ createdAt: -1 })
+                                               .limit(8 - newDropProducts.length)
+                                               .lean();
+      
+      newDropProducts = [...newDropProducts, ...additionalProducts];
+    }
+    return JSON.parse(JSON.stringify(newDropProducts));
+  } catch (error) {
+    console.error('Error fetching new drop products:', error);
+    return [];
+  }
 }
 
-export default function HomePage() {
+async function getTrendingProducts() {
+  try {
+    await dbConnect();
+    // 1. Get products explicitly marked as trending
+    let trendingProducts = await Product.find({ isTrending: true })
+                                         .sort({ createdAt: -1 })
+                                         .limit(8)
+                                         .lean(); 
+    
+    // 2. If we have fewer than 8 trending products, fill the rest with latest products
+    if (trendingProducts.length < 8) {
+      const trendingIds = trendingProducts.map(p => p._id);
+      const additionalProducts = await Product.find({ _id: { $nin: trendingIds } })
+                                               .sort({ createdAt: -1 })
+                                               .limit(8 - trendingProducts.length)
+                                               .lean();
+      
+      trendingProducts = [...trendingProducts, ...additionalProducts];
+    }
+    return JSON.parse(JSON.stringify(trendingProducts));
+  } catch (error) {
+    console.error('Error fetching trending products:', error);
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const [newDropProducts, trendingProducts] = await Promise.all([
+    getNewDropProducts(),
+    getTrendingProducts()
+  ]);
+
   return (
     <div className="bg-loomra-white text-loomra-black font-sans scroll-smooth">
       <main>
-        {/* Hero — static shell, handles its own client-side settings fetch */}
+        {/* Hero */}
         <HeroSection />
         
-        {/* Category Grid — static shell, fetches settings images client-side */}
+        {/* Category Grid */}
         <CategoryGrid />
         
-        {/* New Drop — fully client-side fetched, wrapped in Suspense */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <NewDrop />
-        </Suspense>
+        {/* New Drop */}
+        <NewDrop initialProducts={newDropProducts} />
         
-        {/* Trending — fully client-side fetched, wrapped in Suspense */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <TrendingSlider />
-        </Suspense>
+        {/* Trending */}
+        <TrendingSlider initialProducts={trendingProducts} />
         
-        {/* Lifestyle Banner — static shell, handles own settings fetch */}
+        {/* Lifestyle Banner */}
         <LifestyleBanner />
         
-        {/* Static sections — no data fetching needed */}
+        {/* Static sections */}
         <WhyChooseUs />
         <SocialGallery />
         <ReviewMarquee />
