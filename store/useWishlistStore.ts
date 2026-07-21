@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 
 interface WishlistState {
   wishlist: any[];
+  isWishlistOpen: boolean;
+  toggleWishlistDrawer: () => void;
   toggleWishlist: (product: any) => void;
 }
 
@@ -10,6 +12,10 @@ export const useWishlistStore = create<WishlistState>()(
   persist(
     (set, get) => ({
       wishlist: [],
+      isWishlistOpen: false,
+      
+      toggleWishlistDrawer: () => set({ isWishlistOpen: !get().isWishlistOpen }),
+
       toggleWishlist: (product: any) => {
         const isExist = get().wishlist.find((p: any) => p._id === product._id);
         if (isExist) {
@@ -19,7 +25,10 @@ export const useWishlistStore = create<WishlistState>()(
         }
       }
     }),
-    { name: 'loomra-wishlist' }
+    { 
+      name: 'loomra-wishlist',
+      partialize: (state) => ({ wishlist: state.wishlist }), // Only persist the wishlist items, not UI state
+    }
   )
 );
 

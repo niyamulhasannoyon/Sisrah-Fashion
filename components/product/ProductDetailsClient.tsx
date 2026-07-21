@@ -8,6 +8,7 @@ import MobileStickyCart from '@/components/product/MobileStickyCart';
 import SizeGuideModal from '@/components/product/SizeGuideModal';
 import WhatsAppButton from '@/components/product/WhatsAppButton';
 import { formatCurrency, getDirectImageLink } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductVariant {
   size: string;
@@ -54,6 +55,24 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
   const [selectedSize, setSelectedSize] = useState(product.variants?.[0]?.size ?? '');
   const [activeImage, setActiveImage] = useState(0);
   const [productUrl, setProductUrl] = useState('');
+  
+  // Mobile UX states
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [showSticky, setShowSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Trigger sticky cart when scrolled past 400px (typically when title is hidden)
+      if (window.scrollY > 400) {
+        setShowSticky(true);
+      } else {
+        setShowSticky(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Reviews submission state
   const [rating, setRating] = useState(5);
@@ -162,17 +181,43 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
     <div className="container mx-auto px-4 py-6 lg:py-16 pb-48 md:pb-8">
       <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 relative">
         <div className="w-full lg:w-3/5 flex flex-col gap-4">
-          {/* Main Image Container - Fixed Max Height to avoid screen overflow */}
-          <div className="w-full bg-loomra-surface relative group cursor-zoom-in overflow-hidden aspect-[4/5] max-h-[600px] 2xl:max-h-[750px] rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center">
+          {/* Main Image Container - Swipeable on mobile, click triggers full-screen zoom */}
+          <motion.div 
+            className="w-full bg-loomra-surface relative group cursor-zoom-in overflow-hidden aspect-[4/5] max-h-[600px] 2xl:max-h-[750px] rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center select-none"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={(event, info) => {
+              const swipeThreshold = 50;
+              if (info.offset.x > swipeThreshold && activeImage > 0) {
+                // Swipe Right -> Show Previous Image
+                setActiveImage(activeImage - 1);
+              } else if (info.offset.x < -swipeThreshold && activeImage < (product.images?.length || 1) - 1) {
+                // Swipe Left -> Show Next Image
+                setActiveImage(activeImage + 1);
+              }
+            }}
+            onClick={() => setIsZoomOpen(true)}
+          >
             <Image
               src={imageUrl}
               alt={`AS SIDRAT ${product.title} for Men Bangladesh`}
               priority
               fill
               sizes="(max-width: 768px) 100vw, 60vw"
-              className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
+              className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110 pointer-events-none"
             />
-          </div>
+            {/* Slide indicators for mobile */}
+            {product.images && product.images.length > 1 && (
+              <div className="absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-1.5 md:hidden">
+                {product.images.map((_, idx) => (
+                  <div 
+                    key={idx}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${activeImage === idx ? 'w-4 bg-[#1A1A1A]' : 'w-1.5 bg-[#1A1A1A]/20'}`}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
 
           {/* Thumbnail Gallery - Horizontal for better space management */}
           <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar shrink-0">
@@ -335,19 +380,75 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
         </div>
       </div>
 
-      <MobileStickyCart
-        product={product}
-        selectedSize={selectedSize}
-        selectedColor={selectedColor}
-        disabled={!hasSelectedOptions || currentVariant?.stock === 0}
-        buttonText={
-          currentVariant?.stock === 0 
-            ? 'Out of Stock' 
-            : !hasSelectedOptions 
-              ? 'Select Size' 
-              : 'Add to Cart'
-        }
-      />
+      <AnimatePresence>
+        {showSticky && (
+          <MobileStickyCart
+            product={product}
+            selectedSize={selectedSize}
+            setSelectedSize={setSelectedSize}
+            selectedColor={selectedColor}
+            setSelectedColor={setSelectedColor}
+            availableSizes={availableSizes}
+            availableColors={availableColors}
+            disabled={!hasSelectedOptions || currentVariant?.stock === 0}
+            price={displayPrice}
+            offerPrice={displayOfferPrice}
+            buttonText={
+              currentVariant?.stock === 0 
+                ? 'Out of Stock' 
+                : !hasSelectedOptions 
+                  ? 'Select Size' 
+                  : 'Add to Cart'
+            }
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Tap-to-Zoom Fullscreen Dialog */}
+      <AnimatePresence>
+        {isZoomOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[250] bg-black flex flex-col justify-center items-center p-4 select-none"
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => { setIsZoomOpen(false); setZoomScale(1); }}
+              className="absolute top-6 right-6 z-[260] w-12 h-12 bg-white/10 hover:bg-white/20 active:scale-95 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all cursor-pointer"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Zoomable Image Area */}
+            <div 
+              className="relative w-full h-full max-w-4xl max-h-[80vh] flex items-center justify-center overflow-hidden cursor-zoom-in"
+              onClick={() => setZoomScale(prev => prev === 1 ? 2 : 1)}
+            >
+              <motion.div
+                animate={{ scale: zoomScale }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="relative w-full h-full aspect-[4/5]"
+              >
+                <Image
+                  src={product.images?.[activeImage]?.url || imageUrl}
+                  alt={product.title}
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                  quality={90}
+                />
+              </motion.div>
+            </div>
+
+            {/* Zoom helper label */}
+            <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mt-4">
+              {zoomScale === 1 ? 'Tap Image to Zoom 2x' : 'Tap Image to Zoom Out'}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <SizeGuideModal 
         isOpen={isSizeGuideOpen} 

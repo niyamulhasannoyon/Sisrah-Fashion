@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { LOOMRA_COPY } from '@/lib/constants/copy';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
@@ -29,7 +30,21 @@ export function HeroSection() {
   }, [slides.length]);
 
   return (
-    <section className="relative min-h-[calc(100dvh-80px)] w-full overflow-hidden flex items-center justify-center">
+    <motion.section 
+      className="relative min-h-[calc(100dvh-80px)] w-full overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      onDragEnd={(event, info) => {
+        const swipeThreshold = 50;
+        if (info.offset.x > swipeThreshold) {
+          // Swipe right -> previous slide
+          setActiveSlide((prev) => (prev - 1 + slides.length) % slides.length);
+        } else if (info.offset.x < -swipeThreshold) {
+          // Swipe left -> next slide
+          setActiveSlide((prev) => (prev + 1) % slides.length);
+        }
+      }}
+    >
       {/* Dynamic sliding backgrounds */}
       {slides.map((slide, index) => (
         <div 
@@ -88,7 +103,7 @@ export function HeroSection() {
           ))}
         </div>
       )}
-    </section>
+    </motion.section>
   );
 }
 

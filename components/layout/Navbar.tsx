@@ -5,7 +5,9 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { ShoppingBag, User } from 'lucide-react';
+import { ShoppingBag, User, Heart, Search } from 'lucide-react';
+import { useWishlistStore } from '@/store/useWishlistStore';
+import WishlistDrawer from '@/components/wishlist/WishlistDrawer';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -26,6 +28,7 @@ export function Navbar() {
   const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
   const { toggleCart, cart } = useCartStore();
+  const { wishlist, toggleWishlistDrawer } = useWishlistStore();
   const { isAuthenticated, logout, checkAuth, user } = useAuthStore();
   const pathname = usePathname();
 
@@ -160,9 +163,42 @@ export function Navbar() {
             )}
           </div>
 
+          {/* Mobile action icons */}
+          <div className="flex items-center gap-1 md:hidden">
+            <Link href="/shop" aria-label="Search" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors">
+              <Search size={18} />
+            </Link>
+
+            <button 
+              onClick={toggleWishlistDrawer} 
+              aria-label="Open Wishlist" 
+              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <Heart size={18} />
+              {mounted && wishlist.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-loomra-red text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-md">
+                  {wishlist.length}
+                </span>
+              )}
+            </button>
+
+            <button 
+              onClick={toggleCart} 
+              aria-label="Open Cart" 
+              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <ShoppingBag size={18} />
+              {hydrated && cart.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-loomra-red text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-md">
+                  {cart.length}
+                </span>
+              )}
+            </button>
+          </div>
+
           <button
             type="button"
-            className="relative flex h-12 w-12 items-center justify-center rounded-full border border-loomra-surface text-loomra-black md:hidden focus:outline-none z-50"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-loomra-surface text-loomra-black md:hidden focus:outline-none z-50"
             onClick={() => setOpen(state => !state)}
             aria-label="Toggle Menu"
           >
@@ -307,6 +343,7 @@ export function Navbar() {
         </>
       )}
     </AnimatePresence>
+    <WishlistDrawer />
     </>
   );
 }

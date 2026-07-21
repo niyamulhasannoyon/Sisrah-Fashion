@@ -87,11 +87,22 @@ export default function ShopClient() {
         </button>
       </div>
 
+      {/* Mobile Filter Backdrop */}
+      {isMobileFilterOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] lg:hidden transition-opacity duration-300"
+          onClick={() => setIsMobileFilterOpen(false)}
+        />
+      )}
+
       <div className="flex flex-col lg:flex-row gap-10">
-        <div className={`fixed inset-0 z-50 bg-white p-6 transform transition-transform duration-300 lg:relative lg:translate-x-0 lg:w-64 lg:p-0 lg:bg-transparent lg:z-0 lg:block ${isMobileFilterOpen ? 'translate-x-0 overflow-y-auto' : '-translate-x-full'}`}>
+        <div className={`fixed bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-2xl z-50 p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] transform transition-transform duration-500 ease-out lg:relative lg:translate-y-0 lg:w-64 lg:p-0 lg:bg-transparent lg:z-0 lg:block lg:shadow-none ${isMobileFilterOpen ? 'translate-y-0 max-h-[80vh] overflow-y-auto' : 'translate-y-full'}`}>
+          {/* Drag Handle for Bottom Sheet */}
+          <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4 lg:hidden" />
+
           <div className="flex justify-between items-center lg:hidden mb-6 border-b pb-4">
-            <h2 className="text-xl font-bold uppercase tracking-widest">Filters</h2>
-            <button onClick={() => setIsMobileFilterOpen(false)} className="min-w-[44px] min-h-[44px] flex items-center justify-center"><X size={24} /></button>
+            <h2 className="text-xl font-bold uppercase tracking-widest text-[#1A1A1A]">Filters</h2>
+            <button onClick={() => setIsMobileFilterOpen(false)} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-black"><X size={24} /></button>
           </div>
 
           <div className="flex flex-col gap-8">
