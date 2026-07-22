@@ -1000,6 +1000,30 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                 </div>
               )}
 
+              {/* Pricing Block */}
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 sm:p-5 flex justify-between items-center mt-2">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-450 block">
+                    Special Price (বিশেষ মূল্য)
+                  </span>
+                  <div className="flex items-baseline gap-2.5 mt-1.5">
+                    <span className="text-2xl sm:text-3xl font-black text-[#A31F24] tracking-tight">
+                      ৳{(primaryProduct.offerPrice || primaryProduct.basePrice).toLocaleString()}
+                    </span>
+                    {primaryProduct.offerPrice && primaryProduct.offerPrice < primaryProduct.basePrice && (
+                      <span className="text-xs sm:text-sm text-slate-400 line-through font-bold">
+                        ৳{primaryProduct.basePrice.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {primaryProduct.offerPrice && primaryProduct.offerPrice < primaryProduct.basePrice && (
+                  <div className="bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm">
+                    Save ৳{(primaryProduct.basePrice - primaryProduct.offerPrice).toLocaleString()}
+                  </div>
+                )}
+              </div>
+
               {/* Trust badges */}
               <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100">
                 {[
