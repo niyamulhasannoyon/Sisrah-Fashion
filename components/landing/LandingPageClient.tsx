@@ -249,6 +249,17 @@ function LandingPageSkeleton() {
   );
 }
 
+// ── FB Pixel tracking helper (fire-and-forget) ──
+function trackFbEvent(eventName: string, params?: Record<string, any>) {
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    try {
+      (window as any).fbq('track', eventName, params);
+    } catch (e) {
+      console.warn('[FB Pixel] Tracking warning:', e);
+    }
+  }
+}
+
 // ── LP Analytics helper (fire-and-forget) ──
 function trackLpEvent(slug: string, eventType: 'pageview' | 'click', clickText?: string) {
   if (typeof window === 'undefined') return;
@@ -271,6 +282,7 @@ function trackLpEvent(slug: string, eventType: 'pageview' | 'click', clickText?:
     keepalive: true,
   }).catch(() => {});
 }
+
 
 // ── Main Component ──
 export default function LandingPageClient({ page }: LandingPageClientProps) {
@@ -360,10 +372,16 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
     setMounted(true);
     fetchSettings();
     trackLpEvent(page.slug, 'pageview');
+    trackFbEvent('ViewContent', {
+      content_name: page.pageTitle,
+      content_category: 'LandingPage',
+      currency: 'BDT',
+    });
     try {
       sessionStorage.setItem('loomra_campaign_slug', page.slug);
     } catch {}
-  }, [page.slug, fetchSettings]);
+  }, [page.slug, page.pageTitle, fetchSettings]);
+
 
   const products = useMemo(() => {
     return (page.productIds || []).filter((p): p is ProductData =>
@@ -628,12 +646,19 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       const data = await res.json();
       if (data.success) {
         trackLpEvent(page.slug, 'click', 'lp_direct_order_success');
+        trackFbEvent('Purchase', {
+          value: finalTotal,
+          currency: 'BDT',
+          content_type: 'product',
+          num_items: selectedCount,
+        });
         try {
           localStorage.setItem('loomra_latest_order_id', data.orderId.toString());
           localStorage.setItem('loomra_latest_order_phone', data.phone);
         } catch (storageErr) {
           console.error('[LP Order Success] Failed to save to localStorage:', storageErr);
         }
+
         setOrderSuccess({
           orderId: data.orderId,
           name: shippingInfo.name,

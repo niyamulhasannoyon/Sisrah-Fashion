@@ -48,12 +48,26 @@ export async function generateMetadata({ params }: LpPageProps): Promise<Metadat
     return {
       title: `${heading} — AS SIDRAT`,
       description,
+      metadataBase: new URL('https://assidrat.com'),
+      alternates: {
+        canonical: `/lp/${slug}`,
+      },
       openGraph: {
         title: `${heading} — AS SIDRAT`,
         description,
-        images: [{ url: bannerImage, width: 1200, height: 630 }],
-        type: 'website',
         url: `https://assidrat.com/lp/${slug}`,
+        siteName: 'AS SIDRAT',
+        images: [
+          {
+            url: bannerImage,
+            width: 1200,
+            height: 630,
+            alt: heading,
+            type: 'image/jpeg',
+          },
+        ],
+        locale: 'bn_BD',
+        type: 'product',
       },
       twitter: {
         card: 'summary_large_image',
@@ -61,13 +75,21 @@ export async function generateMetadata({ params }: LpPageProps): Promise<Metadat
         description,
         images: [bannerImage],
       },
-      robots: { index: true, follow: true },
+      other: {
+        'facebook-domain-verification': process.env.NEXT_PUBLIC_FB_DOMAIN_VERIFICATION || '',
+      },
+      robots: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     };
   } catch (err) {
     console.error('[LP Metadata] Error:', err);
     return {
       title: 'AS SIDRAT',
-      description: 'Shop the latest collection at AS SIDRAT.',
+      description: 'Shop premium fashion at AS SIDRAT.',
     };
   }
 }
@@ -86,7 +108,7 @@ export default async function LpPage({ params }: LpPageProps) {
       .lean() as any;
   } catch (err) {
     console.error('[LP Page] Database query failed:', err);
-    throw err; // Let Next.js handle this as a 500 Server Error
+    throw err;
   }
 
   if (!raw) {
@@ -99,6 +121,9 @@ export default async function LpPage({ params }: LpPageProps) {
     ...JSON.parse(JSON.stringify(raw)),
     productIds: products,
   };
+
+  const firstProduct = products[0];
+  const bannerImage = (raw.customHero?.customBannerImage && getDirectImageLink(raw.customHero.customBannerImage.trim())) || firstProduct?.images?.[0]?.url || '/og-image.jpg';
 
   // ── Build Schema.org markup for the landing page ──
   const schemaMarkup = {
@@ -113,11 +138,14 @@ export default async function LpPage({ params }: LpPageProps) {
         ? {
             '@type': 'Product',
             name: products[0]?.title || page.pageTitle,
+            image: products[0]?.images?.map((img: any) => img.url) || [bannerImage],
+            description: products[0]?.description || page.pageTitle,
             offers: {
               '@type': 'Offer',
               priceCurrency: 'BDT',
               price: safePrice(products[0]).toString(),
               availability: 'https://schema.org/InStock',
+              itemCondition: 'https://schema.org/NewCondition',
             },
           }
         : {
@@ -128,10 +156,12 @@ export default async function LpPage({ params }: LpPageProps) {
               item: {
                 '@type': 'Product',
                 name: p.title || 'Product',
+                image: p.images?.[0]?.url || bannerImage,
                 offers: {
                   '@type': 'Offer',
                   priceCurrency: 'BDT',
                   price: safePrice(p).toString(),
+                  availability: 'https://schema.org/InStock',
                 },
               },
             })),
@@ -141,6 +171,17 @@ export default async function LpPage({ params }: LpPageProps) {
 
   return (
     <>
+      <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+      <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="anonymous" />
+      {bannerImage && (
+        <link
+          rel="preload"
+          as="image"
+          href={bannerImage}
+          // @ts-ignore
+          fetchPriority="high"
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
@@ -149,3 +190,4 @@ export default async function LpPage({ params }: LpPageProps) {
     </>
   );
 }
+
