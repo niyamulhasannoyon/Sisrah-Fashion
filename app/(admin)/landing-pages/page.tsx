@@ -29,30 +29,40 @@ interface LandingPageForm {
     customHeading: string;
     customSubheading: string;
     customBannerImage: string;
+    customMobileBannerImage: string;
   };
   promotionalElements: {
     countdownTimerToggle: boolean;
     countdownTargetDate: string;
     announcementText: string;
   };
+  offerSettings: {
+    freeShippingToggle: boolean;
+    freeShippingMinQty: number;
+    freeShippingMinAmount: number;
+    comboDiscountToggle: boolean;
+    comboDiscountType: 'percentage' | 'fixed';
+    comboDiscountValue: number;
+    comboMinQty: number;
+  };
   socialProof: Testimonial[];
   isActive: boolean;
 }
 
 // ── Image Preview Component ──
-function ImagePreview({ url, alt, onRemove }: { url: string; alt: string; onRemove?: () => void }) {
+function ImagePreview({ url, alt, onRemove, aspect = 'aspect-[21/9]', label = 'Banner Preview' }: { url: string; alt: string; onRemove?: () => void; aspect?: string; label?: string }) {
   const [hasError, setHasError] = useState(false);
 
   if (!url || hasError) {
     return (
-      <div className="w-full aspect-[21/9] rounded-xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-300">
+      <div className={`w-full ${aspect} rounded-xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-300`}>
         <ImageOff size={32} />
       </div>
     );
   }
 
   return (
-    <div className="relative w-full aspect-[21/9] rounded-xl overflow-hidden border border-slate-200 bg-slate-50 group">
+    <div className={`relative w-full ${aspect} rounded-xl overflow-hidden border border-slate-200 bg-slate-50 group`}>
       <img
         src={getDirectImageLink(url)}
         alt={alt}
@@ -69,7 +79,7 @@ function ImagePreview({ url, alt, onRemove }: { url: string; alt: string; onRemo
         </button>
       )}
       <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[9px] font-bold px-2 py-1 rounded-md">
-        Banner Preview
+        {label}
       </div>
     </div>
   );
@@ -91,8 +101,17 @@ const EMPTY_FORM: LandingPageForm = {
   slug: '',
   layoutType: 'single-product',
   productIds: [],
-  customHero: { customHeading: '', customSubheading: '', customBannerImage: '' },
+  customHero: { customHeading: '', customSubheading: '', customBannerImage: '', customMobileBannerImage: '' },
   promotionalElements: { countdownTimerToggle: false, countdownTargetDate: '', announcementText: '' },
+  offerSettings: {
+    freeShippingToggle: false,
+    freeShippingMinQty: 0,
+    freeShippingMinAmount: 0,
+    comboDiscountToggle: false,
+    comboDiscountType: 'percentage',
+    comboDiscountValue: 0,
+    comboMinQty: 2,
+  },
   socialProof: [],
   isActive: true,
 };
@@ -126,6 +145,7 @@ export default function AdminLandingPages() {
 
   // Banner upload state
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingMobileBanner, setUploadingMobileBanner] = useState(false);
 
   // Product search for multi-select
   const [productSearch, setProductSearch] = useState('');
@@ -180,8 +200,12 @@ export default function AdminLandingPages() {
   );
 
   // ── Cloudinary Upload (for banner) ──
-  const uploadBannerImage = async (file: File) => {
-    setUploadingBanner(true);
+  const uploadBannerImage = async (file: File, isMobile: boolean = false) => {
+    if (isMobile) {
+      setUploadingMobileBanner(true);
+    } else {
+      setUploadingBanner(true);
+    }
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -194,13 +218,20 @@ export default function AdminLandingPages() {
       if (data.secure_url) {
         setForm((f) => ({
           ...f,
-          customHero: { ...f.customHero, customBannerImage: data.secure_url },
+          customHero: {
+            ...f.customHero,
+            [isMobile ? 'customMobileBannerImage' : 'customBannerImage']: data.secure_url,
+          },
         }));
       }
     } catch {
-      alert('Banner upload failed');
+      alert(`${isMobile ? 'Mobile banner' : 'Banner'} upload failed`);
     } finally {
-      setUploadingBanner(false);
+      if (isMobile) {
+        setUploadingMobileBanner(false);
+      } else {
+        setUploadingBanner(false);
+      }
     }
   };
 
@@ -234,6 +265,7 @@ export default function AdminLandingPages() {
         customHeading: page.customHero?.customHeading || '',
         customSubheading: page.customHero?.customSubheading || '',
         customBannerImage: page.customHero?.customBannerImage || '',
+        customMobileBannerImage: page.customHero?.customMobileBannerImage || '',
       },
       promotionalElements: {
         countdownTimerToggle: page.promotionalElements?.countdownTimerToggle || false,
@@ -241,6 +273,15 @@ export default function AdminLandingPages() {
           ? new Date(page.promotionalElements.countdownTargetDate).toISOString().slice(0, 16)
           : '',
         announcementText: page.promotionalElements?.announcementText || '',
+      },
+      offerSettings: {
+        freeShippingToggle: page.offerSettings?.freeShippingToggle ?? false,
+        freeShippingMinQty: page.offerSettings?.freeShippingMinQty ?? 0,
+        freeShippingMinAmount: page.offerSettings?.freeShippingMinAmount ?? 0,
+        comboDiscountToggle: page.offerSettings?.comboDiscountToggle ?? false,
+        comboDiscountType: page.offerSettings?.comboDiscountType ?? 'percentage',
+        comboDiscountValue: page.offerSettings?.comboDiscountValue ?? 0,
+        comboMinQty: page.offerSettings?.comboMinQty ?? 2,
       },
       socialProof: page.socialProof || [],
       isActive: page.isActive ?? true,
@@ -851,6 +892,71 @@ export default function AdminLandingPages() {
                   )}
                   <p className="text-[9px] text-slate-400 font-medium">Upload or paste a URL. Recommended: 1920×800px (21:9 ratio)</p>
                 </div>
+
+                {/* Custom Mobile Banner Image */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.1em]">Custom Mobile Banner Image</label>
+
+                  {/* Image Preview */}
+                  {form.customHero.customMobileBannerImage && isValidImageUrl(form.customHero.customMobileBannerImage) && (
+                    <ImagePreview
+                      url={form.customHero.customMobileBannerImage}
+                      alt="Mobile banner preview"
+                      aspect="aspect-[4/3]"
+                      label="Mobile Banner Preview"
+                      onRemove={() =>
+                        setForm({
+                          ...form,
+                          customHero: { ...form.customHero, customMobileBannerImage: '' },
+                        })
+                      }
+                    />
+                  )}
+
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="url"
+                        value={form.customHero.customMobileBannerImage}
+                        onChange={(e) =>
+                          setForm({ ...form, customHero: { ...form.customHero, customMobileBannerImage: e.target.value } })
+                        }
+                        placeholder="https://example.com/mobile-banner.jpg"
+                        className={`w-full px-3.5 py-2.5 bg-white border rounded-lg outline-none transition-all text-sm pr-8 ${
+                          form.customHero.customMobileBannerImage && isValidImageUrl(form.customHero.customMobileBannerImage)
+                            ? 'border-emerald-300 ring-1 ring-emerald-200/50'
+                            : form.customHero.customMobileBannerImage && !isValidImageUrl(form.customHero.customMobileBannerImage)
+                            ? 'border-red-300 ring-1 ring-red-200/50'
+                            : 'border-slate-200 focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10'
+                        }`}
+                      />
+                      {form.customHero.customMobileBannerImage && isValidImageUrl(form.customHero.customMobileBannerImage) && (
+                        <CheckCircle2 size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-emerald-500" />
+                      )}
+                    </div>
+                    <label className="shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg cursor-pointer transition-all text-[10px] font-bold uppercase tracking-wider">
+                      {uploadingMobileBanner ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <UploadCloud size={14} />
+                      )}
+                      {uploadingMobileBanner ? 'Uploading...' : 'Upload'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingMobileBanner}
+                        onChange={(e) => {
+                          if (e.target.files?.[0]) uploadBannerImage(e.target.files[0], true);
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {form.customHero.customMobileBannerImage && !isValidImageUrl(form.customHero.customMobileBannerImage) && form.customHero.customMobileBannerImage.length > 5 && (
+                    <p className="text-[9px] text-red-500 font-medium">Invalid URL format — must start with http:// or https://</p>
+                  )}
+                  <p className="text-[9px] text-slate-400 font-medium">Upload or paste a URL. Recommended: 800×1000px (4:5 ratio) or vertical aspect ratio.</p>
+                </div>
               </section>
 
               {/* ── Promotional Elements ── */}
@@ -924,11 +1030,189 @@ export default function AdminLandingPages() {
                 </div>
               </section>
 
+              {/* ── Offers & Discounts ── */}
+              <section className="space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold">5</div>
+                  Offers & Discounts
+                </h3>
+
+                {/* Free Shipping Settings */}
+                <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/50 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-black uppercase text-slate-700 tracking-[0.05em]">Free Delivery</h4>
+                      <p className="text-[10px] text-slate-400">Offer free shipping for orders on this page</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm({
+                          ...form,
+                          offerSettings: {
+                            ...form.offerSettings,
+                            freeShippingToggle: !form.offerSettings.freeShippingToggle,
+                          },
+                        })
+                      }
+                      className={`relative w-10 h-5 rounded-full transition-colors ${
+                        form.offerSettings.freeShippingToggle ? 'bg-emerald-500' : 'bg-slate-200'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
+                          form.offerSettings.freeShippingToggle ? 'translate-x-5' : 'translate-x-0.5'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {form.offerSettings.freeShippingToggle && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200/50">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.1em]">Min Quantity for Free Delivery</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={form.offerSettings.freeShippingMinQty}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              offerSettings: {
+                                ...form.offerSettings,
+                                freeShippingMinQty: Math.max(0, parseInt(e.target.value) || 0),
+                              },
+                            })
+                          }
+                          placeholder="0 = No minimum quantity"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg outline-none transition-all text-sm focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.1em]">Min Amount for Free Delivery (৳)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={form.offerSettings.freeShippingMinAmount}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              offerSettings: {
+                                ...form.offerSettings,
+                                freeShippingMinAmount: Math.max(0, parseInt(e.target.value) || 0),
+                              },
+                            })
+                          }
+                          placeholder="0 = No minimum amount"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg outline-none transition-all text-sm focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Combo Package Discount Settings */}
+                <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/50 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-black uppercase text-slate-700 tracking-[0.05em]">Combo Discount</h4>
+                      <p className="text-[10px] text-slate-400">Offer a discount when buying multiple items in bundle layout</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm({
+                          ...form,
+                          offerSettings: {
+                            ...form.offerSettings,
+                            comboDiscountToggle: !form.offerSettings.comboDiscountToggle,
+                          },
+                        })
+                      }
+                      className={`relative w-10 h-5 rounded-full transition-colors ${
+                        form.offerSettings.comboDiscountToggle ? 'bg-emerald-500' : 'bg-slate-200'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
+                          form.offerSettings.comboDiscountToggle ? 'translate-x-5' : 'translate-x-0.5'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {form.offerSettings.comboDiscountToggle && (
+                    <div className="space-y-4 pt-2 border-t border-slate-200/50">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.1em]">Min Qty to Trigger Discount</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={form.offerSettings.comboMinQty}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                offerSettings: {
+                                  ...form.offerSettings,
+                                  comboMinQty: Math.max(1, parseInt(e.target.value) || 2),
+                                },
+                              })
+                            }
+                            placeholder="e.g. 2"
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg outline-none transition-all text-sm focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.1em]">Discount Type</label>
+                          <select
+                            value={form.offerSettings.comboDiscountType}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                offerSettings: {
+                                  ...form.offerSettings,
+                                  comboDiscountType: e.target.value as 'percentage' | 'fixed',
+                                },
+                              })
+                            }
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg outline-none transition-all text-sm focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10"
+                          >
+                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed">Fixed Flat Amount (৳)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.1em]">Discount Value</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={form.offerSettings.comboDiscountValue}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              offerSettings: {
+                                ...form.offerSettings,
+                                comboDiscountValue: Math.max(0, parseFloat(e.target.value) || 0),
+                              },
+                            })
+                          }
+                          placeholder={form.offerSettings.comboDiscountType === 'percentage' ? 'e.g. 10 for 10%' : 'e.g. 200 for ৳200'}
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg outline-none transition-all text-sm focus:border-slate-900 focus:ring-1 focus:ring-slate-900/10"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+
               {/* ── Social Proof ── */}
               <section className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold">5</div>
+                    <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold">6</div>
                     Testimonials
                   </h3>
                   <button

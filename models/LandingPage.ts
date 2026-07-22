@@ -7,6 +7,7 @@ const CustomHeroSchema = new Schema(
     customHeading: { type: String, default: '' },
     customSubheading: { type: String, default: '' },
     customBannerImage: { type: String, default: '' },
+    customMobileBannerImage: { type: String, default: '' },
   },
   { _id: false }
 );
@@ -16,6 +17,19 @@ const PromotionalElementsSchema = new Schema(
     countdownTimerToggle: { type: Boolean, default: false },
     countdownTargetDate: { type: Date, default: null },
     announcementText: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
+const OfferSettingsSchema = new Schema(
+  {
+    freeShippingToggle: { type: Boolean, default: false },
+    freeShippingMinQty: { type: Number, default: 0 },
+    freeShippingMinAmount: { type: Number, default: 0 },
+    comboDiscountToggle: { type: Boolean, default: false },
+    comboDiscountType: { type: String, enum: ['percentage', 'fixed'], default: 'percentage' },
+    comboDiscountValue: { type: Number, default: 0 },
+    comboMinQty: { type: Number, default: 2 },
   },
   { _id: false }
 );
@@ -41,11 +55,21 @@ export interface ILandingPage extends Document {
     customHeading: string;
     customSubheading: string;
     customBannerImage: string;
+    customMobileBannerImage: string;
   };
   promotionalElements: {
     countdownTimerToggle: boolean;
     countdownTargetDate: Date | null;
     announcementText: string;
+  };
+  offerSettings: {
+    freeShippingToggle: boolean;
+    freeShippingMinQty: number;
+    freeShippingMinAmount: number;
+    comboDiscountToggle: boolean;
+    comboDiscountType: 'percentage' | 'fixed';
+    comboDiscountValue: number;
+    comboMinQty: number;
   };
   socialProof: Array<{
     name: string;
@@ -75,6 +99,10 @@ const LandingPageSchema: Schema<ILandingPage> = new Schema(
     customHero: { type: CustomHeroSchema, default: () => ({}) },
     promotionalElements: {
       type: PromotionalElementsSchema,
+      default: () => ({}),
+    },
+    offerSettings: {
+      type: OfferSettingsSchema,
       default: () => ({}),
     },
     socialProof: { type: [TestimonialSchema], default: [] },

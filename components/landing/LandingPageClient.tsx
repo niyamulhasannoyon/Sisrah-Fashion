@@ -41,11 +41,21 @@ interface LandingPageData {
     customHeading: string;
     customSubheading: string;
     customBannerImage: string;
+    customMobileBannerImage?: string;
   };
   promotionalElements: {
     countdownTimerToggle: boolean;
     countdownTargetDate: string | null;
     announcementText: string;
+  };
+  offerSettings?: {
+    freeShippingToggle: boolean;
+    freeShippingMinQty: number;
+    freeShippingMinAmount: number;
+    comboDiscountToggle: boolean;
+    comboDiscountType: 'percentage' | 'fixed';
+    comboDiscountValue: number;
+    comboMinQty: number;
   };
   socialProof: Testimonial[];
   isActive: boolean;
@@ -340,15 +350,48 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   const isSingle = page.layoutType === 'single-product';
   const primaryProduct = isSingle ? products[0] : null;
 
-  const heroImage = useMemo(() => {
+  const desktopHeroImage = useMemo(() => {
     return (page.customHero?.customBannerImage && getDirectImageLink(page.customHero.customBannerImage.trim())) ||
       primaryProduct?.images?.[activeImage]?.url ||
       products[0]?.images?.[0]?.url ||
       '/images/placeholder.jpg';
   }, [page.customHero, primaryProduct, products, activeImage]);
 
+  const mobileHeroImage = useMemo(() => {
+    return (page.customHero?.customMobileBannerImage && getDirectImageLink(page.customHero.customMobileBannerImage.trim())) ||
+      desktopHeroImage;
+  }, [page.customHero, desktopHeroImage]);
+
+  const heroImage = desktopHeroImage;
+
   const heading = page.customHero?.customHeading?.trim() || primaryProduct?.title || page.pageTitle;
   const subheading = page.customHero?.customSubheading?.trim() || primaryProduct?.description || '';
+
+  const selectedCount = useMemo(() => {
+    if (isSingle) return 1;
+    return Object.values(bundleSelections).filter(Boolean).length;
+  }, [isSingle, bundleSelections]);
+
+  const comboDiscount = useMemo(() => {
+    const settings = page.offerSettings;
+    if (!settings?.comboDiscountToggle) return 0;
+    
+    if (selectedCount >= (settings.comboMinQty ?? 2)) {
+      let subtotal = 0;
+      products.forEach((p) => {
+        if (bundleSelections[p._id]) {
+          subtotal += p.offerPrice || p.basePrice;
+        }
+      });
+      
+      if (settings.comboDiscountType === 'percentage') {
+        return Math.round((subtotal * (settings.comboDiscountValue ?? 0)) / 100);
+      } else {
+        return settings.comboDiscountValue ?? 0;
+      }
+    }
+    return 0;
+  }, [page.offerSettings, selectedCount, products, bundleSelections]);
 
   const totalPrice = useMemo(() => {
     if (isSingle && primaryProduct) {
@@ -360,8 +403,8 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
         total += p.offerPrice || p.basePrice;
       }
     });
-    return total;
-  }, [isSingle, primaryProduct, products, bundleSelections]);
+    return Math.max(0, total - comboDiscount);
+  }, [isSingle, primaryProduct, products, bundleSelections, comboDiscount]);
 
   const totalOriginalPrice = useMemo(() => {
     if (isSingle && primaryProduct) {
@@ -379,12 +422,22 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   const savings = totalOriginalPrice - totalPrice;
   const hasSavings = savings > 0;
 
-  const selectedCount = useMemo(() => {
-    if (isSingle) return 1;
-    return Object.values(bundleSelections).filter(Boolean).length;
-  }, [isSingle, bundleSelections]);
-
   const isShippingFree = useCallback(() => {
+    // Check landing-page specific free shipping settings first
+    const pageShipping = page.offerSettings;
+    if (pageShipping?.freeShippingToggle) {
+      const minQty = pageShipping.freeShippingMinQty ?? 0;
+      const minAmt = pageShipping.freeShippingMinAmount ?? 0;
+      
+      if (minQty === 0 && minAmt === 0) return true;
+      
+      const meetsQty = minQty > 0 ? selectedCount >= minQty : true;
+      const meetsAmt = minAmt > 0 ? totalPrice >= minAmt : true;
+      
+      if (meetsQty && meetsAmt) return true;
+    }
+
+    // Fallback to website global settings
     if (!settings) return false;
     const trigger = settings.freeShippingTrigger;
     if (trigger === 'quantity') {
@@ -396,7 +449,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       return totalPrice >= minAmount;
     }
     return false;
-  }, [settings, selectedCount, totalPrice]);
+  }, [page.offerSettings, settings, selectedCount, totalPrice]);
 
   const getShippingCost = useCallback(() => {
     if (isShippingFree()) return 0;
@@ -489,12 +542,22 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
           paymentMethod: 'Cash on Delivery',
           paymentStatus: 'Pending',
           campaignSlug: page.slug,
+          ...(comboDiscount > 0 && {
+            couponCode: 'COMBO_DISCOUNT',
+            couponDiscount: comboDiscount,
+          }),
         }),
       });
 
       const data = await res.json();
       if (data.success) {
         trackLpEvent(page.slug, 'click', 'lp_direct_order_success');
+        try {
+          localStorage.setItem('loomra_latest_order_id', data.orderId.toString());
+          localStorage.setItem('loomra_latest_order_phone', data.phone);
+        } catch (storageErr) {
+          console.error('[LP Order Success] Failed to save to localStorage:', storageErr);
+        }
         setOrderSuccess({
           orderId: data.orderId,
           name: shippingInfo.name,
@@ -559,19 +622,29 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
           <div className="space-y-3 pt-2">
             <Link
-              href="/shop"
-              className="w-full bg-[#1A1A1A] hover:bg-gray-800 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all block text-center shadow-md"
+              href={`/track-order?id=${orderSuccess.orderId}&phone=${orderSuccess.phone}`}
+              className="w-full bg-[#A31F24] hover:bg-[#82181C] text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#A31F24]/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
-              Continue Shopping
+              <Truck size={16} className="animate-pulse" />
+              অর্ডার ট্র্যাক করুন (Track Now)
             </Link>
-            <a
-              href={`https://wa.me/${settings?.whatsappNumber || '8801700000000'}?text=Hello,%20I%20have%20placed%20order%20%23${orderSuccess.orderId}%20on%20AS%20SIDRAT.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 shadow-md"
-            >
-              Contact on WhatsApp
-            </a>
+
+            <div className="grid grid-cols-2 gap-3">
+              <a
+                href={`https://wa.me/${settings?.whatsappNumber || '8801700000000'}?text=Hello,%20I%20have%20placed%20order%20%23${orderSuccess.orderId}%20on%20AS%20SIDRAT.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-1.5 shadow-md"
+              >
+                WhatsApp Support
+              </a>
+              <Link
+                href="/shop"
+                className="w-full bg-[#1A1A1A] hover:bg-gray-800 text-white py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all block text-center shadow-md"
+              >
+                Shop More
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -593,16 +666,31 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       {/* ── Hero Section ── */}
       <div className="relative bg-gray-100 overflow-hidden">
         <div className="aspect-[4/3] sm:aspect-[4/2] md:aspect-[21/9] relative">
-          <Image
-            src={heroImage}
-            alt={heading}
-            fill
-            priority
-            fetchPriority="high"
-            sizes="100vw"
-            className="object-cover object-top"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+          {/* Mobile Image */}
+          <div className="sm:hidden w-full h-full absolute inset-0">
+            <Image
+              src={mobileHeroImage}
+              alt={heading}
+              fill
+              priority
+              fetchPriority="high"
+              sizes="100vw"
+              className="object-cover object-top"
+            />
+          </div>
+          {/* Desktop Image */}
+          <div className="hidden sm:block w-full h-full absolute inset-0">
+            <Image
+              src={desktopHeroImage}
+              alt={heading}
+              fill
+              priority
+              fetchPriority="high"
+              sizes="100vw"
+              className="object-cover object-top"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent pointer-events-none" />
 
           {/* Hero Text */}
           <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 md:p-12 max-w-2xl mx-auto">
@@ -1043,8 +1131,14 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
             <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 space-y-2">
               <div className="flex justify-between items-center text-[11px] text-gray-500 font-bold uppercase">
                 <span>Selected Items ({selectedCount})</span>
-                <span>৳{totalPrice.toLocaleString()}</span>
+                <span>৳{(totalPrice + comboDiscount).toLocaleString()}</span>
               </div>
+              {comboDiscount > 0 && (
+                <div className="flex justify-between items-center text-[11px] text-emerald-600 font-bold uppercase">
+                  <span>Combo Discount</span>
+                  <span>-৳{comboDiscount.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center text-[11px] text-gray-500 font-bold uppercase">
                 <span>Delivery Cost ({shippingInfo.city})</span>
                 <span>{getShippingCost() === 0 ? 'FREE' : `৳${getShippingCost()}`}</span>

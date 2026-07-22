@@ -37,11 +37,21 @@ interface PageData {
     customHeading: string;
     customSubheading: string;
     customBannerImage: string;
+    customMobileBannerImage?: string;
   };
   promotionalElements: {
     countdownTimerToggle: boolean;
     countdownTargetDate: string | null;
     announcementText: string;
+  };
+  offerSettings?: {
+    freeShippingToggle: boolean;
+    freeShippingMinQty: number;
+    freeShippingMinAmount: number;
+    comboDiscountToggle: boolean;
+    comboDiscountType: 'percentage' | 'fixed';
+    comboDiscountValue: number;
+    comboMinQty: number;
   };
   socialProof: Testimonial[];
   isActive: boolean;
@@ -75,24 +85,52 @@ const DEVICE_LABELS: Record<DeviceView, string> = {
 };
 
 // ── Mini Landing Page Renderer (inside the iframe-like preview) ──
-function MiniLandingPreview({ page }: { page: PageData }) {
+function MiniLandingPreview({ page, deviceView }: { page: PageData; deviceView: DeviceView }) {
   const products = (page.productIds || []).filter((p): p is ProductPreview => typeof p === 'object' && p !== null);
   const isSingle = page.layoutType === 'single-product';
   const primaryProduct = isSingle ? products[0] : null;
 
   const heading = page.customHero?.customHeading || primaryProduct?.title || page.pageTitle;
   const subheading = page.customHero?.customSubheading || primaryProduct?.description || '';
-  const heroImage = (page.customHero?.customBannerImage && getDirectImageLink(page.customHero.customBannerImage.trim())) || products[0]?.images?.[0]?.url || '/images/placeholder.jpg';
 
-  const totalPrice = isSingle
+  const isMobileView = deviceView === 'mobile';
+  const mobileBanner = page.customHero?.customMobileBannerImage?.trim();
+  const desktopBanner = page.customHero?.customBannerImage?.trim();
+
+  const heroImage = (isMobileView && mobileBanner)
+    ? getDirectImageLink(mobileBanner)
+    : (desktopBanner
+        ? getDirectImageLink(desktopBanner)
+        : products[0]?.images?.[0]?.url || '/images/placeholder.jpg');
+
+  const selectedCount = isSingle ? 1 : products.length;
+  const comboDiscount = (() => {
+    const settings = page.offerSettings;
+    if (!settings?.comboDiscountToggle) return 0;
+    if (selectedCount >= (settings.comboMinQty ?? 2)) {
+      const subtotal = isSingle
+        ? (primaryProduct?.offerPrice || primaryProduct?.basePrice || 0)
+        : products.reduce((sum, p) => sum + (p.offerPrice || p.basePrice), 0);
+      if (settings.comboDiscountType === 'percentage') {
+        return Math.round((subtotal * (settings.comboDiscountValue ?? 0)) / 100);
+      } else {
+        return settings.comboDiscountValue ?? 0;
+      }
+    }
+    return 0;
+  })();
+
+  const subtotalPrice = isSingle
     ? (primaryProduct?.offerPrice || primaryProduct?.basePrice || 0)
     : products.reduce((sum, p) => sum + (p.offerPrice || p.basePrice), 0);
+
+  const totalPrice = Math.max(0, subtotalPrice - comboDiscount);
 
   const totalOriginal = isSingle
     ? (primaryProduct?.offerPrice ? primaryProduct.basePrice : 0)
     : products.reduce((sum, p) => sum + p.basePrice, 0);
 
-  const hasSavings = totalOriginal > totalPrice;
+  const hasSavings = totalOriginal > totalPrice || comboDiscount > 0;
   const hasCountdown = page.promotionalElements?.countdownTimerToggle && page.promotionalElements?.countdownTargetDate;
   const testimonials = page.socialProof || [];
 
@@ -136,7 +174,8 @@ function MiniLandingPreview({ page }: { page: PageData }) {
             </div>
             {hasSavings && (
               <p className="text-[9px] font-bold text-emerald-400 mt-0.5 uppercase tracking-wider">
-                Save ৳{(totalOriginal - totalPrice).toLocaleString()}
+                Save ৳{(totalOriginal - totalPrice + comboDiscount).toLocaleString()}
+                {comboDiscount > 0 && ` (Incl. Combo Discount)`}
               </p>
             )}
           </div>
@@ -410,7 +449,7 @@ export default function LandingPagePreviewModal({ page, pageId, onClose }: Landi
 
           {/* Scrollable preview content */}
           <div className="flex-1 min-h-0 overflow-y-auto">
-            <MiniLandingPreview page={pageData} />
+            <MiniLandingPreview page={pageData} deviceView={deviceView} />
           </div>
         </div>
       </div>

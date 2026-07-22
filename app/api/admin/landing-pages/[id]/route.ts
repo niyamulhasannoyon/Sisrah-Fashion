@@ -68,6 +68,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       updateData['customHero.customHeading'] = body.customHero.customHeading ?? '';
       updateData['customHero.customSubheading'] = body.customHero.customSubheading ?? '';
       updateData['customHero.customBannerImage'] = body.customHero.customBannerImage ?? '';
+      updateData['customHero.customMobileBannerImage'] = body.customHero.customMobileBannerImage ?? '';
     }
 
     if (body.promotionalElements !== undefined) {
@@ -77,6 +78,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         body.promotionalElements.countdownTargetDate ?? null;
       updateData['promotionalElements.announcementText'] =
         body.promotionalElements.announcementText ?? '';
+    }
+
+    if (body.offerSettings !== undefined) {
+      updateData['offerSettings.freeShippingToggle'] = body.offerSettings.freeShippingToggle ?? false;
+      updateData['offerSettings.freeShippingMinQty'] = body.offerSettings.freeShippingMinQty ?? 0;
+      updateData['offerSettings.freeShippingMinAmount'] = body.offerSettings.freeShippingMinAmount ?? 0;
+      updateData['offerSettings.comboDiscountToggle'] = body.offerSettings.comboDiscountToggle ?? false;
+      updateData['offerSettings.comboDiscountType'] = body.offerSettings.comboDiscountType || 'percentage';
+      updateData['offerSettings.comboDiscountValue'] = body.offerSettings.comboDiscountValue ?? 0;
+      updateData['offerSettings.comboMinQty'] = body.offerSettings.comboMinQty ?? 2;
     }
 
     if (body.socialProof !== undefined) updateData.socialProof = body.socialProof;
