@@ -22,7 +22,18 @@ export async function generateAndEmailInvoice(
     const React = await import('react');
     const { pdf } = await import('@react-pdf/renderer');
 
-    const invoiceData = buildInvoiceData(order);
+    const { default: dbConnect } = await import('@/lib/dbConnect');
+    const { default: Settings } = await import('@/models/Settings');
+
+    await dbConnect();
+    const settings = (await Settings.findOne().lean()) as any;
+
+    const invoiceData = buildInvoiceData(order, {
+      logoUrl: settings?.logo || undefined,
+      brandAddress: settings?.contactAddress || undefined,
+      brandPhone: settings?.whatsappNumber || undefined,
+      brandEmail: settings?.contactEmail || undefined,
+    });
     const doc = React.createElement(InvoiceDocument as React.ComponentType<any>, { data: invoiceData });
     const blob = await pdf(doc).toBlob();
     const arrayBuffer = await blob.arrayBuffer();

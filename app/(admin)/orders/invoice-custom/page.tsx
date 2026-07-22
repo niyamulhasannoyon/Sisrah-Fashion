@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Trash2, Download, Loader2, FileText } from 'lucide-react';
 
@@ -25,6 +25,27 @@ export default function CustomInvoiceGenerator() {
   const [brandAddress, setBrandAddress] = useState('');
   const [brandPhone, setBrandPhone] = useState('');
   const [brandEmail, setBrandEmail] = useState('');
+
+  // Load brand details default values from site settings on mount
+  useEffect(() => {
+    const fetchBrandSettings = async () => {
+      try {
+        const res = await fetch('/api/admin/settings');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.settings) {
+            const { contactAddress, whatsappNumber, contactEmail } = data.settings;
+            if (contactAddress) setBrandAddress(contactAddress);
+            if (whatsappNumber) setBrandPhone(whatsappNumber);
+            if (contactEmail) setBrandEmail(contactEmail);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch settings for custom invoice pre-populate:', err);
+      }
+    };
+    fetchBrandSettings();
+  }, []);
 
   // Customer
   const [customerName, setCustomerName] = useState('');

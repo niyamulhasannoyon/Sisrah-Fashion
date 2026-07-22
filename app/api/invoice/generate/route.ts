@@ -2,6 +2,7 @@ import React from 'react';
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
+import Settings from '@/models/Settings';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
@@ -44,10 +45,17 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
 
+    const settings = (await Settings.findOne().lean()) as any;
+
     // Build invoice data
     const { buildInvoiceData, InvoiceDocument } = await import('@/components/invoice/InvoicePDF');
 
-    const invoiceData = buildInvoiceData(order);
+    const invoiceData = buildInvoiceData(order, {
+      logoUrl: settings?.logo || undefined,
+      brandAddress: settings?.contactAddress || undefined,
+      brandPhone: settings?.whatsappNumber || undefined,
+      brandEmail: settings?.contactEmail || undefined,
+    });
 
     // Generate PDF
     const { pdf } = await import('@react-pdf/renderer');
@@ -145,7 +153,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'customerName and items are required' }, { status: 400 });
     }
 
-    const { InvoiceDocument } = await import('@/components/invoice/InvoicePDF');
+    await dbConnect();
+    const settings = (await Settings.findOne().lean()) as any;
+
+    const { InvoiceDocument, resolveLogoUrl } = await import('@/components/invoice/InvoicePDF');
 
     const invoiceData = {
       orderId: body.orderId || `CUSTOM-${Date.now().toString().slice(-6)}`,
@@ -174,10 +185,11 @@ export async function POST(req: Request) {
       paidAmount: body.paidAmount,
       couponCode: body.couponCode,
       notes: body.notes,
-      brandName: body.brandName,
-      brandAddress: body.brandAddress,
-      brandPhone: body.brandPhone,
-      brandEmail: body.brandEmail,
+      brandName: body.brandName || 'AS SIDRAT',
+      brandAddress: body.brandAddress || settings?.contactAddress || '',
+      brandPhone: body.brandPhone || settings?.whatsappNumber || '',
+      brandEmail: body.brandEmail || settings?.contactEmail || '',
+      logoUrl: body.logoUrl || settings?.logo || resolveLogoUrl({}),
     };
 
     // Calculate total if not provided
