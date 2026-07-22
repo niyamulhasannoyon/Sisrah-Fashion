@@ -602,6 +602,152 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
+      {/* ── CHANNELS PERFORMANCE: WEBSITE VS LANDING PAGES ── */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div className="border-b border-slate-100 pb-4">
+          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <Globe size={20} className="text-[#A31F24]" /> Landing Page vs Main Website Comparison
+          </h3>
+          <p className="text-xs text-slate-400">Comparing reach (visitors), orders, and revenue generated between your landing pages and the main website.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Traffic Reach comparison */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+              <Users size={16} className="text-[#A31F24]" /> Traffic & Reach (ভলিয়ুম ও রিচ)
+            </h4>
+            
+            <div className="space-y-4">
+              {/* Landing Page traffic */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-800">Landing Pages (ল্যান্ডিং পেজসমূহ)</span>
+                  <div className="flex gap-3 text-slate-500 font-medium">
+                    <span>{data?.sourceComparison?.traffic?.landingPage?.sessions?.toLocaleString() || 0} Reach</span>
+                    <span>•</span>
+                    <span>{data?.sourceComparison?.traffic?.landingPage?.pageviews?.toLocaleString() || 0} Views</span>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-purple-600 h-full transition-all duration-1000"
+                    style={{ 
+                      width: `${
+                        (data?.sourceComparison?.traffic?.landingPage?.sessions + data?.sourceComparison?.traffic?.mainWebsite?.sessions) > 0 
+                          ? Math.round((data.sourceComparison.traffic.landingPage.sessions / (data.sourceComparison.traffic.landingPage.sessions + data.sourceComparison.traffic.mainWebsite.sessions)) * 100) 
+                          : 0
+                      }%` 
+                    }}
+                  />
+                </div>
+                <div className="text-[10px] text-slate-400 text-right">
+                  Share: {((data?.sourceComparison?.traffic?.landingPage?.sessions || 0) + (data?.sourceComparison?.traffic?.mainWebsite?.sessions || 0)) > 0 
+                    ? Math.round((data.sourceComparison.traffic.landingPage.sessions / (data.sourceComparison.traffic.landingPage.sessions + data.sourceComparison.traffic.mainWebsite.sessions)) * 100) 
+                    : 0}% of total reach
+                </div>
+              </div>
+
+              {/* Main Website traffic */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-800">Main Website (প্রধান ওয়েবসাইট)</span>
+                  <div className="flex gap-3 text-slate-500 font-medium">
+                    <span>{data?.sourceComparison?.traffic?.mainWebsite?.sessions?.toLocaleString() || 0} Reach</span>
+                    <span>•</span>
+                    <span>{data?.sourceComparison?.traffic?.mainWebsite?.pageviews?.toLocaleString() || 0} Views</span>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-blue-600 h-full transition-all duration-1000"
+                    style={{ 
+                      width: `${
+                        (data?.sourceComparison?.traffic?.landingPage?.sessions + data?.sourceComparison?.traffic?.mainWebsite?.sessions) > 0 
+                          ? Math.round((data.sourceComparison.traffic.mainWebsite.sessions / (data.sourceComparison.traffic.landingPage.sessions + data.sourceComparison.traffic.mainWebsite.sessions)) * 100) 
+                          : 0
+                      }%` 
+                    }}
+                  />
+                </div>
+                <div className="text-[10px] text-slate-400 text-right">
+                  Share: {((data?.sourceComparison?.traffic?.landingPage?.sessions || 0) + (data?.sourceComparison?.traffic?.mainWebsite?.sessions || 0)) > 0 
+                    ? Math.round((data.sourceComparison.traffic.mainWebsite.sessions / (data.sourceComparison.traffic.landingPage.sessions + data.sourceComparison.traffic.mainWebsite.sessions)) * 100) 
+                    : 0}% of total reach
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Orders & Revenue Comparison */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+              <ShoppingBag size={16} className="text-[#A31F24]" /> Orders & Revenue (অর্ডার ও বিক্রি)
+            </h4>
+
+            <div className="space-y-4">
+              {/* Landing Page sales */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-800">Landing Pages (ল্যান্ডিং পেজসমূহ)</span>
+                  <div className="flex gap-3 text-slate-500 font-medium">
+                    <span>{data?.sourceComparison?.orders?.landingPage?.count || 0} Orders</span>
+                    <span>•</span>
+                    <span className="font-black text-slate-900">৳{data?.sourceComparison?.orders?.landingPage?.revenue?.toLocaleString() || 0}</span>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-purple-500 h-full transition-all duration-1000"
+                    style={{ 
+                      width: `${
+                        (data?.sourceComparison?.orders?.landingPage?.count + data?.sourceComparison?.orders?.mainWebsite?.count) > 0 
+                          ? Math.round((data.sourceComparison.orders.landingPage.count / (data.sourceComparison.orders.landingPage.count + data.sourceComparison.orders.mainWebsite.count)) * 100) 
+                          : 0
+                      }%` 
+                    }}
+                  />
+                </div>
+                <div className="text-[10px] text-slate-400 text-right">
+                  Share: {((data?.sourceComparison?.orders?.landingPage?.count || 0) + (data?.sourceComparison?.orders?.mainWebsite?.count || 0)) > 0 
+                    ? Math.round((data.sourceComparison.orders.landingPage.count / (data.sourceComparison.orders.landingPage.count + data.sourceComparison.orders.mainWebsite.count)) * 100) 
+                    : 0}% of total orders
+                </div>
+              </div>
+
+              {/* Main Website sales */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-800">Main Website (প্রধান ওয়েবসাইট)</span>
+                  <div className="flex gap-3 text-slate-500 font-medium">
+                    <span>{data?.sourceComparison?.orders?.mainWebsite?.count || 0} Orders</span>
+                    <span>•</span>
+                    <span className="font-black text-slate-900">৳{data?.sourceComparison?.orders?.mainWebsite?.revenue?.toLocaleString() || 0}</span>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-blue-500 h-full transition-all duration-1000"
+                    style={{ 
+                      width: `${
+                        (data?.sourceComparison?.orders?.landingPage?.count + data?.sourceComparison?.orders?.mainWebsite?.count) > 0 
+                          ? Math.round((data.sourceComparison.orders.mainWebsite.count / (data.sourceComparison.orders.landingPage.count + data.sourceComparison.orders.mainWebsite.count)) * 100) 
+                          : 0
+                      }%` 
+                    }}
+                  />
+                </div>
+                <div className="text-[10px] text-slate-400 text-right">
+                  Share: {((data?.sourceComparison?.orders?.landingPage?.count || 0) + (data?.sourceComparison?.orders?.mainWebsite?.count || 0)) > 0 
+                    ? Math.round((data.sourceComparison.orders.mainWebsite.count / (data.sourceComparison.orders.landingPage.count + data.sourceComparison.orders.mainWebsite.count)) * 100) 
+                    : 0}% of total orders
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* MIDDLE SECTION (TOP SELLING PRODUCTS, BREAKDOWN CHANGER) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         

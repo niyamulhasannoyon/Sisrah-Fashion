@@ -521,6 +521,15 @@ export default function AdminOrdersPage() {
                           <div className="font-bold text-slate-900">{order.shippingInfo.name}</div>
                           <div className="text-xs text-slate-500 mt-0.5">{order.shippingInfo.phone}</div>
                           <div className="text-[10px] text-slate-450 uppercase tracking-tight mt-0.5">{order.shippingInfo.city}</div>
+                          {order.campaignSlug ? (
+                            <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full border border-purple-100 font-bold text-[9px] tracking-wide inline-block mt-1.5" title={`Landing Page: ${order.campaignSlug}`}>
+                              LP: {order.campaignSlug}
+                            </span>
+                          ) : (
+                            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-100 font-bold text-[9px] tracking-wide inline-block mt-1.5">
+                              Main Website
+                            </span>
+                          )}
                         </td>
                         <td className="p-4">
                           <div className="font-bold text-slate-900">৳{order.totalAmount.toLocaleString()}</div>

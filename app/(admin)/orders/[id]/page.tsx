@@ -470,6 +470,18 @@ export default function OrderDetailPage() {
             
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3 text-sm text-slate-700">
               <div>
+                <p className="text-[10px] font-black uppercase text-slate-400">Order Source</p>
+                {order.campaignSlug ? (
+                  <p className="font-bold text-purple-700 mt-0.5">
+                    Landing Page: <span className="bg-purple-100 px-1.5 py-0.5 rounded text-[10px] uppercase font-mono">{order.campaignSlug}</span>
+                  </p>
+                ) : (
+                  <p className="font-bold text-blue-700 mt-0.5">
+                    Main Website
+                  </p>
+                )}
+              </div>
+              <div>
                 <p className="text-[10px] font-black uppercase text-slate-400">Name</p>
                 <p className="font-bold text-slate-900 mt-0.5">{order.shippingInfo.name}</p>
               </div>

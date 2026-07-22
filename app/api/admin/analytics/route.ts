@@ -350,6 +350,57 @@ export async function GET(req: Request) {
       productBreakdown: Object.values(productBreakdown).sort((a, b) => b.profit - a.profit)
     };
 
+    // Landing Page traffic match (URLs starting with /lp/)
+    const lpTrafficMatch = { ...trafficMatch, url: { $regex: /^\/lp\// } };
+    const mainTrafficMatch = { ...trafficMatch, url: { $not: /^\/lp\// } };
+
+    // Unique session counts (reach)
+    const lpSessions = await AnalyticsEvent.distinct('sessionId', lpTrafficMatch);
+    const mainSessions = await AnalyticsEvent.distinct('sessionId', mainTrafficMatch);
+
+    // Pageview counts
+    const lpPageviews = await AnalyticsEvent.countDocuments({ ...lpTrafficMatch, eventType: 'pageview' });
+    const mainPageviews = await AnalyticsEvent.countDocuments({ ...mainTrafficMatch, eventType: 'pageview' });
+
+    // Landing Page orders vs Main Website orders
+    let lpOrdersCount = 0;
+    let mainOrdersCount = 0;
+    let lpRevenue = 0;
+    let mainRevenue = 0;
+
+    ordersInRange.forEach(order => {
+      if (order.campaignSlug) {
+        lpOrdersCount++;
+        lpRevenue += order.totalAmount;
+      } else {
+        mainOrdersCount++;
+        mainRevenue += order.totalAmount;
+      }
+    });
+
+    const sourceComparison = {
+      traffic: {
+        landingPage: {
+          sessions: lpSessions.length,
+          pageviews: lpPageviews,
+        },
+        mainWebsite: {
+          sessions: mainSessions.length,
+          pageviews: mainPageviews,
+        }
+      },
+      orders: {
+        landingPage: {
+          count: lpOrdersCount,
+          revenue: lpRevenue,
+        },
+        mainWebsite: {
+          count: mainOrdersCount,
+          revenue: mainRevenue,
+        }
+      }
+    };
+
     return NextResponse.json({
       success: true,
       stats: {
@@ -364,6 +415,7 @@ export async function GET(req: Request) {
         averageOrderValue,
         totalQuantitySold
       },
+      sourceComparison,
       profitStats,
       topProducts: {
         byQuantity: topProductsByQuantity,
