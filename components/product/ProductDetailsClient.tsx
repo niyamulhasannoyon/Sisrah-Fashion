@@ -170,8 +170,9 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
   const displayOfferPrice = currentVariant?.offerPrice || product.offerPrice || 0;
 
   const imageUrl = useMemo(() => {
-    if (currentVariant?.image?.url) return currentVariant.image.url;
-    return product.images?.[activeImage]?.url ?? product.images?.[0]?.url ?? '/images/linen-shirt.jpg';
+    const varImg = typeof currentVariant?.image === 'string' ? currentVariant.image : currentVariant?.image?.url;
+    if (varImg) return getDirectImageLink(varImg);
+    return product.images?.[activeImage]?.url ? getDirectImageLink(product.images[activeImage].url) : (product.images?.[0]?.url ? getDirectImageLink(product.images[0].url) : '/images/linen-shirt.jpg');
   }, [currentVariant, product.images, activeImage]);
 
   const hasSelectedOptions = Boolean(selectedColor && selectedSize);

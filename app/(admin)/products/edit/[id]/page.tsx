@@ -4,6 +4,14 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Loader2, X, Save, UploadCloud, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { getDirectImageLink } from '@/lib/utils';
+
+const getVariantImageUrl = (img: any): string => {
+  if (!img) return '';
+  if (typeof img === 'string') return getDirectImageLink(img);
+  if (typeof img === 'object' && img.url) return getDirectImageLink(img.url);
+  return '';
+};
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -45,24 +53,30 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       .then(data => {
         if (data.success) {
           const p = data.product;
-          setTitle(p.title);
-          setDescription(p.description);
-          setBasePrice(p.basePrice);
+          setTitle(p.title || '');
+          setDescription(p.description || '');
+          setBasePrice(p.basePrice || 0);
           setOfferPrice(p.offerPrice || 0);
           setCostPrice(p.costPrice || 0);
           setMarketingCost(p.marketingCost || 0);
           setDeliveryCost(p.deliveryCost || 0);
           setLowStockThreshold(p.lowStockThreshold ?? 10);
+          setCategory(p.category || 'Men');
+          setIsTrending(Boolean(p.isTrending));
+          setIsNewArrival(Boolean(p.isNewArrival));
+          setTags(p.tags || []);
+          setMainImages(p.images || []);
+
           if (p.variants && p.variants.length > 0) {
             setVariants(p.variants);
-            const eSizes = Array.from(new Set(p.variants.map((v:any) => v.size))) as string[];
-            const eColors = Array.from(new Set(p.variants.map((v:any) => v.color))) as string[];
+            const eSizes = Array.from(new Set(p.variants.map((v: any) => v.size))) as string[];
+            const eColors = Array.from(new Set(p.variants.map((v: any) => v.color))) as string[];
             setSelectedSizes(eSizes);
             setSelectedColors(eColors);
-            
+
             // কাস্টম কালার থাকলে লিস্টে অ্যাড করা
             const newColors = eColors.filter(c => !dynamicColors.includes(c));
-            if(newColors.length > 0) setDynamicColors([...dynamicColors, ...newColors]);
+            if (newColors.length > 0) setDynamicColors(prev => [...prev, ...newColors]);
           }
         }
         setLoading(false);
@@ -73,15 +87,16 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const uploadToCloudinary = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'loomra_preset'); 
-    const CLOUD_NAME = 'dj3uym3gv'; 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'loomra_preset';
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dj3uym3gv';
+    formData.append('upload_preset', preset); 
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData });
     return await res.json();
   };
 
   const addImageViaUrl = () => {
     if (!imageUrl) return;
-    setMainImages([...mainImages, { url: imageUrl, public_id: `url-${Date.now()}` }]);
+    setMainImages([...mainImages, { url: getDirectImageLink(imageUrl), public_id: `url-${Date.now()}` }]);
     setImageUrl('');
   };
 
@@ -90,7 +105,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setUploadingImage(true);
     try {
       const data = await uploadToCloudinary(e.target.files[0]);
-      setMainImages([...mainImages, { url: data.secure_url, public_id: data.public_id }]);
+      if (data && (data.secure_url || data.url)) {
+        setMainImages([...mainImages, { url: data.secure_url || data.url, public_id: data.public_id || `img-${Date.now()}` }]);
+      } else {
+        alert("Upload failed! Please check your network or try pasting an image link.");
+      }
     } catch (error) { alert("Upload failed!"); } finally { setUploadingImage(false); }
   };
 
@@ -98,7 +117,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setUploadingImage(true);
     try {
       const data = await uploadToCloudinary(file);
-      handleVariantChange(index, 'image', { url: data.secure_url, public_id: data.public_id });
+      if (data && (data.secure_url || data.url)) {
+        const uploadedUrl = data.secure_url || data.url;
+        handleVariantChange(index, 'image', { url: uploadedUrl, public_id: data.public_id || `var-${Date.now()}` });
+      } else {
+        alert("Variant image upload failed!");
+      }
     } catch (error) { alert("Upload failed!"); } finally { setUploadingImage(false); }
   };
 
@@ -112,11 +136,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     selectedSizes.forEach(size => {
       selectedColors.forEach(color => {
         const existing = variants.find(v => v.size === size && v.color === color);
+        const existingImgUrl = getVariantImageUrl(existing?.image);
         newVariants.push({
           size, color,
           price: existing ? existing.price : basePrice,
           stock: existing ? existing.stock : 10,
-          image: existing?.image || null,
+          image: existingImgUrl ? existing.image : null,
         });
       });
     });
@@ -126,6 +151,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const handleVariantChange = (index: number, field: string, value: any) => {
     const updatedVariants = [...variants];
     updatedVariants[index][field] = value;
+
+    // When setting an image for a color, auto-apply to other size variants of the same color that don't have an image set yet
+    if (field === 'image' && value) {
+      const currentColor = updatedVariants[index].color;
+      updatedVariants.forEach((v, i) => {
+        if (v.color === currentColor && i !== index && !getVariantImageUrl(v.image)) {
+          updatedVariants[i].image = value;
+        }
+      });
+    }
+
     setVariants(updatedVariants);
   };
 
@@ -286,29 +322,70 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         <td className="p-3"><input type="number" value={variant.stock} onChange={e => handleVariantChange(idx, 'stock', Number(e.target.value))} className="w-24 p-2 bg-white border border-slate-200 rounded outline-none focus:border-black" /></td>
                         <td className="p-3">
                           <div className="flex flex-col gap-2">
-                            {variant.image ? (
-                               <div className="relative w-12 h-16 border rounded overflow-hidden group shadow-sm">
-                                 <Image src={variant.image.url} fill sizes="48px" className="w-full h-full object-cover" alt="var" />
-                                 <button type="button" onClick={() => handleVariantChange(idx, 'image', null)} className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X size={14} /></button>
-                               </div>
-                            ) : (
-                               <div className="flex items-center gap-2">
-                                 <label className="w-12 h-16 flex shrink-0 items-center justify-center border-2 border-dashed border-slate-200 rounded cursor-pointer hover:bg-slate-100 text-slate-400 hover:text-black transition-all">
-                                   <UploadCloud size={16} />
-                                   <input type="file" className="hidden" accept="image/*" onChange={(e) => { if(e.target.files) handleVariantImageUpload(idx, e.target.files[0]); }} />
-                                 </label>
-                                 <input 
-                                   type="text" 
-                                   placeholder="URL" 
-                                   className="w-24 p-2 text-[10px] bg-white border border-slate-200 rounded outline-none focus:border-black"
-                                   onBlur={(e) => {
-                                     if (e.target.value) {
-                                       handleVariantChange(idx, 'image', { url: e.target.value, public_id: `var-url-${Date.now()}` });
-                                     }
-                                   }}
-                                 />
-                               </div>
-                            )}
+                            {(() => {
+                              const imgUrl = getVariantImageUrl(variant.image);
+                              if (imgUrl) {
+                                return (
+                                  <div className="relative w-12 h-16 border border-slate-200 rounded-lg overflow-hidden group shadow-sm bg-slate-50">
+                                    <Image 
+                                      src={imgUrl} 
+                                      fill 
+                                      sizes="48px" 
+                                      unoptimized
+                                      className="w-full h-full object-cover" 
+                                      alt={`${variant.color} variant`} 
+                                    />
+                                    <button 
+                                      type="button" 
+                                      onClick={() => handleVariantChange(idx, 'image', null)} 
+                                      className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      title="Remove image"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <label className="w-12 h-16 flex shrink-0 flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 hover:border-black text-slate-400 hover:text-black transition-all">
+                                    <UploadCloud size={16} />
+                                    <span className="text-[9px] font-bold text-slate-400 mt-1">Upload</span>
+                                    <input 
+                                      type="file" 
+                                      className="hidden" 
+                                      accept="image/*" 
+                                      onChange={(e) => { 
+                                        if (e.target.files && e.target.files[0]) {
+                                          handleVariantImageUpload(idx, e.target.files[0]); 
+                                        }
+                                      }} 
+                                    />
+                                  </label>
+                                  <input 
+                                    type="text" 
+                                    placeholder="Or paste URL" 
+                                    className="w-24 p-2 text-[10px] bg-white border border-slate-200 rounded-md outline-none focus:border-black transition-all"
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        const val = (e.target as HTMLInputElement).value.trim();
+                                        if (val) {
+                                          handleVariantChange(idx, 'image', { url: val, public_id: `var-url-${Date.now()}` });
+                                          (e.target as HTMLInputElement).value = '';
+                                        }
+                                      }
+                                    }}
+                                    onBlur={(e) => {
+                                      const val = e.target.value.trim();
+                                      if (val) {
+                                        handleVariantChange(idx, 'image', { url: val, public_id: `var-url-${Date.now()}` });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              );
+                            })()}
                           </div>
                         </td>
                       </tr>
