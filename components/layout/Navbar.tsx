@@ -85,26 +85,26 @@ export function Navbar() {
       )}
 
       <header className="sticky top-0 z-[100] w-full border-b border-gray-100 bg-white/90 backdrop-blur-md shadow-xs transition-all duration-300">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-2 md:py-2.5">
           
           {/* Left: Brand Logo + Nav Links (Grouped for balanced spacing) */}
           <div className="flex items-center gap-8 lg:gap-12">
-            <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+            <Link href="/" className="flex items-center gap-3 shrink-0 group">
               {/* Brand Logo Icon */}
-              <div className="relative w-8 h-8 md:w-9 md:h-9 shrink-0 flex items-center justify-center overflow-hidden">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 shrink-0 flex items-center justify-center overflow-hidden">
                 {!mounted ? (
-                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-slate-100 animate-pulse" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-slate-100 animate-pulse" />
                 ) : settings?.logo ? (
                   <Image 
                     src={getDirectImageLink(settings.logo)} 
                     alt="AS SIDRAT" 
                     fill
-                    sizes="(max-width: 768px) 32px, 36px"
+                    sizes="(max-width: 768px) 48px, 56px"
                     priority
                     className="object-contain transition-all duration-300 group-hover:scale-105" 
                   />
                 ) : (
-                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 select-none">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-600 select-none">
                     S
                   </div>
                 )}
