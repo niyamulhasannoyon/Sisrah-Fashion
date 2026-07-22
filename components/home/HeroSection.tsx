@@ -31,7 +31,7 @@ export function HeroSection() {
 
   return (
     <motion.section 
-      className="relative min-h-[calc(100dvh-80px)] w-full overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"
+      className="relative w-full min-h-[75vh] md:min-h-[85vh] flex items-center justify-center text-center overflow-hidden cursor-grab active:cursor-grabbing"
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={(event, info) => {
@@ -89,24 +89,35 @@ export function HeroSection() {
         );
       })}
       
-      {/* Bottom-heavy gradient overlay — darkens the text area without drowning the image top */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-0" />
+      {/* 2. Dark Overlay (টেক্সট স্পষ্ট দেখানোর মূল সমাধান) */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 z-0" />
       
-      {/* Content */}
-      <div className="relative z-10 mx-auto flex flex-col items-center justify-center min-h-[calc(100dvh-80px)] max-w-6xl gap-5 sm:gap-7 px-4 py-16 text-center">
-        <span className="text-[10px] sm:text-xs uppercase tracking-[0.32em] text-[#A31F24] font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">Summer Essentials</span>
-        <h1 className="max-w-4xl text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.3] sm:leading-[1.35] md:leading-[1.4] font-bengali px-2 sm:px-4 tracking-normal drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
-          {headline}
-        </h1>
-        <p className="max-w-2xl text-xs sm:text-sm md:text-base lg:text-lg font-normal text-white/90 font-bengali px-4 leading-relaxed mt-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
-          {subheadline}
-        </p>
-        <Link
-          href="/shop"
-          className="mt-6 sm:mt-8 inline-flex items-center justify-center border border-white/50 bg-transparent text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] px-8 py-4 rounded-none transition-all duration-300 hover:bg-white hover:text-black active:scale-95 shadow-sm"
-        >
-          VIEW COLLECTIONS
-        </Link>
+      {/* 3. Hero Content (Text Backplate/Glassmorphism & Mobile Font Scaling) */}
+      <div className="relative z-10 max-w-xl mx-auto px-4 py-8 flex flex-col items-center">
+        <div className="bg-black/35 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 md:p-10 flex flex-col items-center text-center shadow-xl">
+          {/* Summer Essentials Tag */}
+          <span className="text-red-500 font-bold tracking-[0.2em] text-xs md:text-sm uppercase mb-3">
+            SUMMER ESSENTIALS
+          </span>
+
+          {/* Main Headline */}
+          <h1 className="text-white font-extrabold text-2xl sm:text-3xl md:text-5xl leading-tight mb-4 drop-shadow-md text-balance font-bengali">
+            {headline}
+          </h1>
+
+          {/* Subtitle / Paragraph */}
+          <p className="text-gray-200 text-xs sm:text-sm md:text-base max-w-md mb-6 leading-relaxed opacity-90 font-bengali text-pretty">
+            {subheadline}
+          </p>
+
+          {/* CTA Button */}
+          <Link
+            href="/shop"
+            className="inline-block border-2 border-white text-white font-semibold text-xs md:text-sm px-6 py-3 tracking-widest hover:bg-white hover:text-black transition-all duration-300 backdrop-blur-xs"
+          >
+            VIEW COLLECTIONS
+          </Link>
+        </div>
       </div>
 
       {/* Pager Indicator Dots */}
