@@ -28,6 +28,7 @@ export interface IProduct extends Document {
   marketingCost?: number;
   deliveryCost?: number;
   category: string;
+  subCategory?: string;
   tags: string[];
   images: { url: string; public_id: string }[];
   variants: IProductVariant[];
@@ -49,6 +50,7 @@ const ProductSchema: Schema = new Schema(
     marketingCost: { type: Number, default: 0 },
     deliveryCost: { type: Number, default: 0 },
     category: { type: String, required: true },
+    subCategory: { type: String, default: '' },
     tags: [{ type: String }],
     images: [
       {

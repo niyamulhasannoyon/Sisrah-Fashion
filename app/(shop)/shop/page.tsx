@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import ShopClient from '@/components/product/ShopClient';
+import { Loader2 } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Shop Premium Minimalist Collection - AS SIDRAT',
@@ -23,5 +27,16 @@ export const metadata: Metadata = {
 };
 
 export default function ShopPage() {
-  return <ShopClient />;
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 flex flex-col items-center justify-center min-h-[50vh]">
+          <Loader2 className="animate-spin text-[#A31F24]" size={36} />
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-3">Loading Collection...</p>
+        </div>
+      }
+    >
+      <ShopClient />
+    </Suspense>
+  );
 }

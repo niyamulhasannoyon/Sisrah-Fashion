@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import ProductListing from '@/components/product/ProductListing';
+import { Loader2 } from 'lucide-react';
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -60,5 +62,16 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }).lean();
   const safeProducts = JSON.parse(JSON.stringify(products));
 
-  return <ProductListing products={safeProducts} categoryName={category} />;
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 flex flex-col items-center justify-center min-h-[50vh]">
+          <Loader2 className="animate-spin text-[#A31F24]" size={36} />
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-3">Loading Category...</p>
+        </div>
+      }
+    >
+      <ProductListing products={safeProducts} categoryName={category} />
+    </Suspense>
+  );
 }
