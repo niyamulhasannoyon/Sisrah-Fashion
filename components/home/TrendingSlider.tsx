@@ -31,35 +31,47 @@ export function TrendingSlider({ initialProducts }: { initialProducts?: any[] })
   }, [initialProducts]);
 
   if (loading) return (
-    <div className="py-20 flex justify-center items-center">
-      <Loader2 className="animate-spin text-loomra-red" size={32} />
+    <div className="py-16 flex justify-center items-center">
+      <Loader2 className="animate-spin text-[#A31F24]" size={28} />
     </div>
   );
 
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-loomra-white py-24 border-t border-slate-100">
-      <div className="mx-auto max-w-6xl px-6 sm:px-8">
-        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <section className="bg-slate-50/50 py-16 lg:py-24 border-t border-slate-100">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        
+        {/* Header Block */}
+        <div className="mb-10 lg:mb-12 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-small uppercase tracking-[0.32em] text-loomra-red font-bold">Curated Edit</p>
-            <h2 className="text-4xl font-black text-loomra-black tracking-tight mt-2 uppercase">Trending Now <span className="text-loomra-red">.</span></h2>
-            <p className="text-loomra-muted mt-2 max-w-md">Our most-loved pieces, curated for your contemporary lifestyle.</p>
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#A31F24]">
+              TRENDING NOW
+            </span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight font-bengali mt-1">
+              জনপ্রিয় কালেকশনসমূহ <span className="text-[#A31F24]">.</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 font-bengali mt-1.5 max-w-md">
+              চলতি সিজনের সবচেয়ে পছন্দনীয় পোশাক, তৈরি আপনার প্রতিদিনের স্বাচ্ছন্দ্যের জন্য।
+            </p>
           </div>
+
           <a
             href="/shop"
-            className="text-xs font-black uppercase tracking-[2px] border-b-2 border-loomra-black pb-1 hover:text-loomra-red hover:border-loomra-red transition-all"
+            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1 hover:text-[#A31F24] hover:border-[#A31F24] transition-all self-start md:self-auto mt-3 md:mt-0"
           >
-            Explore All
+            <span>EXPLORE ALL</span>
+            <span>→</span>
           </a>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {products.map(product => (
             <ProductCard key={product._id} product={product} />
           ))}
         </div>
+
       </div>
     </section>
   );
