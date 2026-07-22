@@ -180,7 +180,15 @@ export default function AddProductPage() {
     e.preventDefault();
     setLoading(true);
 
-    if (mainImages.length === 0) {
+    const sanitizedImages = mainImages
+      .map(img => {
+        if (typeof img === 'string') return { url: getDirectImageLink(img), public_id: `url-${Date.now()}` };
+        if (img && img.url) return { url: getDirectImageLink(img.url), public_id: img.public_id || `img-${Date.now()}` };
+        return null;
+      })
+      .filter(Boolean);
+
+    if (sanitizedImages.length === 0) {
       alert("Please upload at least one main product image.");
       setLoading(false);
       return;
@@ -203,7 +211,7 @@ export default function AddProductPage() {
       isTrending,
       isNewArrival,
       tags,
-      images: mainImages,
+      images: sanitizedImages,
       variants
     };
 

@@ -47,6 +47,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [variants, setVariants] = useState<any[]>([]);
 
   // ডাটাবেস থেকে প্রোডাক্ট লোড করা
+  // ডাটাবেস থেকে প্রোডাক্ট লোড করা
   useEffect(() => {
     fetch(`/api/products/${id}`)
       .then(res => res.json())
@@ -65,7 +66,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           setIsTrending(Boolean(p.isTrending));
           setIsNewArrival(Boolean(p.isNewArrival));
           setTags(p.tags || []);
-          setMainImages(p.images || []);
+
+          let loadedImages = p.images || [];
+          // ── Fallback: If product main gallery images are empty, recover from variant images if available ──
+          if (loadedImages.length === 0 && p.variants && p.variants.length > 0) {
+            const varImgs = p.variants
+              .map((v: any) => getVariantImageUrl(v.image))
+              .filter(Boolean);
+            if (varImgs.length > 0) {
+              const uniqueImgs = Array.from(new Set(varImgs));
+              loadedImages = uniqueImgs.map((url, i) => ({ url, public_id: `recovered-img-${i}-${Date.now()}` }));
+            }
+          }
+          setMainImages(loadedImages);
 
           if (p.variants && p.variants.length > 0) {
             setVariants(p.variants);
@@ -95,8 +108,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   };
 
   const addImageViaUrl = () => {
-    if (!imageUrl) return;
-    setMainImages([...mainImages, { url: getDirectImageLink(imageUrl), public_id: `url-${Date.now()}` }]);
+    if (!imageUrl.trim()) return;
+    const directUrl = getDirectImageLink(imageUrl.trim());
+    setMainImages(prev => [...prev, { url: directUrl, public_id: `url-${Date.now()}` }]);
     setImageUrl('');
   };
 
@@ -106,7 +120,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     try {
       const data = await uploadToCloudinary(e.target.files[0]);
       if (data && (data.secure_url || data.url)) {
-        setMainImages([...mainImages, { url: data.secure_url || data.url, public_id: data.public_id || `img-${Date.now()}` }]);
+        setMainImages(prev => [...prev, { url: data.secure_url || data.url, public_id: data.public_id || `img-${Date.now()}` }]);
       } else {
         alert("Upload failed! Please check your network or try pasting an image link.");
       }
@@ -189,8 +203,33 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
+
+    const sanitizedImages = mainImages
+      .map(img => {
+        if (typeof img === 'string') return { url: getDirectImageLink(img), public_id: `url-${Date.now()}` };
+        if (img && img.url) return { url: getDirectImageLink(img.url), public_id: img.public_id || `img-${Date.now()}` };
+        return null;
+      })
+      .filter(Boolean);
+
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    const productData = { title, slug, description, basePrice, offerPrice, lowStockThreshold, category, isTrending, isNewArrival, tags, images: mainImages, variants, costPrice, marketingCost, deliveryCost };
+    const productData = { 
+      title, 
+      slug, 
+      description, 
+      basePrice, 
+      offerPrice, 
+      lowStockThreshold, 
+      category, 
+      isTrending, 
+      isNewArrival, 
+      tags, 
+      images: sanitizedImages, 
+      variants, 
+      costPrice, 
+      marketingCost, 
+      deliveryCost 
+    };
 
     try {
       const res = await fetch(`/api/products/${id}`, {
@@ -221,12 +260,16 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                <ImageIcon size={18} className="text-slate-400" /> Main Product Gallery
             </h3>
             <div className="flex flex-wrap gap-4 mb-4">
-              {mainImages.map((img, idx) => (
-                <div key={idx} className="relative w-24 h-32 border rounded-lg overflow-hidden group">
-                  <Image src={img.url} fill sizes="96px" className="w-full h-full object-cover" alt="img" />
-                  <button type="button" onClick={() => setMainImages(mainImages.filter((_, i) => i !== idx))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"><X size={12} /></button>
-                </div>
-              ))}
+              {mainImages.map((img, idx) => {
+                const src = typeof img === 'string' ? getDirectImageLink(img) : getDirectImageLink(img?.url);
+                if (!src) return null;
+                return (
+                  <div key={idx} className="relative w-24 h-32 border border-slate-200 rounded-lg overflow-hidden group shadow-sm bg-slate-50">
+                    <Image src={src} fill sizes="96px" unoptimized className="w-full h-full object-cover" alt={`gallery image ${idx + 1}`} />
+                    <button type="button" onClick={() => setMainImages(mainImages.filter((_, i) => i !== idx))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"><X size={12} /></button>
+                  </div>
+                );
+              })}
               <label className="w-24 h-32 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-all">
                 {uploadingImage ? <Loader2 size={24} className="animate-spin text-slate-400" /> : <UploadCloud size={24} className="text-slate-400" />}
                 <span className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Add Gallery</span>
@@ -237,15 +280,21 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             <div className="flex gap-2 mt-4">
               <input 
                 type="text" 
-                placeholder="Or paste image URL here..." 
+                placeholder="Or paste image URL here & hit Enter..." 
                 value={imageUrl}
                 onChange={e => setImageUrl(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addImageViaUrl();
+                  }
+                }}
                 className="flex-1 p-2 text-xs bg-slate-50 border border-slate-200 rounded outline-none focus:border-black transition-all"
               />
               <button 
                 type="button" 
                 onClick={addImageViaUrl}
-                className="px-4 py-2 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase rounded hover:bg-slate-200 transition-all"
+                className="px-4 py-2 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase rounded hover:bg-slate-200 transition-all shrink-0"
               >
                 Add Link
               </button>
