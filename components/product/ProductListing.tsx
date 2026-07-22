@@ -95,13 +95,16 @@ export default function ProductListing({
             Showing {filteredProducts.length} Products
           </p>
         </div>
-        <button
-          onClick={() => setIsMobileFilterOpen(true)}
-          className="lg:hidden flex items-center gap-2 bg-[#F9F9F9] border border-gray-200 px-4 py-2 rounded text-sm font-bold uppercase"
-        >
-          <SlidersHorizontal size={16} /> Filters
-        </button>
       </div>
+
+      {/* Mobile Floating Filters Button */}
+      <button
+        onClick={() => setIsMobileFilterOpen(true)}
+        className="lg:hidden fixed bottom-20 right-2 z-40 flex items-center justify-center w-12 h-12 rounded-full bg-white text-[#1A1A1A] border border-gray-200 shadow-lg active:scale-95 transition-transform"
+        aria-label="Filters"
+      >
+        <SlidersHorizontal size={20} />
+      </button>
 
       {/* ── Main Layout: Sidebar + Grid ── */}
       <div className="flex flex-col lg:flex-row gap-10">

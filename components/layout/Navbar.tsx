@@ -71,7 +71,7 @@ export function Navbar() {
         </div>
       )}
       <header className="sticky top-0 z-[100] w-full border-b border-white/20 bg-white/80 backdrop-blur-lg shadow-sm transition-all duration-300">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 md:py-3 sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 md:py-2.5 sm:px-8 lg:px-12">
         <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
           {/* Brand Logo Icon Container */}
           <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0 flex items-center justify-center overflow-hidden">
@@ -163,38 +163,6 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile action icons */}
-          <div className="flex items-center gap-1 md:hidden">
-            <Link href="/shop" aria-label="Search" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors">
-              <Search size={18} />
-            </Link>
-
-            <button 
-              onClick={toggleWishlistDrawer} 
-              aria-label="Open Wishlist" 
-              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
-            >
-              <Heart size={18} />
-              {mounted && wishlist.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-loomra-red text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-md">
-                  {wishlist.length}
-                </span>
-              )}
-            </button>
-
-            <button 
-              onClick={toggleCart} 
-              aria-label="Open Cart" 
-              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
-            >
-              <ShoppingBag size={18} />
-              {hydrated && cart.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-loomra-red text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-md">
-                  {cart.length}
-                </span>
-              )}
-            </button>
-          </div>
 
           <button
             type="button"

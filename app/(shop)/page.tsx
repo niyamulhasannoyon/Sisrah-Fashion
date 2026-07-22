@@ -2,7 +2,7 @@ import { HeroSection } from '@/components/home/HeroSection';
 import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { WhyChooseUs } from '@/components/home/WhyChooseUs';
 import { ReviewMarquee } from '@/components/home/ReviewMarquee';
-import { Newsletter } from '@/components/home/Newsletter';
+
 import { NewDrop } from '@/components/home/NewDrop';
 import { TrendingSlider } from '@/components/home/TrendingSlider';
 import { LifestyleBanner } from '@/components/home/LifestyleBanner';
@@ -92,7 +92,7 @@ export default async function HomePage() {
         <WhyChooseUs />
         <SocialGallery />
         <ReviewMarquee />
-        <Newsletter />
+
       </main>
     </div>
   );

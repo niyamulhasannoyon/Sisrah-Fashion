@@ -94,7 +94,7 @@ export function HeroSection() {
       
       {/* 3. Hero Content (Text Backplate/Glassmorphism & Mobile Font Scaling) */}
       <div className="relative z-10 max-w-xl mx-auto px-4 py-8 flex flex-col items-center">
-        <div className="bg-black/45 backdrop-blur-xl border border-white/20 rounded-2xl p-6 sm:p-8 md:p-10 flex flex-col items-center text-center shadow-xl">
+        <div className="bg-black/60 backdrop-blur-md border border-white/20 rounded-2xl p-6 sm:p-8 md:p-10 flex flex-col items-center text-center shadow-xl">
           {/* Summer Essentials Tag */}
           <span className="text-red-500 font-bold tracking-[0.2em] text-xs md:text-sm uppercase mb-3">
             SUMMER ESSENTIALS
@@ -106,14 +106,14 @@ export function HeroSection() {
           </h1>
 
           {/* Subtitle / Paragraph */}
-          <p className="text-slate-100 text-sm sm:text-base max-w-md mb-6 leading-relaxed font-bengali text-pretty">
+          <p className="text-gray-200 text-xs leading-relaxed max-w-md mb-6 font-bengali text-pretty">
             {subheadline}
           </p>
 
           {/* CTA Button */}
           <Link
             href="/shop"
-            className="inline-block border-2 border-white text-white font-semibold text-xs md:text-sm px-8 py-3.5 tracking-widest hover:bg-white hover:text-black transition-all duration-300 backdrop-blur-sm"
+            className="inline-block w-full sm:w-auto text-center border-2 border-white text-white font-semibold text-xs md:text-sm px-8 py-3 tracking-widest hover:bg-white hover:text-black transition-all duration-300 backdrop-blur-sm"
           >
             VIEW COLLECTIONS
           </Link>

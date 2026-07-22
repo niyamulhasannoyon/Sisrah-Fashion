@@ -38,7 +38,7 @@ export function WhyChooseUs() {
           {/* Watermark and Foreground Title Container */}
           <div className="relative w-full flex items-center justify-center min-h-[80px]">
             {/* Background Watermark */}
-            <span aria-hidden="true" className="absolute text-[2.2rem] xs:text-[2.6rem] sm:text-[5rem] lg:text-[6.5rem] font-black uppercase tracking-[0.05em] text-gray-50/70 select-none pointer-events-none font-sans z-0 leading-none text-center whitespace-nowrap">
+            <span aria-hidden="true" className="hidden sm:block absolute sm:text-[5rem] lg:text-[6.5rem] font-black uppercase tracking-[0.05em] text-gray-50/70 select-none pointer-events-none font-sans z-0 leading-none text-center whitespace-nowrap">
               WHY CHOOSE US
             </span>
             
@@ -53,21 +53,21 @@ export function WhyChooseUs() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {features.map((feature, idx) => {
             const Icon = feature.icon;
             return (
               <div 
                 key={idx} 
-                className="bg-white p-8 rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.02)] flex flex-col items-center text-center transition-all duration-300 hover:shadow-[0_15px_40px_rgba(0,0,0,0.05)] hover:border-gray-200/60"
+                className="bg-white p-4 sm:p-8 rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.02)] flex flex-col items-center text-center transition-all duration-300 hover:shadow-[0_15px_40px_rgba(0,0,0,0.05)] hover:border-gray-200/60"
               >
-                <div className="w-12 h-12 bg-loomra-red/5 text-loomra-red rounded-full flex items-center justify-center mb-5">
-                  <Icon size={24} strokeWidth={2} />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-loomra-red/5 text-loomra-red rounded-full flex items-center justify-center mb-3 sm:mb-5 shrink-0">
+                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
                 </div>
-                <h3 className="text-base font-bold text-loomra-black leading-relaxed">
+                <h3 className="text-xs xs:text-sm sm:text-base font-bold text-loomra-black leading-relaxed">
                   {feature.title}
                 </h3>
-                <p className="text-xs text-loomra-muted mt-3 leading-relaxed">
+                <p className="text-[10px] xs:text-xs text-gray-600 mt-1.5 sm:mt-3 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
