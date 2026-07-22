@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: LpPageProps): Promise<Metadat
           },
         ],
         locale: 'bn_BD',
-        type: 'product',
+        type: 'website',
       },
       twitter: {
         card: 'summary_large_image',
