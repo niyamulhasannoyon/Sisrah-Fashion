@@ -2,13 +2,40 @@
 
 import { X, Ruler } from 'lucide-react';
 
+interface SizeGuideRow {
+  size: string;
+  chest?: string;
+  length?: string;
+  shoulder?: string;
+  [key: string]: any;
+}
+
+export interface SizeGuideData {
+  columns?: string[];
+  rows?: SizeGuideRow[];
+  note?: string;
+}
+
 interface SizeGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
+  sizeGuide?: SizeGuideData;
 }
 
-export default function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
+const DEFAULT_ROWS: SizeGuideRow[] = [
+  { size: 'S', chest: '38"', length: '27"', shoulder: '17"' },
+  { size: 'M', chest: '40"', length: '28"', shoulder: '18"' },
+  { size: 'L', chest: '42"', length: '29"', shoulder: '19"' },
+  { size: 'XL', chest: '44"', length: '30"', shoulder: '20"' },
+  { size: 'XXL', chest: '46"', length: '31"', shoulder: '21"' },
+  { size: 'XXXL', chest: '48"', length: '32"', shoulder: '22"' },
+];
+
+export default function SizeGuideModal({ isOpen, onClose, sizeGuide }: SizeGuideModalProps) {
   if (!isOpen) return null;
+
+  const rowsToDisplay = (sizeGuide?.rows && sizeGuide.rows.length > 0) ? sizeGuide.rows : DEFAULT_ROWS;
+  const noteToDisplay = sizeGuide?.note || 'Note: Measurements may vary slightly by 0.5 inches due to manufacturing.';
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -47,19 +74,12 @@ export default function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps)
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-700 font-medium">
-                {[
-                  { size: 'S', chest: '38"', length: '27"', shoulder: '17"' },
-                  { size: 'M', chest: '40"', length: '28"', shoulder: '18"' },
-                  { size: 'L', chest: '42"', length: '29"', shoulder: '19"' },
-                  { size: 'XL', chest: '44"', length: '30"', shoulder: '20"' },
-                  { size: 'XXL', chest: '46"', length: '31"', shoulder: '21"' },
-                  { size: 'XXXL', chest: '48"', length: '32"', shoulder: '22"' },
-                ].map((row) => (
-                  <tr key={row.size} className="hover:bg-gray-50 transition-colors">
+                {rowsToDisplay.map((row, index) => (
+                  <tr key={row.size || index} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4 font-black text-black border-r border-gray-100 bg-gray-50/50">{row.size}</td>
-                    <td className="p-4 border-r border-gray-100">{row.chest}</td>
-                    <td className="p-4 border-r border-gray-100">{row.length}</td>
-                    <td className="p-4">{row.shoulder}</td>
+                    <td className="p-4 border-r border-gray-100">{row.chest || '-'}</td>
+                    <td className="p-4 border-r border-gray-100">{row.length || '-'}</td>
+                    <td className="p-4">{row.shoulder || '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -67,7 +87,7 @@ export default function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps)
           </div>
 
           <div className="mt-6 flex items-center justify-center gap-2 text-xs font-bold text-[#A31F24] bg-red-50 p-3 rounded-lg border border-red-100">
-             <Ruler size={16} /> Note: Measurements may vary slightly by 0.5 inches due to manufacturing.
+             <Ruler size={16} /> {noteToDisplay}
           </div>
         </div>
 

@@ -32,6 +32,11 @@ export interface IProduct extends Document {
   tags: string[];
   images: { url: string; public_id: string }[];
   variants: IProductVariant[];
+  sizeGuide?: {
+    columns?: string[];
+    rows?: { size: string; chest?: string; length?: string; shoulder?: string; [key: string]: any }[];
+    note?: string;
+  };
   lowStockThreshold: number;
   rating: number;
   numReviews: number;
@@ -59,6 +64,21 @@ const ProductSchema: Schema = new Schema(
       },
     ],
     variants: [VariantSchema],
+    sizeGuide: {
+      columns: { type: [String], default: ['Size', 'Chest', 'Length', 'Shoulder'] },
+      rows: [
+        {
+          size: { type: String },
+          chest: { type: String, default: '' },
+          length: { type: String, default: '' },
+          shoulder: { type: String, default: '' },
+        },
+      ],
+      note: {
+        type: String,
+        default: 'Note: Measurements may vary slightly by 0.5 inches due to manufacturing.',
+      },
+    },
     lowStockThreshold: { type: Number, required: true, default: 10 },
     rating: { type: Number, required: true, default: 0 },
     numReviews: { type: Number, required: true, default: 0 },

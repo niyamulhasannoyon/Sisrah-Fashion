@@ -38,6 +38,7 @@ interface ProductDetailsClientProps {
     averageRating?: number;
     images?: ProductImage[];
     variants?: ProductVariant[];
+    sizeGuide?: any;
   };
   reviews: Array<{
     _id: string;
@@ -454,6 +455,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
       <SizeGuideModal 
         isOpen={isSizeGuideOpen} 
         onClose={() => setIsSizeGuideOpen(false)} 
+        sizeGuide={product.sizeGuide}
       />
 
       {/* Customer Reviews Section */}

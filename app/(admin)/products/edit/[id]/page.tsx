@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Loader2, X, Save, UploadCloud, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { getDirectImageLink } from '@/lib/utils';
+import SizeGuideEditor, { DEFAULT_SIZE_GUIDE_ROWS, DEFAULT_SIZE_GUIDE_NOTE, SizeGuideRow } from '@/components/admin/SizeGuideEditor';
 
 const getVariantImageUrl = (img: any): string => {
   if (!img) return '';
@@ -37,6 +38,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [mainImages, setMainImages] = useState<any[]>([]);
   const [imageUrl, setImageUrl] = useState('');
 
+  // Size Guide State
+  const [sizeGuideRows, setSizeGuideRows] = useState<SizeGuideRow[]>(DEFAULT_SIZE_GUIDE_ROWS);
+  const [sizeGuideNote, setSizeGuideNote] = useState<string>(DEFAULT_SIZE_GUIDE_NOTE);
+
   // Variants States
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
   const [dynamicColors, setDynamicColors] = useState(['Black', 'White', 'Navy Blue', 'Red', 'Olive', 'Gray', 'Mustard']);
@@ -66,6 +71,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           setIsTrending(Boolean(p.isTrending));
           setIsNewArrival(Boolean(p.isNewArrival));
           setTags(p.tags || []);
+
+          if (p.sizeGuide) {
+            if (Array.isArray(p.sizeGuide.rows) && p.sizeGuide.rows.length > 0) {
+              setSizeGuideRows(p.sizeGuide.rows);
+            }
+            if (p.sizeGuide.note) {
+              setSizeGuideNote(p.sizeGuide.note);
+            }
+          }
 
           let loadedImages = p.images || [];
           // ── Fallback: If product main gallery images are empty, recover from variant images if available ──
@@ -228,7 +242,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       variants, 
       costPrice, 
       marketingCost, 
-      deliveryCost 
+      deliveryCost,
+      sizeGuide: {
+        columns: ['Size', 'Chest', 'Length', 'Shoulder'],
+        rows: sizeGuideRows.filter(r => r.size.trim() !== ''),
+        note: sizeGuideNote,
+      },
     };
 
     try {
@@ -444,6 +463,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
           </div>
+
+          {/* Size Guide Customizer */}
+          <SizeGuideEditor
+            rows={sizeGuideRows}
+            note={sizeGuideNote}
+            onChangeRows={setSizeGuideRows}
+            onChangeNote={setSizeGuideNote}
+          />
         </div>
 
         {/* Sidebar */}

@@ -71,12 +71,12 @@ export function Navbar() {
       {settings?.announcementText && (
         <div 
           style={{ backgroundColor: settings.announcementBgColor || '#A31F24' }} 
-          className="w-full text-white text-center py-2 px-4 text-[10px] sm:text-xs font-bold tracking-widest uppercase transition-colors shadow-sm flex items-center justify-center"
+          className="w-full text-white text-center py-2.5 px-4 text-xs sm:text-sm font-semibold font-bengali leading-snug transition-colors shadow-xs flex items-center justify-center"
         >
           {settings.announcementLink ? (
-            <Link href={settings.announcementLink} className="hover:underline flex items-center justify-center gap-1">
+            <Link href={settings.announcementLink} className="hover:underline flex items-center justify-center gap-1.5 flex-wrap">
               <span>{settings.announcementText}</span>
-              <span className="text-[9px] transform translate-y-[0.5px]">→</span>
+              <span className="text-[10px] transform translate-y-[0.5px]">→</span>
             </Link>
           ) : (
             <span>{settings.announcementText}</span>

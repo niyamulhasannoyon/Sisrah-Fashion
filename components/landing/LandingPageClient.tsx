@@ -878,16 +878,16 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
       {/* ── Announcement Bar ── */}
       {announcementText && (
-        <div className="bg-gray-900 text-white text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] py-2.5 text-center">
-          <span className="inline-flex items-center gap-2">
-            <Truck size={14} className="text-emerald-400" />
-            {announcementText}
+        <div className="bg-slate-900 text-white text-xs sm:text-sm font-semibold py-2.5 px-4 text-center font-bengali shadow-sm">
+          <span className="inline-flex items-center justify-center gap-2 flex-wrap max-w-xl mx-auto leading-normal">
+            <Truck size={16} className="text-emerald-400 shrink-0" />
+            <span>{announcementText}</span>
           </span>
         </div>
       )}
 
       {/* ── Hero Banner Section ── */}
-      <div className="relative bg-gray-100 overflow-hidden">
+      <div className="relative bg-slate-950 overflow-hidden">
         <div className="aspect-[4/3] sm:aspect-[4/2] md:aspect-[21/9] relative">
           <div className="sm:hidden w-full h-full absolute inset-0">
             <Image
@@ -911,39 +911,46 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
               className="object-cover object-top"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent pointer-events-none" />
+          {/* Strong Gradient Overlay for crisp text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent pointer-events-none" />
 
-          <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 md:p-12 max-w-2xl mx-auto">
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 md:p-10 max-w-xl mx-auto z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-center"
+              className="text-center bg-slate-950/80 backdrop-blur-md border border-white/15 rounded-2xl p-4 sm:p-6 shadow-2xl"
             >
               {subheading && (
-                <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-white/80 mb-2 font-bengali">
-                  {subheading}
-                </p>
+                <div className="mb-2">
+                  <span className="inline-block px-3 py-1 bg-[#A31F24] text-white font-bold text-xs sm:text-sm rounded-full font-bengali shadow-xs leading-tight">
+                    {subheading}
+                  </span>
+                </div>
               )}
-              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-white uppercase tracking-[0.02em] leading-tight font-bengali">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-white font-bengali leading-snug tracking-normal drop-shadow-md">
                 {heading}
               </h1>
 
-              <div className="mt-3 sm:mt-4 flex items-center justify-center gap-3">
+              <div className="mt-3 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
                 {hasSavings && (
-                  <span className="text-lg sm:text-2xl text-white/60 line-through font-bold">
+                  <span className="text-xs sm:text-base text-slate-300 line-through font-bold">
                     ৳{totalOriginalPrice.toLocaleString()}
                   </span>
                 )}
-                <span className={`font-black ${hasSavings ? 'text-emerald-400 text-2xl sm:text-4xl' : 'text-white text-xl sm:text-3xl'}`}>
+                <span className={`font-black px-3.5 py-1 rounded-xl border shadow-sm ${
+                  hasSavings 
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-lg sm:text-2xl' 
+                    : 'bg-white/10 text-white border-white/20 text-base sm:text-xl'
+                }`}>
                   ৳{totalPrice.toLocaleString()}
                 </span>
+                {hasSavings && (
+                  <span className="bg-red-500/20 text-red-300 border border-red-500/30 px-2.5 py-1 rounded-lg text-xs font-bold font-bengali">
+                    সাশ্রয় ৳{savings.toLocaleString()}
+                  </span>
+                )}
               </div>
-              {hasSavings && (
-                <p className="text-[10px] sm:text-xs font-bold text-emerald-400 mt-1 uppercase tracking-wider">
-                  Save ৳{savings.toLocaleString()}
-                </p>
-              )}
             </motion.div>
           </div>
         </div>

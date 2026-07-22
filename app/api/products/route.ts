@@ -100,6 +100,7 @@ export async function POST(request: Request) {
       tags: Array.isArray(body.tags) ? body.tags.map(String) : [],
       images: Array.isArray(body.images) ? body.images : [],
       variants: Array.isArray(body.variants) ? body.variants : [],
+      sizeGuide: body.sizeGuide || undefined,
       isTrending: Boolean(body.isTrending),
       isNewArrival: Boolean(body.isNewArrival),
     };

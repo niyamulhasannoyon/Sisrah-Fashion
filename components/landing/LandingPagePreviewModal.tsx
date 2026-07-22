@@ -158,16 +158,16 @@ function MiniLandingPreview({ page, deviceView }: { page: PageData; deviceView: 
 
       {/* Announcement Bar */}
       {page.promotionalElements?.announcementText && (
-        <div className="bg-gray-900 text-white text-[9px] font-bold uppercase tracking-[0.2em] py-2 text-center">
-          <span className="inline-flex items-center gap-1.5">
-            <Truck size={12} className="text-emerald-400" />
-            {page.promotionalElements.announcementText}
+        <div className="bg-slate-900 text-white text-xs font-semibold py-2 px-3 text-center font-bengali shadow-sm">
+          <span className="inline-flex items-center justify-center gap-1.5 flex-wrap max-w-xl mx-auto leading-normal">
+            <Truck size={14} className="text-emerald-400 shrink-0" />
+            <span>{page.promotionalElements.announcementText}</span>
           </span>
         </div>
       )}
 
       {/* Hero */}
-      <div className="relative bg-gray-100">
+      <div className="relative bg-slate-950 overflow-hidden">
         <div className="aspect-[4/3] relative">
           <Image
             src={heroImage}
@@ -176,28 +176,37 @@ function MiniLandingPreview({ page, deviceView }: { page: PageData; deviceView: 
             sizes="(max-width: 768px) 100vw, 1024px"
             className="object-cover object-top"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
-            {subheading && (
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/80 mb-1">{subheading}</p>
-            )}
-            <h2 className="text-lg sm:text-xl font-black text-white uppercase leading-tight">{heading}</h2>
-            <div className="mt-2 flex items-center justify-center gap-2">
-              {hasSavings && (
-                <span className="text-sm text-white/60 line-through font-bold">
-                  ৳{totalOriginal.toLocaleString()}
-                </span>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 p-3 text-center max-w-md mx-auto z-10">
+            <div className="bg-slate-950/85 backdrop-blur-md border border-white/15 rounded-xl p-3 shadow-xl">
+              {subheading && (
+                <div className="mb-1.5">
+                  <span className="inline-block px-2.5 py-0.5 bg-[#A31F24] text-white font-bold text-[10px] sm:text-xs rounded-full font-bengali shadow-xs leading-tight">
+                    {subheading}
+                  </span>
+                </div>
               )}
-              <span className={`font-black ${hasSavings ? 'text-emerald-400 text-xl' : 'text-white text-lg'}`}>
-                ৳{totalPrice.toLocaleString()}
-              </span>
+              <h2 className="text-base sm:text-lg font-black text-white font-bengali leading-snug tracking-normal drop-shadow-md">{heading}</h2>
+              <div className="mt-2 flex items-center justify-center gap-2 flex-wrap">
+                {hasSavings && (
+                  <span className="text-xs text-slate-300 line-through font-bold">
+                    ৳{totalOriginal.toLocaleString()}
+                  </span>
+                )}
+                <span className={`font-black px-2.5 py-0.5 rounded-lg border shadow-sm ${
+                  hasSavings 
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-base' 
+                    : 'bg-white/10 text-white border-white/20 text-sm'
+                }`}>
+                  ৳{totalPrice.toLocaleString()}
+                </span>
+                {hasSavings && (
+                  <span className="bg-red-500/20 text-red-300 border border-red-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold font-bengali">
+                    সাশ্রয় ৳{(totalOriginal - totalPrice + comboDiscount).toLocaleString()}
+                  </span>
+                )}
+              </div>
             </div>
-            {hasSavings && (
-              <p className="text-[9px] font-bold text-emerald-400 mt-0.5 uppercase tracking-wider">
-                Save ৳{(totalOriginal - totalPrice + comboDiscount).toLocaleString()}
-                {comboDiscount > 0 && ` (Incl. Combo Discount)`}
-              </p>
-            )}
           </div>
         </div>
       </div>
