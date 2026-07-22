@@ -170,11 +170,64 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
   const displayPrice = currentVariant?.price || product.basePrice;
   const displayOfferPrice = currentVariant?.offerPrice || product.offerPrice || 0;
 
+  // Combine product gallery images and all unique variant images
+  const allProductImages = useMemo(() => {
+    const list: Array<{ url: string; color?: string }> = [];
+    const seenUrls = new Set<string>();
+
+    if (product.images && Array.isArray(product.images)) {
+      product.images.forEach((img) => {
+        const directUrl = getDirectImageLink(img.url);
+        if (directUrl && !seenUrls.has(directUrl)) {
+          seenUrls.add(directUrl);
+          list.push({ url: directUrl });
+        }
+      });
+    }
+
+    if (product.variants && Array.isArray(product.variants)) {
+      product.variants.forEach((v) => {
+        const rawUrl = typeof v.image === 'string' ? v.image : v.image?.url;
+        if (rawUrl) {
+          const directUrl = getDirectImageLink(rawUrl);
+          if (directUrl && !seenUrls.has(directUrl)) {
+            seenUrls.add(directUrl);
+            list.push({ url: directUrl, color: v.color });
+          }
+        }
+      });
+    }
+
+    if (list.length === 0) {
+      list.push({ url: '/images/linen-shirt.jpg' });
+    }
+
+    return list;
+  }, [product.images, product.variants]);
+
+  // Sync active image thumbnail when color option changes
+  useEffect(() => {
+    if (!selectedColor) return;
+    const matchIdx = allProductImages.findIndex((img) => img.color === selectedColor);
+    if (matchIdx !== -1) {
+      setActiveImage(matchIdx);
+    }
+  }, [selectedColor, allProductImages]);
+
+  const handleSelectThumbnail = (idx: number) => {
+    setActiveImage(idx);
+    const targetImage = allProductImages[idx];
+    if (targetImage?.color && targetImage.color !== selectedColor) {
+      setSelectedColor(targetImage.color);
+    }
+  };
+
   const imageUrl = useMemo(() => {
-    const varImg = typeof currentVariant?.image === 'string' ? currentVariant.image : currentVariant?.image?.url;
-    if (varImg) return getDirectImageLink(varImg);
-    return product.images?.[activeImage]?.url ? getDirectImageLink(product.images[activeImage].url) : (product.images?.[0]?.url ? getDirectImageLink(product.images[0].url) : '/images/linen-shirt.jpg');
-  }, [currentVariant, product.images, activeImage]);
+    if (allProductImages[activeImage]?.url) {
+      return allProductImages[activeImage].url;
+    }
+    return allProductImages[0]?.url || '/images/linen-shirt.jpg';
+  }, [allProductImages, activeImage]);
 
   const hasSelectedOptions = Boolean(selectedColor && selectedSize);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
@@ -192,10 +245,10 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
               const swipeThreshold = 50;
               if (info.offset.x > swipeThreshold && activeImage > 0) {
                 // Swipe Right -> Show Previous Image
-                setActiveImage(activeImage - 1);
-              } else if (info.offset.x < -swipeThreshold && activeImage < (product.images?.length || 1) - 1) {
+                handleSelectThumbnail(activeImage - 1);
+              } else if (info.offset.x < -swipeThreshold && activeImage < allProductImages.length - 1) {
                 // Swipe Left -> Show Next Image
-                setActiveImage(activeImage + 1);
+                handleSelectThumbnail(activeImage + 1);
               }
             }}
             onClick={() => setIsZoomOpen(true)}
@@ -209,9 +262,9 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
               className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110 pointer-events-none"
             />
             {/* Slide indicators for mobile */}
-            {product.images && product.images.length > 1 && (
+            {allProductImages.length > 1 && (
               <div className="absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-1.5 md:hidden">
-                {product.images.map((_, idx) => (
+                {allProductImages.map((_, idx) => (
                   <div 
                     key={idx}
                     className={`h-1.5 rounded-full transition-all duration-300 ${activeImage === idx ? 'w-4 bg-[#1A1A1A]' : 'w-1.5 bg-[#1A1A1A]/20'}`}
@@ -223,10 +276,10 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
 
           {/* Thumbnail Gallery - Horizontal for better space management */}
           <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar shrink-0">
-            {product.images?.map((img: any, idx: number) => (
+            {allProductImages.map((img, idx) => (
               <button
                 key={idx}
-                onClick={() => setActiveImage(idx)}
+                onClick={() => handleSelectThumbnail(idx)}
                 className={`relative w-20 h-24 shrink-0 border-2 rounded-xl overflow-hidden transition-all ${activeImage === idx ? 'border-loomra-black shadow-md opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
                 <Image src={img.url} alt={`AS SIDRAT ${product.title} for Men Bangladesh - View ${idx + 1}`} fill sizes="80px" className="w-full h-full object-cover object-top" />
