@@ -109,7 +109,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Link 
             href="/track-order" 
             className="hidden sm:flex items-center gap-2.5 px-4 h-12 border border-loomra-surface hover:border-loomra-red active:bg-loomra-surface rounded-full text-xs font-bold uppercase tracking-widest text-[#1A1A1A] hover:text-[#A31F24] transition-all"
@@ -131,15 +131,15 @@ export function Navbar() {
           </button>
 
           {/* Auth Section with reserved layout space & fade-in transition */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-4">
             {!mounted ? (
               // Initial Mounting Skeleton to prevent CLS & Mismatches
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <div className="h-9 w-20 bg-slate-100 rounded-lg animate-pulse" />
                 <div className="h-9 w-24 bg-slate-100 rounded-lg animate-pulse" />
               </div>
             ) : (
-              <div className="flex items-center gap-2 transition-opacity duration-300 opacity-100">
+              <div className="flex items-center gap-4 transition-opacity duration-300 opacity-100">
                 {isAuthenticated ? (
                   <>
                     <Link href="/profile" aria-label="View Profile" className="flex items-center justify-center w-9 h-9 border border-loomra-surface rounded-full hover:border-loomra-red transition overflow-hidden shadow-sm">
@@ -149,7 +149,7 @@ export function Navbar() {
                         <User size={16} />
                       )}
                     </Link>
-                    <button onClick={handleLogout} className="px-4 py-2 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-small font-bold uppercase tracking-widest">
+                    <button onClick={handleLogout} className="px-4 border border-loomra-black bg-transparent text-loomra-black hover:bg-loomra-surface transition-colors rounded-[4px] text-xs font-bold uppercase tracking-widest h-9 flex items-center justify-center">
                       Logout
                     </button>
                   </>
