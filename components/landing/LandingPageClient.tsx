@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Clock, ShoppingBag, Check, Package, Truck, ShieldCheck, MapPin, User, Phone, Mail, HelpCircle, ChevronDown, ChevronUp, CheckCircle2, Sparkles, Plus } from 'lucide-react';
+import { Star, Clock, ShoppingBag, Check, Package, Truck, ShieldCheck, MapPin, User, Phone, Mail, HelpCircle, ChevronDown, ChevronUp, CheckCircle2, Sparkles, Plus, X } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
@@ -279,6 +279,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   const [additionalProducts, setAdditionalProducts] = useState<ProductData[]>([]);
   const [suggestedProducts, setSuggestedProducts] = useState<ProductData[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+  const [detailProduct, setDetailProduct] = useState<ProductData | null>(null);
 
   useEffect(() => {
     const loadSuggestions = async () => {
@@ -1154,7 +1155,10 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                 
                 return (
                   <div key={p._id} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition-shadow">
-                    <div className="flex gap-3">
+                    <div 
+                      onClick={() => setDetailProduct(p)}
+                      className="flex gap-3 cursor-pointer hover:opacity-90 transition-opacity"
+                    >
                       <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
                         <img
                           src={p.images?.[0]?.url || '/images/placeholder.jpg'}
@@ -1475,6 +1479,146 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
         totalPrice={totalPrice}
         shippingCost={getShippingCost()}
       />
+
+      {/* ── Product Detail Modal ── */}
+      <AnimatePresence>
+        {detailProduct && (
+          <div 
+            onClick={() => setDetailProduct(null)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative flex flex-col max-h-[85vh]"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setDetailProduct(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-700 flex items-center justify-center transition-all z-20 shadow-md border border-gray-100"
+              >
+                <X size={18} />
+              </button>
+
+              {/* Scrollable Content Container */}
+              <div className="overflow-y-auto flex-1">
+                {/* Product Image */}
+                <div className="relative aspect-[4/3] w-full bg-slate-50 border-b border-gray-100">
+                  <img
+                    src={detailProduct.images?.[0]?.url || '/images/placeholder.jpg'}
+                    alt={detailProduct.title}
+                    className="w-full h-full object-cover object-top"
+                  />
+                  <div className="absolute top-4 left-4 bg-[#A31F24] text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
+                    {detailProduct.category}
+                  </div>
+                </div>
+
+                {/* Details info */}
+                <div className="p-6 space-y-4">
+                  <div>
+                    <h3 className="text-base font-black text-gray-900 leading-snug">
+                      {detailProduct.title}
+                    </h3>
+                    
+                    <div className="flex items-center gap-2.5 mt-2">
+                      <span className="text-lg font-black text-[#A31F24]">
+                        ৳{(detailProduct.offerPrice || detailProduct.basePrice).toLocaleString()}
+                      </span>
+                      {detailProduct.offerPrice && detailProduct.offerPrice < detailProduct.basePrice && (
+                        <span className="text-xs text-gray-400 line-through font-semibold">
+                          ৳{detailProduct.basePrice.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  {detailProduct.description && (
+                    <div className="space-y-1.5 border-t border-gray-100 pt-4">
+                      <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                        Product Details (বিস্তারিত বিবরণ)
+                      </h4>
+                      <p className="text-xs text-gray-600 font-medium leading-relaxed font-bengali whitespace-pre-line">
+                        {detailProduct.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Available variants preview */}
+                  {detailProduct.variants && detailProduct.variants.length > 0 && (
+                    <div className="space-y-2 border-t border-gray-100 pt-4">
+                      <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                        Available Sizes & Colors (উপলব্ধ সাইজ ও কালার)
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {Array.from(new Set((detailProduct.variants || []).map((v) => v.size))).map((size) => (
+                          <span key={size} className="text-[10px] font-bold px-2 py-1 bg-slate-50 border border-slate-100 rounded text-slate-700 uppercase">
+                            Size: {size}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {Array.from(new Set((detailProduct.variants || []).map((v) => v.color))).map((color) => (
+                          <span key={color} className="text-[10px] font-bold px-2 py-1 bg-slate-50 border border-slate-100 rounded text-slate-700 uppercase">
+                            Color: {color}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom CTA / Action Bar */}
+              <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-3">
+                <button
+                  onClick={() => {
+                    const isAdded = bundleSelections[detailProduct._id] === true;
+                    const nextAdded = !isAdded;
+                    if (nextAdded) {
+                      const size = detailProduct.variants?.[0]?.size || 'M';
+                      const color = detailProduct.variants?.[0]?.color || 'Black';
+                      setSelectedSizes((prev) => ({ ...prev, [detailProduct._id]: size }));
+                      setSelectedColors((prev) => ({ ...prev, [detailProduct._id]: color }));
+                      setAdditionalProducts((prev) => {
+                        if (prev.some(ap => ap._id === detailProduct._id)) return prev;
+                        return [...prev, detailProduct];
+                      });
+                    } else {
+                      setAdditionalProducts((prev) => prev.filter(ap => ap._id !== detailProduct._id));
+                    }
+                    
+                    setBundleSelections((prev) => ({
+                      ...prev,
+                      [detailProduct._id]: nextAdded,
+                    }));
+                    setDetailProduct(null);
+                  }}
+                  className={`flex-1 py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm ${
+                    bundleSelections[detailProduct._id] === true
+                      ? 'bg-red-50 text-red-700 border border-red-200'
+                      : 'bg-slate-900 text-white hover:bg-slate-800'
+                  }`}
+                >
+                  {bundleSelections[detailProduct._id] === true ? (
+                    <>
+                      <CheckCircle2 size={14} className="text-red-600" /> Remove From Order
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={14} /> Add to Order
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

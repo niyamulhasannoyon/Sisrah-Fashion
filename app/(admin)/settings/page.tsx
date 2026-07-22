@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Save, Loader2, UploadCloud, X, Users, Image as ImageIcon, Sliders, Layers, Truck, Settings } from 'lucide-react';
+import { Save, Loader2, UploadCloud, X, Users, Image as ImageIcon, Sliders, Layers, Truck, Settings, Trash2 } from 'lucide-react';
 import { getDirectImageLink } from '@/lib/utils';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
@@ -426,78 +426,212 @@ export default function AdminSettings() {
                       <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Hero Slider Images (Backgrounds)</label>
                       <p className="text-[10px] text-slate-400 font-medium mt-0.5">Add as many images as you like. They will rotate automatically on the homepage hero banner.</p>
                     </div>
-                    
-                    {/* List of current hero images */}
-                    <div className="flex flex-wrap gap-4 mt-2 mb-2">
+                                       {/* List of current hero images */}
+                    <div className="space-y-4 mt-2 mb-4">
                       {settings.heroImages?.map((img: any, idx: number) => (
-                        <div key={idx} className="relative w-32 h-20 border border-slate-100 rounded-xl overflow-hidden group shadow-sm bg-slate-50">
-                          <Image src={getDirectImageLink(img.url)} fill sizes="128px" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="hero slider banner" />
-                          <button 
-                            type="button" 
-                            onClick={() => {
-                              const newImages = settings.heroImages.filter((_: any, index: number) => index !== idx);
-                              setSettings({ ...settings, heroImages: newImages });
-                            }} 
-                            className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
-                          >
-                            <X size={12} />
-                          </button>
+                        <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4 shadow-sm relative group">
+                          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Slide #{idx + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = settings.heroImages.filter((_: any, index: number) => index !== idx);
+                                setSettings({ ...settings, heroImages: newImages });
+                              }}
+                              className="text-red-500 hover:text-red-700 text-xs font-semibold flex items-center gap-1 transition-all"
+                            >
+                              <Trash2 size={14} /> Remove Slide
+                            </button>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Desktop Image Section */}
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Desktop Image</label>
+                              <div className="flex gap-3">
+                                {/* Preview */}
+                                <div className="relative w-24 h-16 border border-slate-200 rounded-lg overflow-hidden shrink-0 bg-white shadow-sm flex items-center justify-center">
+                                  {img.url ? (
+                                    <Image src={getDirectImageLink(img.url)} fill sizes="96px" className="object-cover" alt="desktop preview" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+                                      <ImageIcon size={20} />
+                                    </div>
+                                  )}
+                                </div>
+                                {/* Upload & URL */}
+                                <div className="flex-1 space-y-2">
+                                  <input
+                                    type="text"
+                                    value={img.url || ''}
+                                    onChange={(e) => {
+                                      const newImages = [...settings.heroImages];
+                                      newImages[idx] = { ...newImages[idx], url: e.target.value };
+                                      setSettings({ ...settings, heroImages: newImages });
+                                    }}
+                                    placeholder="Desktop Image URL"
+                                    className="w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-black text-xs"
+                                  />
+                                  <div className="flex gap-2">
+                                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-[10px] font-bold text-slate-600 transition-all">
+                                      <UploadCloud size={12} />
+                                      <span>Upload</span>
+                                      <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                          if (!e.target.files?.length) return;
+                                          setSaving(true);
+                                          try {
+                                            const data = await uploadToCloudinary(e.target.files[0]);
+                                            const newImages = [...settings.heroImages];
+                                            newImages[idx] = { ...newImages[idx], url: data.secure_url, public_id: data.public_id };
+                                            setSettings({ ...settings, heroImages: newImages });
+                                          } catch (error) {
+                                            alert("Upload failed!");
+                                          } finally {
+                                            setSaving(false);
+                                          }
+                                        }}
+                                      />
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Mobile Image Section */}
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Mobile Image (Optional)</label>
+                              <div className="flex gap-3">
+                                {/* Preview */}
+                                <div className="relative w-24 h-16 border border-slate-200 rounded-lg overflow-hidden shrink-0 bg-white shadow-sm flex items-center justify-center">
+                                  {img.mobileUrl ? (
+                                    <Image src={getDirectImageLink(img.mobileUrl)} fill sizes="96px" className="object-cover" alt="mobile preview" />
+                                  ) : img.url ? (
+                                    <div className="relative w-full h-full opacity-60">
+                                      <Image src={getDirectImageLink(img.url)} fill sizes="96px" className="object-cover grayscale-[30%]" alt="fallback desktop preview" />
+                                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[9px] font-black uppercase tracking-wider text-white text-center px-1">
+                                        Same as Desktop
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+                                      <ImageIcon size={20} />
+                                    </div>
+                                  )}
+                                </div>
+                                {/* Upload & URL */}
+                                <div className="flex-1 space-y-2">
+                                  <input
+                                    type="text"
+                                    value={img.mobileUrl || ''}
+                                    onChange={(e) => {
+                                      const newImages = [...settings.heroImages];
+                                      newImages[idx] = { ...newImages[idx], mobileUrl: e.target.value };
+                                      setSettings({ ...settings, heroImages: newImages });
+                                    }}
+                                    placeholder="Mobile Image URL (falls back to desktop)"
+                                    className="w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-black text-xs"
+                                  />
+                                  <div className="flex gap-2">
+                                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-[10px] font-bold text-slate-600 transition-all">
+                                      <UploadCloud size={12} />
+                                      <span>Upload Mobile</span>
+                                      <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                          if (!e.target.files?.length) return;
+                                          setSaving(true);
+                                          try {
+                                            const data = await uploadToCloudinary(e.target.files[0]);
+                                            const newImages = [...settings.heroImages];
+                                            newImages[idx] = { ...newImages[idx], mobileUrl: data.secure_url, mobilePublicId: data.public_id };
+                                            setSettings({ ...settings, heroImages: newImages });
+                                          } catch (error) {
+                                            alert("Upload failed!");
+                                          } finally {
+                                            setSaving(false);
+                                          }
+                                        }}
+                                      />
+                                    </label>
+                                    {img.mobileUrl && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const newImages = [...settings.heroImages];
+                                          newImages[idx] = { ...newImages[idx], mobileUrl: '', mobilePublicId: '' };
+                                          setSettings({ ...settings, heroImages: newImages });
+                                        }}
+                                        className="text-red-500 hover:text-red-700 text-[10px] font-bold px-2 py-1.5 border border-red-200 rounded-lg bg-red-50/50 hover:bg-red-50 transition-all"
+                                      >
+                                        Clear Mobile
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ))}
-                      
-                      {/* Upload new hero image */}
-                      <label className="w-32 h-20 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-black transition-all group shrink-0">
-                        {uploadingHero ? (
-                          <Loader2 size={16} className="animate-spin text-slate-400" />
-                        ) : (
-                          <div className="flex flex-col items-center">
-                            <UploadCloud size={16} className="text-slate-500 mb-1" />
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-black">Upload</span>
-                          </div>
-                        )}
-                        <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                          if (!e.target.files?.length) return;
-                          setSaving(true);
-                          setUploadingHero(true);
-                          try {
-                            const data = await uploadToCloudinary(e.target.files[0]);
-                            setSettings({
-                              ...settings,
-                              heroImages: [...(settings.heroImages || []), { url: data.secure_url, public_id: data.public_id }]
-                            });
-                          } catch (error) {
-                            alert("Upload failed!");
-                          } finally {
-                            setUploadingHero(false);
-                            setSaving(false);
-                          }
-                        }} />
-                      </label>
                     </div>
 
-                    {/* Add by URL */}
-                    <div className="flex gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="Or paste image URL here..." 
-                        value={heroUrl}
-                        onChange={(e) => setHeroUrl(e.target.value)}
-                        className="flex-1 p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black text-xs"
-                      />
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          if (!heroUrl) return;
-                          setSettings({
-                            ...settings,
-                            heroImages: [...(settings.heroImages || []), { url: heroUrl, public_id: 'external' }]
-                          });
-                          setHeroUrl('');
-                        }}
-                        className="px-4 py-2.5 bg-black text-white text-xs font-bold uppercase rounded-lg hover:bg-slate-800 transition-all shrink-0 font-sans"
-                      >
-                        Add URL
-                      </button>
+                    {/* Add new slide container */}
+                    <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/50">
+                      <div className="text-left">
+                        <h4 className="text-xs font-bold text-slate-700">Add a New Hero Slide</h4>
+                        <p className="text-[10px] text-slate-400">Upload a desktop image to start. You can then add an optional mobile-specific crop.</p>
+                      </div>
+                      
+                      <div className="flex gap-3 w-full md:w-auto shrink-0">
+                        {/* Upload */}
+                        <label className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-black hover:bg-slate-50 text-xs font-bold text-slate-700 shadow-sm transition-all">
+                          {uploadingHero ? (
+                            <Loader2 size={14} className="animate-spin text-slate-400" />
+                          ) : (
+                            <>
+                              <UploadCloud size={14} className="text-slate-500" />
+                              <span>Upload Image</span>
+                            </>
+                          )}
+                          <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                            if (!e.target.files?.length) return;
+                            setSaving(true);
+                            setUploadingHero(true);
+                            try {
+                              const data = await uploadToCloudinary(e.target.files[0]);
+                              setSettings({
+                                ...settings,
+                                heroImages: [...(settings.heroImages || []), { url: data.secure_url, public_id: data.public_id, mobileUrl: '', mobilePublicId: '' }]
+                              });
+                            } catch (error) {
+                              alert("Upload failed!");
+                            } finally {
+                              setUploadingHero(false);
+                              setSaving(false);
+                            }
+                          }} />
+                        </label>
+                        
+                        {/* Add empty slide */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSettings({
+                              ...settings,
+                              heroImages: [...(settings.heroImages || []), { url: '', public_id: '', mobileUrl: '', mobilePublicId: '' }]
+                            });
+                          }}
+                          className="flex-1 md:w-auto px-4 py-2.5 bg-black text-white text-xs font-bold uppercase rounded-lg hover:bg-slate-800 transition-all font-sans"
+                        >
+                          + Add Empty Slide
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">

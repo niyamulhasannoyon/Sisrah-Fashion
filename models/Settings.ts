@@ -40,7 +40,7 @@ const SettingsSchema = new Schema({
   categoryImageFusion: String,
   
   // Hero slider background images
-  heroImages: [{ url: String, public_id: String }],
+  heroImages: [{ url: String, mobileUrl: String, public_id: String, mobilePublicId: String }],
 }, { timestamps: true });
 
 export default mongoose.models.Settings || mongoose.model('Settings', SettingsSchema);

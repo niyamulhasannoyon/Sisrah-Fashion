@@ -35,7 +35,7 @@ interface Settings {
   categoryImageMen?: string;
   categoryImageWomen?: string;
   categoryImageFusion?: string;
-  heroImages?: { url: string; public_id: string }[];
+  heroImages?: { url: string; mobileUrl?: string; public_id: string; mobilePublicId?: string }[];
 }
 
 interface SettingsState {

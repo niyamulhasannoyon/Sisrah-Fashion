@@ -46,25 +46,48 @@ export function HeroSection() {
       }}
     >
       {/* Dynamic sliding backgrounds */}
-      {slides.map((slide, index) => (
-        <div 
-          key={index}
-          className={`absolute inset-0 transition-all duration-[5000ms] ease-out ${
-            index === activeSlide ? 'opacity-100 scale-105' : 'opacity-0 scale-100 pointer-events-none'
-          }`}
-        >
-          <Image
-            src={getDirectImageLink(slide.url)}
-            alt="AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh"
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px"
-            priority={index === 0}
-            fetchPriority={index === 0 ? "high" : "auto"}
-            className="object-cover object-center"
-            quality={75}
-          />
-        </div>
-      ))}
+      {slides.map((slide, index) => {
+        const desktopSrc = getDirectImageLink(slide.url);
+        const mobileSrc = slide.mobileUrl ? getDirectImageLink(slide.mobileUrl) : desktopSrc;
+        
+        return (
+          <div 
+            key={index}
+            className={`absolute inset-0 transition-all duration-[5000ms] ease-out ${
+              index === activeSlide ? 'opacity-100 scale-105' : 'opacity-0 scale-100 pointer-events-none'
+            }`}
+          >
+            {/* Desktop Image */}
+            <div className={`absolute inset-0 w-full h-full ${slide.mobileUrl ? 'hidden md:block' : 'block'}`}>
+              <Image
+                src={desktopSrc}
+                alt="AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px"
+                priority={index === 0}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                className="object-cover object-center"
+                quality={75}
+              />
+            </div>
+            {/* Mobile Image */}
+            {slide.mobileUrl && (
+              <div className="absolute inset-0 w-full h-full block md:hidden">
+                <Image
+                  src={mobileSrc}
+                  alt="AS SIDRAT — Premium Climate-Conscious Fashion in Bangladesh (Mobile)"
+                  fill
+                  sizes="100vw"
+                  priority={index === 0}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  className="object-cover object-center"
+                  quality={75}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
       
       {/* Bottom-heavy gradient overlay — darkens the text area without drowning the image top */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-0" />
