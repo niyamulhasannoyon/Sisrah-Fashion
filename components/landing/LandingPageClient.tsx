@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Clock, ShoppingBag, Check, Package, Truck, ShieldCheck, MapPin, User, Phone, Mail, HelpCircle, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
+import { Star, Clock, ShoppingBag, Check, Package, Truck, ShieldCheck, MapPin, User, Phone, Mail, HelpCircle, ChevronDown, ChevronUp, CheckCircle2, Sparkles, Plus } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
@@ -276,6 +276,32 @@ function trackLpEvent(slug: string, eventType: 'pageview' | 'click', clickText?:
 export default function LandingPageClient({ page }: LandingPageClientProps) {
   const { settings, fetchSettings } = useSettingsStore();
   const [mounted, setMounted] = useState(false);
+  const [additionalProducts, setAdditionalProducts] = useState<ProductData[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<ProductData[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.products)) {
+          // Filter out products already present on the page
+          const lpProductIds = new Set((page.productIds || []).map((p) => p._id));
+          const filtered = data.products
+            .filter((p: any) => !lpProductIds.has(p._id))
+            .slice(0, 4);
+          setSuggestedProducts(filtered);
+        }
+      } catch (err) {
+        console.error('Failed to load suggestions:', err);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    };
+    loadSuggestions();
+  }, [page.productIds]);
+
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>(() => {
     const sizes: Record<string, string> = {};
     (page.productIds || []).forEach((p) => {
@@ -344,6 +370,10 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
     );
   }, [page.productIds]);
 
+  const allProducts = useMemo(() => {
+    return [...products, ...additionalProducts];
+  }, [products, additionalProducts]);
+
   const hasCountdown = page.promotionalElements?.countdownTimerToggle && page.promotionalElements?.countdownTargetDate;
   const announcementText = page.promotionalElements?.announcementText;
   const testimonials = page.socialProof || [];
@@ -368,9 +398,18 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   const subheading = page.customHero?.customSubheading?.trim() || primaryProduct?.description || '';
 
   const selectedCount = useMemo(() => {
-    if (isSingle) return 1;
-    return Object.values(bundleSelections).filter(Boolean).length;
-  }, [isSingle, bundleSelections]);
+    if (isSingle && additionalProducts.length === 0) return 1;
+    let count = isSingle ? 1 : 0;
+    if (!isSingle) {
+      products.forEach((p) => {
+        if (bundleSelections[p._id]) count += 1;
+      });
+    }
+    additionalProducts.forEach((p) => {
+      if (bundleSelections[p._id]) count += 1;
+    });
+    return count;
+  }, [isSingle, products, additionalProducts, bundleSelections]);
 
   const comboDiscount = useMemo(() => {
     const settings = page.offerSettings;
@@ -378,7 +417,16 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
     
     if (selectedCount >= (settings.comboMinQty ?? 2)) {
       let subtotal = 0;
-      products.forEach((p) => {
+      if (isSingle && primaryProduct) {
+        subtotal += primaryProduct.offerPrice || primaryProduct.basePrice;
+      } else {
+        products.forEach((p) => {
+          if (bundleSelections[p._id]) {
+            subtotal += p.offerPrice || p.basePrice;
+          }
+        });
+      }
+      additionalProducts.forEach((p) => {
         if (bundleSelections[p._id]) {
           subtotal += p.offerPrice || p.basePrice;
         }
@@ -391,33 +439,45 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       }
     }
     return 0;
-  }, [page.offerSettings, selectedCount, products, bundleSelections]);
+  }, [page.offerSettings, selectedCount, isSingle, primaryProduct, products, additionalProducts, bundleSelections]);
 
   const totalPrice = useMemo(() => {
-    if (isSingle && primaryProduct) {
-      return primaryProduct.offerPrice || primaryProduct.basePrice;
-    }
     let total = 0;
-    products.forEach((p) => {
+    if (isSingle && primaryProduct) {
+      total += primaryProduct.offerPrice || primaryProduct.basePrice;
+    } else {
+      products.forEach((p) => {
+        if (bundleSelections[p._id]) {
+          total += p.offerPrice || p.basePrice;
+        }
+      });
+    }
+    additionalProducts.forEach((p) => {
       if (bundleSelections[p._id]) {
         total += p.offerPrice || p.basePrice;
       }
     });
     return Math.max(0, total - comboDiscount);
-  }, [isSingle, primaryProduct, products, bundleSelections, comboDiscount]);
+  }, [isSingle, primaryProduct, products, additionalProducts, bundleSelections, comboDiscount]);
 
   const totalOriginalPrice = useMemo(() => {
-    if (isSingle && primaryProduct) {
-      return primaryProduct.offerPrice ? primaryProduct.basePrice : 0;
-    }
     let total = 0;
-    products.forEach((p) => {
+    if (isSingle && primaryProduct) {
+      total += primaryProduct.offerPrice ? primaryProduct.basePrice : 0;
+    } else {
+      products.forEach((p) => {
+        if (bundleSelections[p._id]) {
+          total += p.basePrice;
+        }
+      });
+    }
+    additionalProducts.forEach((p) => {
       if (bundleSelections[p._id]) {
         total += p.basePrice;
       }
     });
     return total;
-  }, [isSingle, primaryProduct, products, bundleSelections]);
+  }, [isSingle, primaryProduct, products, additionalProducts, bundleSelections]);
 
   const savings = totalOriginalPrice - totalPrice;
   const hasSavings = savings > 0;
@@ -497,18 +557,33 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
     }
 
     let orderItems: any[] = [];
-    if (isSingle && primaryProduct) {
-      const imgUrl = primaryProduct.images?.[0]?.url || '/images/placeholder.jpg';
-      orderItems.push({
-        title: primaryProduct.title,
-        price: primaryProduct.offerPrice || primaryProduct.basePrice,
-        image: imgUrl,
-        selectedSize: selectedSizes[primaryProduct._id] || 'M',
-        selectedColor: selectedColors[primaryProduct._id] || 'Black',
-        quantity: 1,
-      });
+    if (isSingle && additionalProducts.length === 0) {
+      if (primaryProduct) {
+        const imgUrl = primaryProduct.images?.[0]?.url || '/images/placeholder.jpg';
+        orderItems.push({
+          title: primaryProduct.title,
+          price: primaryProduct.offerPrice || primaryProduct.basePrice,
+          image: imgUrl,
+          selectedSize: selectedSizes[primaryProduct._id] || 'M',
+          selectedColor: selectedColors[primaryProduct._id] || 'Black',
+          quantity: 1,
+        });
+      }
     } else {
-      products.forEach((p) => {
+      if (isSingle && primaryProduct) {
+        const imgUrl = primaryProduct.images?.[0]?.url || '/images/placeholder.jpg';
+        orderItems.push({
+          title: primaryProduct.title,
+          price: primaryProduct.offerPrice || primaryProduct.basePrice,
+          image: imgUrl,
+          selectedSize: selectedSizes[primaryProduct._id] || 'M',
+          selectedColor: selectedColors[primaryProduct._id] || 'Black',
+          quantity: 1,
+        });
+      }
+      
+      const itemsToCheck = isSingle ? additionalProducts : allProducts;
+      itemsToCheck.forEach((p) => {
         if (bundleSelections[p._id]) {
           const imgUrl = p.images?.[0]?.url || '/images/placeholder.jpg';
           orderItems.push({
@@ -653,6 +728,38 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] pb-24 font-sans">
+      {/* ── Brand Header ── */}
+      <header className="bg-white border-b border-gray-100 py-4 shadow-sm">
+        <div className="max-w-2xl mx-auto px-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            {settings?.logo ? (
+              <img
+                src={getDirectImageLink(settings.logo)}
+                alt="AS SIDRAT Logo"
+                className="h-10 sm:h-12 w-auto object-contain"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-[#A31F24] rounded-xl flex items-center justify-center text-white font-black text-xl">
+                S
+              </div>
+            )}
+            <div>
+              <span className="text-sm sm:text-base font-black tracking-widest text-slate-900 block leading-tight">
+                AS SIDRAT
+              </span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">
+                Premium Fashion
+              </span>
+            </div>
+          </Link>
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] font-black uppercase tracking-wider bg-red-50 text-[#A31F24] border border-red-100 px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#A31F24]"></span> Special Offer
+            </span>
+          </div>
+        </div>
+      </header>
+
       {/* ── Announcement Bar ── */}
       {announcementText && (
         <div className="bg-gray-900 text-white text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] py-2.5 text-center">
@@ -1027,6 +1134,125 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                   <span className="font-bold text-emerald-600">✓ Included</span>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Brand Recommendations / Suggested Products ── */}
+        {suggestedProducts.length > 0 && (
+          <div className="space-y-4 pt-4">
+            <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
+              <Sparkles size={18} className="text-amber-500" /> Special Add-on Offers (স্পেশাল অফার)
+            </h3>
+            <p className="text-[11px] text-gray-500 mt-1">
+              অর্ডারের সাথে আরও কিছু প্রোডাক্ট যোগ করুন এবং অতিরিক্ত ডিসকাউন্ট উপভোগ করুন:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {suggestedProducts.map((p) => {
+                const isAdded = bundleSelections[p._id] === true;
+                const hasVariants = p.variants && p.variants.length > 0;
+                
+                return (
+                  <div key={p._id} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div className="flex gap-3">
+                      <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
+                        <img
+                          src={p.images?.[0]?.url || '/images/placeholder.jpg'}
+                          alt={p.title}
+                          className="w-full h-full object-cover object-top"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-xs font-bold text-gray-900 truncate">{p.title}</h4>
+                        <p className="text-[9px] text-gray-400 uppercase mt-0.5">{p.category}</p>
+                        {p.description && (
+                          <p className="text-[10px] text-gray-500 line-clamp-2 mt-1 font-bengali">
+                            {p.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-xs font-black text-gray-900">
+                            ৳{(p.offerPrice || p.basePrice).toLocaleString()}
+                          </span>
+                          {p.offerPrice && p.offerPrice < p.basePrice && (
+                            <span className="text-[10px] text-gray-400 line-through">
+                              ৳{p.basePrice.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Options selectors if added */}
+                    {isAdded && hasVariants && (
+                      <div className="flex gap-2 pt-2 border-t border-gray-100">
+                        <select
+                          value={selectedSizes[p._id] || ''}
+                          onChange={(e) =>
+                            setSelectedSizes({ ...selectedSizes, [p._id]: e.target.value })
+                          }
+                          className="text-[9px] font-bold uppercase border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:border-gray-900"
+                        >
+                          {(p.variants || []).map((v) => (
+                            <option key={v.size} value={v.size}>Size: {v.size}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={selectedColors[p._id] || ''}
+                          onChange={(e) =>
+                            setSelectedColors({ ...selectedColors, [p._id]: e.target.value })
+                          }
+                          className="text-[9px] font-bold uppercase border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:border-gray-900"
+                        >
+                          {[...new Set((p.variants || []).map((v) => v.color))].map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Add to order button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextAdded = !isAdded;
+                        if (nextAdded) {
+                          const size = p.variants?.[0]?.size || 'M';
+                          const color = p.variants?.[0]?.color || 'Black';
+                          setSelectedSizes((prev) => ({ ...prev, [p._id]: size }));
+                          setSelectedColors((prev) => ({ ...prev, [p._id]: color }));
+                          setAdditionalProducts((prev) => {
+                            if (prev.some(ap => ap._id === p._id)) return prev;
+                            return [...prev, p];
+                          });
+                        } else {
+                          setAdditionalProducts((prev) => prev.filter(ap => ap._id !== p._id));
+                        }
+                        
+                        setBundleSelections((prev) => ({
+                          ...prev,
+                          [p._id]: nextAdded,
+                        }));
+                      }}
+                      className={`w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                        isAdded
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-slate-900 text-white hover:bg-slate-800'
+                      }`}
+                    >
+                      {isAdded ? (
+                        <>
+                          <CheckCircle2 size={12} className="text-emerald-600" /> Added to Order
+                        </>
+                      ) : (
+                        <>
+                          <Plus size={12} /> Add to Order
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

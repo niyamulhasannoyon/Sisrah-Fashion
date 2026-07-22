@@ -136,6 +136,26 @@ function MiniLandingPreview({ page, deviceView }: { page: PageData; deviceView: 
 
   return (
     <div className="bg-[#FAFAFA] min-h-full">
+      {/* Brand Header */}
+      <div className="bg-white border-b border-gray-100 py-3 px-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-[#A31F24] rounded-lg flex items-center justify-center text-white font-black text-sm">
+            S
+          </div>
+          <div>
+            <span className="text-[11px] font-black tracking-widest text-slate-900 block leading-tight">
+              AS SIDRAT
+            </span>
+            <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest block">
+              Premium Fashion
+            </span>
+          </div>
+        </div>
+        <span className="text-[8px] font-black uppercase tracking-wider bg-red-50 text-[#A31F24] border border-red-100 px-2 py-1 rounded-full">
+          Official Store
+        </span>
+      </div>
+
       {/* Announcement Bar */}
       {page.promotionalElements?.announcementText && (
         <div className="bg-gray-900 text-white text-[9px] font-bold uppercase tracking-[0.2em] py-2 text-center">
