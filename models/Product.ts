@@ -68,4 +68,11 @@ const ProductSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+// Compound indexes for ultra-fast query execution (IXSCAN instead of COLLSCAN)
+ProductSchema.index({ category: 1, createdAt: -1 });
+ProductSchema.index({ isTrending: -1, createdAt: -1 });
+ProductSchema.index({ isNewArrival: -1, createdAt: -1 });
+ProductSchema.index({ tags: 1 });
+
+
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
