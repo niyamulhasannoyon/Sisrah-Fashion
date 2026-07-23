@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +19,8 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   Sparkles,
   Plus,
@@ -343,6 +345,14 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   const [mounted, setMounted] = useState(false);
   const [suggestedProducts, setSuggestedProducts] = useState<ProductData[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+  const suggestedScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollSuggestions = (direction: 'left' | 'right') => {
+    if (suggestedScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -270 : 270;
+      suggestedScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Modal Product State
   const [detailProduct, setDetailProduct] = useState<ProductData | null>(null);
@@ -1380,40 +1390,83 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
         {/* ── Suggested / Add-on Products ── */}
         {suggestedProducts.length > 0 && (
-          <div className="space-y-4 pt-4">
-            <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
-              <Sparkles size={18} className="text-amber-500" /> Special Add-on Offers (স্পেশাল অফার)
-            </h3>
-            <p className="text-[11px] text-gray-500 mt-1 font-bengali">
-              অর্ডারের সাথে আরও কিছু প্রোডাক্ট যোগ করুন এবং অতিরিক্ত ডিসকাউন্ট উপভোগ করুন:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-3 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h3 className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles size={16} className="text-amber-500 shrink-0" />
+                  <span>Special Add-on Offers (স্পেশাল অফার)</span>
+                  <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200 ml-1">
+                    {suggestedProducts.length}
+                  </span>
+                </h3>
+                <p className="text-[11px] text-gray-500 mt-0.5 font-bengali">
+                  অর্ডারের সাথে আরও কিছু প্রোডাক্ট যোগ করুন এবং অতিরিক্ত ডিসকাউন্ট উপভোগ করুন:
+                </p>
+              </div>
+
+              {/* Carousel Scroll Controls */}
+              {suggestedProducts.length > 1 && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => scrollSuggestions('left')}
+                    className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-all cursor-pointer border border-gray-200 active:scale-95"
+                    title="Previous offer"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollSuggestions('right')}
+                    className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-all cursor-pointer border border-gray-200 active:scale-95"
+                    title="Next offer"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Horizontal Scroll Carousel */}
+            <div
+              ref={suggestedScrollRef}
+              className="flex gap-3 overflow-x-auto pb-2 pt-1 custom-scrollbar snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
+            >
               {suggestedProducts.map((p) => {
                 const isAdded = !!addOnItems[p._id];
                 const pImages = getProductImages(p);
 
                 return (
-                  <div key={p._id} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <div
+                    key={p._id}
+                    className={`w-[82vw] max-w-[270px] sm:w-[280px] shrink-0 snap-start rounded-2xl p-3 shadow-xs transition-all flex flex-col justify-between border ${
+                      isAdded
+                        ? 'bg-emerald-50/40 border-emerald-400 ring-1 ring-emerald-400/20'
+                        : 'bg-white border-gray-200/80 hover:border-gray-300 hover:shadow-sm'
+                    }`}
+                  >
                     <div
                       onClick={() => setDetailProduct(p)}
                       className="flex gap-3 cursor-pointer hover:opacity-90 transition-opacity"
                     >
-                      <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
+                      <div className="relative w-16 h-20 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
                         <img
                           src={pImages[0]}
                           alt={p.title}
                           className="w-full h-full object-cover object-top"
                         />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="text-xs font-bold text-gray-900 truncate">{p.title}</h4>
-                        <p className="text-[9px] text-gray-400 uppercase mt-0.5">{p.category}</p>
-                        {p.description && (
-                          <p className="text-[10px] text-gray-500 line-clamp-2 mt-1 font-bengali">
-                            {p.description}
-                          </p>
+                        {isAdded && (
+                          <div className="absolute top-1 right-1 bg-emerald-600 text-white rounded-full p-0.5 shadow-sm">
+                            <CheckCircle2 size={12} />
+                          </div>
                         )}
-                        <div className="flex items-center gap-2 mt-1.5">
+                      </div>
+                      <div className="min-w-0 flex-1 flex flex-col justify-center">
+                        <span className="text-[9px] font-black uppercase text-amber-600 tracking-wider">Add-on Deal</span>
+                        <h4 className="text-xs font-bold text-gray-900 truncate mt-0.5" title={p.title}>{p.title}</h4>
+                        <p className="text-[9px] text-gray-400 uppercase mt-0.5">{p.category}</p>
+                        <div className="flex items-center gap-1.5 mt-1.5">
                           <span className="text-xs font-black text-gray-900">
                             ৳{(p.offerPrice || p.basePrice).toLocaleString()}
                           </span>
@@ -1427,13 +1480,13 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                     </div>
 
                     {/* Quick Add / View Details */}
-                    <div className="flex gap-2 pt-2 border-t border-gray-100">
+                    <div className="flex gap-1.5 pt-2.5 mt-2 border-t border-gray-100">
                       <button
                         type="button"
                         onClick={() => setDetailProduct(p)}
-                        className="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border border-gray-200 text-gray-700 hover:border-gray-900 transition-all text-center cursor-pointer"
+                        className="flex-1 py-1.5 px-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border border-gray-200 text-gray-700 hover:border-gray-900 hover:bg-gray-50 transition-all text-center cursor-pointer truncate"
                       >
-                        View & Select Options
+                        Options
                       </button>
                       <button
                         type="button"
@@ -1460,13 +1513,23 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                             });
                           }
                         }}
-                        className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                        className={`py-1.5 px-3 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 ${
                           isAdded
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs'
                             : 'bg-gray-900 text-white hover:bg-gray-800'
                         }`}
                       >
-                        {isAdded ? <CheckCircle2 size={12} /> : <Plus size={12} />}
+                        {isAdded ? (
+                          <>
+                            <CheckCircle2 size={12} />
+                            <span>Added</span>
+                          </>
+                        ) : (
+                          <>
+                            <Plus size={12} />
+                            <span>Add</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>

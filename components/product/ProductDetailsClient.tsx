@@ -487,7 +487,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                 className="relative w-full h-full aspect-[4/5]"
               >
                 <Image
-                  src={product.images?.[activeImage]?.url || imageUrl}
+                  src={allProductImages[activeImage]?.url || imageUrl}
                   alt={product.title}
                   fill
                   sizes="100vw"
