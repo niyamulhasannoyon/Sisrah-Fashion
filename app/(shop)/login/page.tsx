@@ -24,15 +24,19 @@ function CustomGoogleButton({
 }) {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => onSuccess(tokenResponse),
-    onError: (error) => onError(error),
+    onError: (errorResponse) => {
+      console.error('Google OAuth error:', errorResponse);
+      onError(errorResponse);
+    },
   });
 
   const handleClick = () => {
-    if (!googleClientId) {
-      onError('Google Sign In is temporarily unconfigured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in Vercel.');
-      return;
+    try {
+      login();
+    } catch (err: any) {
+      console.error('Google OAuth trigger error:', err);
+      onError(err);
     }
-    login();
   };
 
   return (
@@ -90,7 +94,7 @@ function LoginContent() {
     }
   }, [searchParams]);
 
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '997671776781-8tvf6paidbpk13b0nghor90ge0qsvht9.apps.googleusercontent.com';
 
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -439,7 +443,13 @@ function LoginContent() {
                   <CustomGoogleButton
                     googleClientId={googleClientId}
                     onSuccess={handleGoogleSuccess}
-                    onError={(err: any) => setError(typeof err === 'string' ? err : 'Google Authentication Failed.')}
+                    onError={(err: any) => {
+                      console.error('Google Auth Handler Error:', err);
+                      const msg = typeof err === 'string'
+                        ? err
+                        : (err?.error_description || err?.error || 'Google Sign-In popup closed or blocked by browser.');
+                      setError(msg);
+                    }}
                     loading={googleLoading}
                   />
                 </div>
