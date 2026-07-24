@@ -1,14 +1,15 @@
+import dynamic from 'next/dynamic';
 import { HeroSection } from '@/components/home/HeroSection';
 import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { WhyChooseUs } from '@/components/home/WhyChooseUs';
-import { ReviewMarquee } from '@/components/home/ReviewMarquee';
-
 import { NewDrop } from '@/components/home/NewDrop';
 import { TrendingSlider } from '@/components/home/TrendingSlider';
 import { LifestyleBanner } from '@/components/home/LifestyleBanner';
-import { SocialGallery } from '@/components/home/SocialGallery';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+
+const SocialGallery = dynamic(() => import('@/components/home/SocialGallery').then((mod) => mod.SocialGallery));
+const ReviewMarquee = dynamic(() => import('@/components/home/ReviewMarquee').then((mod) => mod.ReviewMarquee));
 
 export const revalidate = 60;
 

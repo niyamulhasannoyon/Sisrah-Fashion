@@ -7,9 +7,16 @@ import User from '@/models/User';
 import Notification from '@/models/Notification';
 import { cookies } from 'next/headers';
 import * as jose from 'jose';
+import { reviewLimiter } from '@/lib/rateLimiter';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Apply rate limiting: 3 review submissions per minute
+    const limitCheck = reviewLimiter.check(req);
+    if (limitCheck.blocked) {
+      return limitCheck.response!;
+    }
+
     await dbConnect();
     const { rating, comment, images } = await req.json();
 

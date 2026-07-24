@@ -6,11 +6,22 @@ import Notification from '@/models/Notification';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 import { generateAndEmailInvoice } from '@/lib/invoice';
 import { sendAdminOrderNotification } from '@/lib/email';
+import { orderLimiter } from '@/lib/rateLimiter';
 
 export const dynamic = 'force-dynamic';
 
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export async function POST(req: Request) {
   try {
+    // Apply rate limiting: 5 order requests per 3 minutes
+    const limitCheck = orderLimiter.check(req);
+    if (limitCheck.blocked) {
+      return limitCheck.response!;
+    }
+
     await dbConnect();
     const body = await req.json();
     
@@ -186,7 +197,7 @@ export async function GET(req: Request) {
 
     // Search filter: Order ID, customer name, phone number
     if (search) {
-      const searchRegex = new RegExp(search, 'i');
+      const searchRegex = new RegExp(escapeRegex(search), 'i');
 
       // Check if search query is numeric (for orderId match)
       const searchNum = parseInt(search);

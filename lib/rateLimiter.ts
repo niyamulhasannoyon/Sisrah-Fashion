@@ -192,3 +192,17 @@ export const staffLoginLimiter = rateLimiter({
   windowMs: 60_000,
   label: 'Too many staff login attempts',
 });
+
+/** Order placement protection: 5 orders per 3 minutes */
+export const orderLimiter = rateLimiter({
+  maxRequests: 5,
+  windowMs: 3 * 60_000,
+  label: 'Too many order requests',
+});
+
+/** Product review submission: 3 per minute */
+export const reviewLimiter = rateLimiter({
+  maxRequests: 3,
+  windowMs: 60_000,
+  label: 'Too many review submissions',
+});
