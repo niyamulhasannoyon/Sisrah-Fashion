@@ -16,7 +16,7 @@ const hindSiliguri = Hind_Siliguri({
   display: 'swap'
 });
 
-const BASE_URL = 'https://assidrat.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app';
 
 export const metadata: Metadata = {
   title: 'AS SIDRAT | Premium Shirt & T-Shirt Brand Bangladesh',
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   verification: {
-    google: '4mbgGQs3PoTcMTbCYLFypmE_u9bbwfwW4_F85kWGmXA',
+    google: '7t916kantTbYn_dqGMqfKi5pitEUT6_74AR_fqWpjf0',
   },
 };
 

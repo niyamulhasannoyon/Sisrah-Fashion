@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Size Guide & Fit Advisor - AS SIDRAT',
   description: 'Find your perfect fit. View size charts for AS SIDRAT shirts, panjabis, trousers, and co-ords to ensure comfortable, well-tailored wear.',
   alternates: {
-    canonical: 'https://assidrat.com/size-guide',
+    canonical: '/size-guide',
   },
   openGraph: {
     title: 'Size Guide & Fit Advisor - AS SIDRAT',
     description: 'Find your perfect fit. View size charts for AS SIDRAT shirts, panjabis, trousers, and co-ords to ensure comfortable, well-tailored wear.',
-    url: 'https://assidrat.com/size-guide',
+    url: '/size-guide',
     type: 'website',
     siteName: 'AS SIDRAT',
     locale: 'en_BD',

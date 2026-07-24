@@ -9,12 +9,12 @@ export const metadata: Metadata = {
   title: 'Shop Premium Minimalist Collection - AS SIDRAT',
   description: 'Explore the complete AS SIDRAT collection. Premium linen shirts, tailored pants, panjabis, and kaftans designed for tropical weather and modern aesthetics.',
   alternates: {
-    canonical: 'https://assidrat.com/shop',
+    canonical: '/shop',
   },
   openGraph: {
     title: 'Shop Premium Minimalist Collection - AS SIDRAT',
     description: 'Explore the complete AS SIDRAT collection. Premium linen shirts, tailored pants, panjabis, and kaftans designed for tropical weather.',
-    url: 'https://assidrat.com/shop',
+    url: '/shop',
     type: 'website',
     siteName: 'AS SIDRAT',
     locale: 'en_BD',

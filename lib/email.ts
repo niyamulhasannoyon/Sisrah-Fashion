@@ -19,7 +19,7 @@ export async function sendAdminOrderNotification(order: any) {
     const totalAmount = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
     const paymentMethod = order.paymentMethod || 'Cash on Delivery';
     const paymentStatus = order.paymentStatus || 'Pending';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.com';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app';
 
     // Calculate subtotal
     const subtotal = items.reduce((sum: number, item: any) => sum + (item.price || 0) * (item.quantity || 1), 0);

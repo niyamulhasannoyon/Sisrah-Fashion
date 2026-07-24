@@ -36,7 +36,7 @@ const isInStock = (variants?: Array<{ stock: number }>): boolean => {
  * Generates comprehensive SEO metadata for product pages
  * Supports Open Graph, Twitter Cards, and structured data
  */
-export function generateProductMetadata(product: ProductMetadataInput, baseUrl: string = 'https://assidrat.com'): Metadata {
+export function generateProductMetadata(product: ProductMetadataInput, baseUrl: string = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app'): Metadata {
   const productTitle = product.title || 'Premium Fashion';
   const productDescription = truncateText(product.description, 160);
   const productImage = product.images?.[0]?.url || '/images/placeholder.jpg';

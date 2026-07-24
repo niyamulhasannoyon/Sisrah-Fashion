@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'FAQ & Customer Support - AS SIDRAT',
   description: 'Got questions about shipping, sizing, or returns? Find answers to frequently asked questions about shopping with AS SIDRAT in Bangladesh.',
   alternates: {
-    canonical: 'https://assidrat.com/faq',
+    canonical: '/faq',
   },
   openGraph: {
     title: 'FAQ & Customer Support - AS SIDRAT',
     description: 'Got questions about shipping, sizing, or returns? Find answers to frequently asked questions about shopping with AS SIDRAT in Bangladesh.',
-    url: 'https://assidrat.com/faq',
+    url: '/faq',
     type: 'website',
     siteName: 'AS SIDRAT',
     locale: 'en_BD',

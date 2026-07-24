@@ -20,7 +20,7 @@ import LandingPage from '@/models/LandingPage';
 import Settings from '@/models/Settings';
 
 // Base URL configuration
-const BASE_URL = 'https://assidrat.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app';
 
 /**
  * Product Category Configuration

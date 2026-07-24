@@ -45,17 +45,19 @@ export async function generateMetadata({ params }: LpPageProps): Promise<Metadat
     const description = raw.customHero?.customSubheading || product?.description || 'Shop the latest collection at AS SIDRAT.';
     const bannerImage = (raw.customHero?.customBannerImage && getDirectImageLink(raw.customHero.customBannerImage.trim())) || product?.images?.[0]?.url || '/og-image.jpg';
 
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app';
+
     return {
       title: `${heading} — AS SIDRAT`,
       description,
-      metadataBase: new URL('https://assidrat.com'),
+      metadataBase: new URL(baseUrl),
       alternates: {
         canonical: `/lp/${slug}`,
       },
       openGraph: {
         title: `${heading} — AS SIDRAT`,
         description,
-        url: `https://assidrat.com/lp/${slug}`,
+        url: `${baseUrl}/lp/${slug}`,
         siteName: 'AS SIDRAT',
         images: [
           {

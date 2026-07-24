@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Terms of Service - AS SIDRAT',
   description: 'Review the terms and conditions for purchasing and using the AS SIDRAT online storefront.',
   alternates: {
-    canonical: 'https://assidrat.com/terms-of-service',
+    canonical: '/terms-of-service',
   },
   openGraph: {
     title: 'Terms of Service - AS SIDRAT',
     description: 'Review the terms and conditions for purchasing and using the AS SIDRAT online storefront.',
-    url: 'https://assidrat.com/terms-of-service',
+    url: '/terms-of-service',
     type: 'website',
     siteName: 'AS SIDRAT',
     locale: 'en_BD',

@@ -28,7 +28,8 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   };
 
   const description = categoryDescriptions[slug.toLowerCase()] || `Shop premium ${category} collection at AS SIDRAT. Breathable, climate-conscious minimalist wear.`;
-  const url = `https://assidrat.com/category/${slug}`;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app';
+  const url = `${baseUrl}/category/${slug}`;
 
   return {
     title: `${category} Collection - AS SIDRAT | Buy clothing in Bangladesh`,

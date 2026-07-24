@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Privacy Policy - AS SIDRAT',
   description: 'Learn how AS SIDRAT handles and protects your personal information and transaction security.',
   alternates: {
-    canonical: 'https://assidrat.com/privacy-policy',
+    canonical: '/privacy-policy',
   },
   openGraph: {
     title: 'Privacy Policy - AS SIDRAT',
     description: 'Learn how AS SIDRAT handles and protects your personal information and transaction security.',
-    url: 'https://assidrat.com/privacy-policy',
+    url: '/privacy-policy',
     type: 'website',
     siteName: 'AS SIDRAT',
     locale: 'en_BD',

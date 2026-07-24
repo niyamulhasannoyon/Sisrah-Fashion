@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Style Lookbook & Inspirations - AS SIDRAT',
   description: 'Get style inspiration from our curated minimal fashion lookbook. Explore styling ideas for premium linen shirts, trousers, and fusion wear.',
   alternates: {
-    canonical: 'https://assidrat.com/community',
+    canonical: '/community',
   },
   openGraph: {
     title: 'Style Lookbook & Inspirations - AS SIDRAT',
     description: 'Get style inspiration from our curated minimal fashion lookbook. Explore styling ideas for premium linen shirts, trousers, and fusion wear.',
-    url: 'https://assidrat.com/community',
+    url: '/community',
     type: 'website',
     siteName: 'AS SIDRAT',
     locale: 'en_BD',

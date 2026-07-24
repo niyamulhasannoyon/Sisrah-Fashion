@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: 'Shipping, Delivery & Exchange Policy - AS SIDRAT',
   description: 'Read about our delivery timelines (Dhaka & nationwide), cash on delivery options, and hassle-free 7-day exchange and return policy.',
   alternates: {
-    canonical: 'https://assidrat.com/shipping-returns',
+    canonical: '/shipping-returns',
   },
   openGraph: {
     title: 'Shipping, Delivery & Exchange Policy - AS SIDRAT',
     description: 'Read about our delivery timelines (Dhaka & nationwide), cash on delivery options, and exchange policy.',
-    url: 'https://assidrat.com/shipping-returns',
+    url: '/shipping-returns',
     type: 'website',
     siteName: 'AS SIDRAT',
     locale: 'en_BD',
