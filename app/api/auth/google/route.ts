@@ -16,26 +16,45 @@ export async function POST(req: Request) {
     }
 
     await dbConnect();
-    const { credential, phone } = await req.json();
+    const { credential, accessToken, phone } = await req.json();
 
-    if (!credential) {
-      return NextResponse.json({ error: 'Google credential token is required' }, { status: 400 });
+    if (!credential && !accessToken) {
+      return NextResponse.json({ error: 'Google credential or access token is required' }, { status: 400 });
     }
 
-    if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-      console.error('[Google Auth] NEXT_PUBLIC_GOOGLE_CLIENT_ID is not configured');
-      return NextResponse.json({ error: 'Google authentication is not configured' }, { status: 500 });
+    let email = '';
+    let name = '';
+    let picture = '';
+
+    if (accessToken) {
+      // Fetch user profile from Google UserInfo API using access_token
+      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!userInfoRes.ok) {
+        return NextResponse.json({ error: 'Failed to fetch Google user profile' }, { status: 400 });
+      }
+      const userInfo = await userInfoRes.json();
+      email = userInfo.email;
+      name = userInfo.name;
+      picture = userInfo.picture;
+    } else {
+      if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+        console.error('[Google Auth] NEXT_PUBLIC_GOOGLE_CLIENT_ID is not configured');
+        return NextResponse.json({ error: 'Google authentication is not configured' }, { status: 500 });
+      }
+
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      });
+      
+      const payload = ticket.getPayload();
+      if (!payload) return NextResponse.json({ error: 'Invalid Google token' }, { status: 400 });
+      email = payload.email || '';
+      name = payload.name || '';
+      picture = payload.picture || '';
     }
-
-    const ticket = await client.verifyIdToken({
-      idToken: credential,
-      audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-    });
-    
-    const payload = ticket.getPayload();
-    if (!payload) return NextResponse.json({ error: 'Invalid Google token' }, { status: 400 });
-
-    const { email, name, picture } = payload;
 
     let user = await User.findOne({ email });
 
