@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
+import { sendAdminOrderNotification } from '@/lib/email';
 const SSLCommerzPayment = require('sslcommerz-lts');
 
 export async function POST(req: Request) {
@@ -25,6 +26,9 @@ export async function POST(req: Request) {
       paymentStatus: 'Pending',
       orderStatus: 'Processing',
     });
+
+    // Send admin notification (non-blocking)
+    sendAdminOrderNotification(newOrder.toObject());
 
     const tran_id = newOrder._id.toString();
 

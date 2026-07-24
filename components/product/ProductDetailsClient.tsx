@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2 } from 'lucide-react';
+import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2, Ruler } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import MobileStickyCart from '@/components/product/MobileStickyCart';
 import SizeGuideModal from '@/components/product/SizeGuideModal';
@@ -50,6 +50,15 @@ interface ProductDetailsClientProps {
     verifiedPurchase?: boolean;
   }>;
 }
+
+const DEFAULT_SIZE_GUIDE_ROWS = [
+  { size: 'S', chest: '38"', length: '27"', shoulder: '17"' },
+  { size: 'M', chest: '40"', length: '28"', shoulder: '18"' },
+  { size: 'L', chest: '42"', length: '29"', shoulder: '19"' },
+  { size: 'XL', chest: '44"', length: '30"', shoulder: '20"' },
+  { size: 'XXL', chest: '46"', length: '31"', shoulder: '21"' },
+  { size: 'XXXL', chest: '48"', length: '32"', shoulder: '22"' },
+];
 
 export default function ProductDetailsClient({ product, reviews }: ProductDetailsClientProps) {
   const [selectedColor, setSelectedColor] = useState(product.variants?.[0]?.color ?? '');
@@ -166,6 +175,38 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
   const currentVariant = useMemo(() => {
     return product.variants?.find((v: any) => v.color === selectedColor && v.size === selectedSize);
   }, [product.variants, selectedColor, selectedSize]);
+
+  const activeSizeGuideRows = useMemo(() => {
+    if (product.sizeGuide?.rows && Array.isArray(product.sizeGuide.rows) && product.sizeGuide.rows.length > 0) {
+      return product.sizeGuide.rows;
+    }
+    return DEFAULT_SIZE_GUIDE_ROWS;
+  }, [product.sizeGuide]);
+
+  const selectedSizeDetails = useMemo(() => {
+    if (!selectedSize) return null;
+    const found = activeSizeGuideRows.find(
+      (row: any) => row.size?.trim().toLowerCase() === selectedSize.trim().toLowerCase()
+    );
+    if (!found) return null;
+
+    const measurements: { label: string; value: string }[] = [];
+    const knownKeys = ['chest', 'length', 'shoulder'];
+
+    knownKeys.forEach((key) => {
+      if (found[key]) {
+        measurements.push({ label: key, value: String(found[key]) });
+      }
+    });
+
+    Object.keys(found).forEach((key) => {
+      if (key !== 'size' && key !== '_id' && !knownKeys.includes(key) && found[key]) {
+        measurements.push({ label: key, value: String(found[key]) });
+      }
+    });
+
+    return measurements.length > 0 ? measurements : null;
+  }, [selectedSize, activeSizeGuideRows]);
 
   const displayPrice = currentVariant?.price || product.basePrice;
   const displayOfferPrice = currentVariant?.offerPrice || product.offerPrice || 0;
@@ -367,6 +408,22 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
               ))}
             </div>
 
+            {/* Dynamic Selected Size Measurements (Copied directly from Size Guide) */}
+            {selectedSizeDetails && selectedSizeDetails.length > 0 && (
+              <div className="mt-1 p-3 bg-gray-50 border border-gray-200/60 rounded-xl flex flex-wrap items-center gap-x-4 gap-y-2 text-xs transition-all animate-in fade-in duration-200">
+                <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 flex items-center gap-1.5 mr-1">
+                  <Ruler size={13} className="text-[#A31F24]" />
+                  Size {selectedSize} Specs:
+                </span>
+                {selectedSizeDetails.map((item) => (
+                  <div key={item.label} className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-md border border-gray-200/80 shadow-2xs">
+                    <span className="capitalize text-gray-400 text-[11px] font-medium">{item.label}:</span>
+                    <span className="font-bold text-gray-900 text-[11px]">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Dynamic Scarcity/Stock Urgency Indicator */}
             {hasSelectedOptions && currentVariant && (
               <div className="mt-4 text-xs font-bold transition-all">
@@ -420,7 +477,9 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
             <WhatsAppButton 
               productName={product.title} 
               productUrl={productUrl} 
-              price={displayOfferPrice > 0 ? displayOfferPrice : displayPrice} 
+              price={displayOfferPrice > 0 ? displayOfferPrice : displayPrice}
+              selectedSize={selectedSize}
+              selectedColor={selectedColor}
             />
           </div>
 

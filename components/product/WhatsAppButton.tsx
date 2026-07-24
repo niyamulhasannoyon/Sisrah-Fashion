@@ -8,9 +8,17 @@ interface WhatsAppButtonProps {
   productName: string;
   productUrl: string;
   price: number;
+  selectedSize?: string;
+  selectedColor?: string;
 }
 
-export default function WhatsAppButton({ productName, productUrl, price }: WhatsAppButtonProps) {
+export default function WhatsAppButton({ 
+  productName, 
+  productUrl, 
+  price,
+  selectedSize,
+  selectedColor 
+}: WhatsAppButtonProps) {
   const { settings, fetchSettings } = useSettingsStore();
 
   useEffect(() => {
@@ -23,7 +31,16 @@ export default function WhatsAppButton({ productName, productUrl, price }: Whats
   const brandPhone = rawPhone.replace(/\+/g, '').replace(/\s+/g, '');
 
   const handleWhatsAppOrder = () => {
-    const message = `Hello Loomra! I want to order this item:\n\n*Product:* ${productName}\n*Price:* ৳ ${price}\n*Link:* ${productUrl}\n\nPlease let me know how to proceed.`;
+    let details = `*Product:* ${productName}\n*Price:* ৳ ${price}`;
+    if (selectedSize) {
+      details += `\n*Size:* ${selectedSize}`;
+    }
+    if (selectedColor) {
+      details += `\n*Color:* ${selectedColor}`;
+    }
+    details += `\n*Link:* ${productUrl}`;
+
+    const message = `Hello AS SIDRAT! I want to order this item:\n\n${details}\n\nPlease let me know how to proceed.`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${brandPhone}?text=${encodedMessage}`;
 

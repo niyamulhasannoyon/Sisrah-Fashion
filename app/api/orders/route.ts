@@ -5,6 +5,7 @@ import Coupon from '@/models/Coupon';
 import Notification from '@/models/Notification';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 import { generateAndEmailInvoice } from '@/lib/invoice';
+import { sendAdminOrderNotification } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,6 +132,9 @@ export async function POST(req: Request) {
 
     // Auto-generate invoice (non-blocking)
     generateAndEmailInvoice(newOrder.toObject(), body.shippingInfo?.email);
+
+    // Send admin email notification (non-blocking)
+    sendAdminOrderNotification(newOrder.toObject());
 
     return NextResponse.json({ 
       success: true, 
