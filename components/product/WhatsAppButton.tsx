@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, ArrowRight } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useEffect } from 'react';
 
@@ -10,6 +10,7 @@ interface WhatsAppButtonProps {
   price: number;
   selectedSize?: string;
   selectedColor?: string;
+  className?: string;
 }
 
 export default function WhatsAppButton({ 
@@ -17,7 +18,8 @@ export default function WhatsAppButton({
   productUrl, 
   price,
   selectedSize,
-  selectedColor 
+  selectedColor,
+  className = ''
 }: WhatsAppButtonProps) {
   const { settings, fetchSettings } = useSettingsStore();
 
@@ -50,10 +52,22 @@ export default function WhatsAppButton({
   return (
     <button
       onClick={handleWhatsAppOrder}
-      className="w-full mt-16px flex items-center justify-center gap-8px bg-[#25D366] text-white py-16px text-small font-bold uppercase tracking-widest hover:bg-[#1DA851] transition-colors rounded-[4px]"
+      type="button"
+      className={`w-full group relative flex items-center justify-center gap-3 bg-gradient-to-r from-[#25D366] via-[#20bd5a] to-[#128C7E] text-white py-3.5 px-5 sm:py-4 sm:px-6 rounded-xl font-bold uppercase tracking-[1.5px] text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/35 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-300 ${className}`}
     >
-      <MessageCircle size={20} />
-      Order via WhatsApp
+      {/* Icon with glowing ring container */}
+      <span className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300 shrink-0">
+        <MessageCircle size={18} className="text-white fill-white/20" />
+        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-300 rounded-full animate-ping opacity-75" />
+        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-200 rounded-full" />
+      </span>
+
+      <span className="flex flex-col items-start text-left">
+        <span className="leading-none text-xs sm:text-sm font-black tracking-widest">Order via WhatsApp</span>
+        <span className="text-[10px] text-emerald-100 font-medium normal-case tracking-normal mt-1 opacity-90">Instant chat & fast checkout</span>
+      </span>
+
+      <ArrowRight size={18} className="ml-auto opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 hidden sm:block shrink-0" />
     </button>
   );
 }
