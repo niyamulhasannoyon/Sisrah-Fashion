@@ -31,12 +31,12 @@ export function HeroSection() {
   }, [slides.length]);
 
   return (
-    <section className="relative w-full bg-[#121214] text-white py-6 lg:py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative w-full bg-[#121214] text-white py-8 lg:py-0 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-fit lg:min-h-[calc(100vh-80px)] flex flex-col justify-center">
       {/* Subtle Background Lighting Accent */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#A31F24]/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-10 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-7xl w-full py-4 lg:py-8">
         {/* Desktop 2-Column Split / Mobile Stacked Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
@@ -52,7 +52,7 @@ export function HeroSection() {
             </div>
 
             {/* Main Headline (Bengali font tuned for crisp readability) */}
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-snug sm:leading-tight lg:leading-[1.2] font-bengali drop-shadow-sm">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white leading-snug sm:leading-tight lg:leading-[1.18] font-bengali drop-shadow-sm">
               {headline}
             </h1>
 
@@ -98,7 +98,7 @@ export function HeroSection() {
           </div>
 
           {/* Right Column: Lifestyle Showcase Visual Frame (Cols 8-12 on desktop) */}
-          <div className="lg:col-span-5 relative w-full h-[380px] sm:h-[460px] lg:h-[520px]">
+          <div className="lg:col-span-5 relative w-full h-[380px] sm:h-[480px] lg:h-[540px] xl:h-[580px]">
             {/* Visual Frame Container with consistent rounded corners across screen sizes */}
             <motion.div 
               className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-stone-900 group cursor-grab active:cursor-grabbing"
