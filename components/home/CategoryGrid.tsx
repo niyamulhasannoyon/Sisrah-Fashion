@@ -40,11 +40,10 @@ export function CategoryGrid() {
   return (
     <section className="bg-slate-50/50 py-16 lg:py-24 border-t border-slate-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        
-        {/* Header (Functional UI English badge + Emotional copy Bengali headline) */}
+        {/* Header Block */}
         <div className="mb-10 lg:mb-12 flex flex-col gap-2 text-center">
           <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-[#A31F24] font-bold">
-            COLLECTIONS
+            FEATURED CATEGORIES
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 font-bengali">
             পছন্দের ক্যাটাগরি বেছে নিন
