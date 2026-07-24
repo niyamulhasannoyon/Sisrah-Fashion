@@ -6,21 +6,7 @@ export async function proxy(request: NextRequest) {
   const token = request.cookies.get('loomra_token')?.value;
   const path = request.nextUrl.pathname;
 
-  // Prevent authenticated users from visiting login or register
-  if (path === '/login' || path === '/register') {
-    if (token) {
-      try {
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-        await jwtVerify(token, secret);
-        return NextResponse.redirect(new URL('/', request.url));
-      } catch (error) {
-        // Token is invalid, delete cookie and let them view the page
-        const response = NextResponse.next();
-        response.cookies.delete('loomra_token');
-        return response;
-      }
-    }
-  }
+  // Allow access to /login so logged-in users can view their active session or switch accounts
 
   if (path.startsWith('/profile')) {
     if (!token) {

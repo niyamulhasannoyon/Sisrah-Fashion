@@ -14,8 +14,8 @@ export function Button({ children, className = '', href, variant = 'primary', ..
   const hasBengali = typeof children === 'string' && /[\u0980-\u09FF]/.test(children);
 
   const baseStyles = `
-    rounded-[4px] px-32px py-16px 
-    text-small inline-flex items-center justify-center
+    rounded-[4px] px-6 py-3
+    text-xs inline-flex items-center justify-center
     transition-all duration-300 ease-in-out
     disabled:opacity-50 disabled:cursor-not-allowed
     hover:scale-[1.02] active:scale-[0.98] hover:opacity-95
@@ -31,8 +31,9 @@ export function Button({ children, className = '', href, variant = 'primary', ..
   const styles = cn(baseStyles, variants[variant], className);
 
   if (href) {
+    const { onClick, ...restProps } = props as any;
     return (
-      <Link href={href} className={styles}>
+      <Link href={href} className={styles} onClick={onClick} {...restProps}>
         {children}
       </Link>
     );

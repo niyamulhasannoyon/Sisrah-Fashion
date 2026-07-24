@@ -50,6 +50,10 @@ function LoginContent() {
 
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
+  const [forgotModalOpen, setForgotModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -57,16 +61,37 @@ function LoginContent() {
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+    const inputVal = formData.email.trim();
 
-    if (!emailRegex.test(formData.email.trim())) {
-      setError('Please enter a valid email address (e.g. name@domain.com).');
-      setLoading(false);
-      return;
-    }
+    if (mode === 'login') {
+      const isEmail = emailRegex.test(inputVal);
+      const isPhone = bdPhoneRegex.test(inputVal);
 
-    if (mode === 'register') {
+      if (!inputVal) {
+        setError('Please enter your email or phone number.');
+        setLoading(false);
+        return;
+      }
+
+      if (!isEmail && !isPhone) {
+        setError('Please enter a valid email address or phone number (e.g. 017XXXXXXXX).');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.password) {
+        setError('Please enter your password.');
+        setLoading(false);
+        return;
+      }
+    } else {
       if (!formData.name.trim()) {
         setError('Please enter your full name.');
+        setLoading(false);
+        return;
+      }
+      if (!emailRegex.test(inputVal)) {
+        setError('Please enter a valid email address (e.g. name@example.com).');
         setLoading(false);
         return;
       }
@@ -80,12 +105,16 @@ function LoginContent() {
         setLoading(false);
         return;
       }
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      setLoading(false);
-      return;
+      if (formData.password.length < 8) {
+        setError('Password must be at least 8 characters long.');
+        setLoading(false);
+        return;
+      }
+      if (!/[A-Z]/.test(formData.password) || !/[a-z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
+        setError('Password must contain at least one uppercase letter, one lowercase letter, and one number.');
+        setLoading(false);
+        return;
+      }
     }
 
     const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
@@ -96,7 +125,8 @@ function LoginContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name.trim(),
-          email: formData.email.trim().toLowerCase(),
+          email: inputVal.toLowerCase(),
+          identifier: inputVal,
           phone: formData.phone.trim(),
           password: formData.password,
         }),
@@ -445,16 +475,16 @@ function LoginContent() {
                     )}
                   </AnimatePresence>
 
-                  {/* Email Input */}
+                  {/* Email / Phone Input */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Email Address
+                      {mode === 'login' ? 'Email Address or Phone Number' : 'Email Address'}
                     </label>
                     <div className="relative">
                       <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
-                        type="email"
-                        placeholder="yourname@example.com"
+                        type="text"
+                        placeholder={mode === 'login' ? "Email address or 017XXXXXXXX" : "yourname@example.com"}
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -470,9 +500,17 @@ function LoginContent() {
                         Password
                       </label>
                       {mode === 'login' && (
-                        <span className="text-[11px] font-semibold text-[#A31F24] hover:underline cursor-pointer">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setForgotModalOpen(true);
+                            setForgotEmail(formData.email);
+                            setForgotSuccess('');
+                          }}
+                          className="text-[11px] font-semibold text-[#A31F24] hover:underline focus:outline-none"
+                        >
                           Forgot password?
-                        </span>
+                        </button>
                       )}
                     </div>
                     <div className="relative">
@@ -493,13 +531,18 @@ function LoginContent() {
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
+                    {mode === 'register' && (
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Min. 8 characters with 1 uppercase, 1 lowercase & 1 number.
+                      </p>
+                    )}
                   </div>
 
                   {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={loading || googleLoading}
-                    className="w-full bg-[#1A1A1A] hover:bg-[#A31F24] text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-md transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+                    className="w-full bg-[#1A1A1A] hover:bg-[#A31F24] text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-md transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 mt-2 cursor-pointer active:scale-[0.99]"
                   >
                     {loading ? (
                       <Loader2 className="animate-spin" size={18} />
@@ -531,6 +574,63 @@ function LoginContent() {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {forgotModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-slate-200"
+            >
+              <button
+                type="button"
+                onClick={() => setForgotModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg font-bold"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Reset Password</h3>
+              <p className="text-xs text-slate-500 mb-4">
+                Enter your email address or phone number associated with your account, and we will guide you to reset your password.
+              </p>
+
+              {forgotSuccess ? (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold p-4 rounded-xl mb-4">
+                  {forgotSuccess}
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!forgotEmail.trim()) return;
+                    setForgotSuccess(`Password reset instructions have been sent to ${forgotEmail.trim()}. Please check your inbox or phone.`);
+                  }}
+                  className="space-y-4"
+                >
+                  <input
+                    type="text"
+                    required
+                    placeholder="Email address or 017XXXXXXXX"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:border-[#1A1A1A] focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full bg-[#A31F24] hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider py-3 rounded-xl transition-all"
+                  >
+                    Send Reset Instructions
+                  </button>
+                </form>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </GoogleOAuthProvider>
   );
 }

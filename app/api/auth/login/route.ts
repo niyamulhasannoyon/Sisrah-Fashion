@@ -14,25 +14,39 @@ export async function POST(req: Request) {
     }
 
     await dbConnect();
-    const { email, password } = await req.json();
+    const body = await req.json();
+    const identifier = (body.email || body.identifier || body.phone || '').trim();
+    const password = body.password;
 
     // Validate input
-    if (!email || !password) {
-      return NextResponse.json({ success: false, error: 'Email and password are required' }, { status: 400 });
+    if (!identifier || !password) {
+      return NextResponse.json({ success: false, error: 'Email/Phone and password are required' }, { status: 400 });
     }
 
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({ success: false, error: 'Invalid email format' }, { status: 400 });
+    const cleanIdentifier = identifier.toLowerCase();
+    const bdPhoneRegex = /^(?:\+88|88)?(01[3-9]\d{8})$/;
+    const isPhone = bdPhoneRegex.test(cleanIdentifier);
+    
+    // Normalize phone number if phone format (e.g. 017XXXXXXXX)
+    let phoneMatch = cleanIdentifier;
+    if (isPhone) {
+      const match = cleanIdentifier.match(/(01[3-9]\d{8})$/);
+      if (match) phoneMatch = match[1];
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
-    }
+    // Find user by email or phone
+    const user = await User.findOne({
+      $or: [
+        { email: cleanIdentifier },
+        { phone: cleanIdentifier },
+        { phone: phoneMatch },
+        { phone: `+88${phoneMatch}` },
+        { phone: `88${phoneMatch}` },
+      ],
+    });
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Invalid email/phone or password' }, { status: 401 });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
