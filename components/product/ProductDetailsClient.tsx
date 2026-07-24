@@ -9,6 +9,7 @@ import SizeGuideModal from '@/components/product/SizeGuideModal';
 import WhatsAppButton from '@/components/product/WhatsAppButton';
 import { formatCurrency, getDirectImageLink } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackViewContent, trackAddToCart } from '@/lib/analytics/trackEvents';
 
 interface ProductVariant {
   size: string;
@@ -101,7 +102,17 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
     if (typeof window !== 'undefined') {
       setProductUrl(window.location.href);
     }
-  }, []);
+
+    // Fire ViewContent analytics event
+    const finalPrice = product.offerPrice && product.offerPrice > 0 ? product.offerPrice : product.basePrice;
+    trackViewContent({
+      id: product._id,
+      title: product.title,
+      price: finalPrice,
+      category: product.category,
+    });
+  }, [product]);
+
   const addToCart = useCartStore((state) => state.addToCart);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -462,6 +473,14 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                   availableSizes,
                   availableColors
                 });
+                trackAddToCart({
+                  id: product._id,
+                  title: product.title,
+                  price: finalPrice,
+                  category: product.category,
+                  size: selectedSize,
+                  color: selectedColor
+                }, 1);
               }}
               disabled={!hasSelectedOptions || currentVariant?.stock === 0}
               className="flex-1 bg-loomra-red text-loomra-white py-4 text-small font-bold uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackInitiateCheckout, trackPurchase } from '@/lib/analytics/trackEvents';
 
 const districts = [
   'Dhaka', 'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra', 'Brahmanbaria', 'Chandpur', 'Chapainawabganj', 'Chittagong', 'Chuadanga', 'Comilla', "Cox's Bazar", 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jessore', 'Jhalokati', 'Jhenaidah', 'Joypurhat', 'Khagrachari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Maulvibazar', 'Meherpur', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet', 'Tangail', 'Thakurgaon'
@@ -40,6 +41,12 @@ export default function CheckoutPage() {
     setIsClient(true);
     if (!settings) {
       fetchSettings();
+    }
+    if (cart.length > 0) {
+      trackInitiateCheckout(
+        cart.map((item) => ({ id: item._id, title: item.title, price: item.price, quantity: item.quantity })),
+        getCartTotal()
+      );
     }
   }, [settings, fetchSettings]);
 
@@ -204,6 +211,11 @@ export default function CheckoutPage() {
       });
       const data = await res.json();
       if (data.success) {
+        trackPurchase(
+          data.orderId.toString(),
+          cart.map((item) => ({ id: item._id, title: item.title, price: item.price, quantity: item.quantity })),
+          finalTotal
+        );
         clearCart();
         localStorage.setItem('loomra_latest_order_id', data.orderId.toString());
         localStorage.setItem('loomra_latest_order_phone', data.phone);

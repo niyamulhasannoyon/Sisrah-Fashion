@@ -41,6 +41,9 @@ const SettingsSchema = new Schema({
   
   // Hero slider background images
   heroImages: [{ url: String, mobileUrl: String, public_id: String, mobilePublicId: String }],
+  // Analytics & Pixel tracking
+  facebookPixelId: String,
+  googleAnalyticsId: String,
 }, { timestamps: true });
 
 export default mongoose.models.Settings || mongoose.model('Settings', SettingsSchema);

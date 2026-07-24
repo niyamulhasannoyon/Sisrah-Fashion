@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useCartStore } from '@/store/useCartStore';
 import { ShoppingBag } from 'lucide-react';
+import { trackAddToCart } from '@/lib/analytics/trackEvents';
 
 interface MobileStickyCartProps {
   product: {
@@ -54,6 +55,13 @@ export default function MobileStickyCart({
       availableSizes,
       availableColors
     });
+    trackAddToCart({
+      id: product._id,
+      title: product.title,
+      price: displayPrice,
+      size: selectedSize || 'M',
+      color: selectedColor || 'Standard'
+    }, 1);
   };
 
   return (

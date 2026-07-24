@@ -93,8 +93,43 @@ async function getSettings() {
   }
 }
 
+import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings();
+
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'AS SIDRAT',
+    url: BASE_URL,
+    logo: settings?.logo || `${BASE_URL}/favicon.png`,
+    sameAs: [
+      settings?.facebookUrl || 'https://facebook.com',
+      settings?.instagramUrl || 'https://instagram.com',
+      settings?.youtubeUrl || 'https://youtube.com',
+    ].filter(Boolean),
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: settings?.whatsappNumber || '+8801733919156',
+      contactType: 'customer service',
+      areaServed: 'BD',
+      availableLanguage: ['en', 'bn'],
+    },
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'AS SIDRAT',
+    url: BASE_URL,
+    alternateName: ['AS SIDRAT Clothing', 'Sisrah Fashion'],
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${BASE_URL}/shop?search={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
 
   return (
     <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
@@ -108,17 +143,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'WebSite',
-              'name': 'AS SIDRAT',
-              'url': BASE_URL,
-              'alternateName': ['AS SIDRAT Clothing', 'Sisrah Fashion'],
-            }),
+            __html: JSON.stringify([websiteSchema, organizationSchema]),
           }}
         />
       </head>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans" suppressHydrationWarning>
+        <AnalyticsScripts
+          facebookPixelId={settings?.facebookPixelId}
+          googleAnalyticsId={settings?.googleAnalyticsId}
+        />
         <StoreInitializer settings={settings} />
         {children}
       </body>

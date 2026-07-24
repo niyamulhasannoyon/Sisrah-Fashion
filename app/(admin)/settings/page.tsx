@@ -188,6 +188,7 @@ export default function AdminSettings() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-1">
             {[
               { id: 'general', label: 'General Details', icon: Settings, desc: 'Identity, contacts, & socials' },
+              { id: 'seo', label: 'SEO & Analytics', icon: Sliders, desc: 'Meta Pixel & GA4 IDs' },
               { id: 'announcement', label: 'Announcements', icon: Sliders, desc: 'Top promo bar config' },
               { id: 'hero', label: 'Hero Banner & Story', icon: ImageIcon, desc: 'Homepage slides & copy' },
               { id: 'categories', label: 'Category Banners', icon: Layers, desc: 'Grid banner backgrounds' },
@@ -1021,6 +1022,47 @@ export default function AdminSettings() {
                       <input type="file" className="hidden" accept="image/*" onChange={handleCommunityImageUpload} />
                     </label>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab: SEO & Analytics */}
+            {activeTab === 'seo' && (
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                  Meta Pixel & Google Analytics 4 (GA4) Tracking
+                </h3>
+                
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">
+                    Facebook / Meta Pixel ID
+                  </label>
+                  <input 
+                    type="text" 
+                    value={settings.facebookPixelId || ''}
+                    onChange={e => setSettings({...settings, facebookPixelId: e.target.value.trim()})}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm font-mono"
+                    placeholder="e.g. 1234567890123456"
+                  />
+                  <span className="text-[11px] text-slate-400">
+                    Tracks PageView, ViewContent, AddToCart, InitiateCheckout, and Purchase events automatically.
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">
+                    Google Analytics 4 (GA4) Measurement ID
+                  </label>
+                  <input 
+                    type="text" 
+                    value={settings.googleAnalyticsId || ''}
+                    onChange={e => setSettings({...settings, googleAnalyticsId: e.target.value.trim()})}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm font-mono"
+                    placeholder="e.g. G-XXXXXXXXXX"
+                  />
+                  <span className="text-[11px] text-slate-400">
+                    Sends Google Analytics 4 eCommerce events (page_view, view_item, add_to_cart, begin_checkout, purchase).
+                  </span>
                 </div>
               </div>
             )}

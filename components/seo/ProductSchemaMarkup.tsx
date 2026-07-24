@@ -38,7 +38,7 @@ interface ProductSchemaProps {
  * @param product - Product data from database
  * @param baseUrl - Base URL of your site (default: https://assidrat.com)
  */
-export default function ProductSchemaMarkup({ product, baseUrl = 'https://assidrat.com' }: ProductSchemaProps) {
+export default function ProductSchemaMarkup({ product, baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app' }: ProductSchemaProps) {
   // Determine current price and discount
   const currentPrice = product.offerPrice && product.offerPrice > 0 ? product.offerPrice : product.basePrice;
   const originalPrice = product.basePrice;
@@ -60,14 +60,9 @@ export default function ProductSchemaMarkup({ product, baseUrl = 'https://assidr
   // Generate SKU (fallback to slug if not provided)
   const sku = product.sku || `${product.slug.toUpperCase()}-${product.id?.slice(-6) || 'NO-ID'}`;
 
-  /**
-   * JSON-LD Product Schema Object
-   * Fully compliant with schema.org specifications
-   */
-  const schemaMarkup = {
+  const productSchema = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
-    // Basic Product Information
     name: product.title,
     description: product.description,
     sku: sku,
@@ -78,15 +73,13 @@ export default function ProductSchemaMarkup({ product, baseUrl = 'https://assidr
       name: product.brand || 'AS SIDRAT',
     },
     category: product.category || 'Fashion',
-    // Product Images (maximum 3 recommended)
     image: imageArray,
-    // Pricing Information
     offers: {
       '@type': 'Offer',
       url: productUrl,
       priceCurrency: 'BDT',
       price: currentPrice.toString(),
-      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Valid for 30 days
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       itemCondition: 'https://schema.org/NewCondition',
       availability: availability,
       seller: {
@@ -94,11 +87,8 @@ export default function ProductSchemaMarkup({ product, baseUrl = 'https://assidr
         name: 'AS SIDRAT',
         url: baseUrl,
       },
-      // Include original price if there's a discount
       ...(hasDiscount && {
-        priceCurrency: 'BDT',
-        price: currentPrice.toString(),
-        'priceSpecification': [
+        priceSpecification: [
           {
             '@type': 'PriceSpecification',
             priceCurrency: 'BDT',
@@ -114,7 +104,6 @@ export default function ProductSchemaMarkup({ product, baseUrl = 'https://assidr
         ],
       }),
     },
-    // Customer Reviews and Ratings (if available)
     ...(product.rating &&
       product.numReviews && {
         aggregateRating: {
@@ -127,10 +116,35 @@ export default function ProductSchemaMarkup({ product, baseUrl = 'https://assidr
       }),
   };
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: product.category ? product.category.toUpperCase() : 'Shop',
+        item: product.category ? `${baseUrl}/category/${product.category}` : `${baseUrl}/shop`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: product.title,
+        item: productUrl,
+      },
+    ],
+  };
+
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup, null, 2) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify([productSchema, breadcrumbSchema], null, 2) }}
       suppressHydrationWarning
     />
   );
