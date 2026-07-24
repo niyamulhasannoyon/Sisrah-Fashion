@@ -122,6 +122,19 @@ export default async function LpPage({ params }: LpPageProps) {
     productIds: products,
   };
 
+  // Prefetch up to 4 suggested add-on products server-side for zero client latency
+  const lpProductIds = products.map((p: any) => p._id);
+  let initialSuggestedProducts: any[] = [];
+  try {
+    const rawSuggestions = await Product.find({ _id: { $nin: lpProductIds } })
+      .select('title basePrice offerPrice images category variants rating numReviews sizeGuide')
+      .limit(4)
+      .lean() as any[];
+    initialSuggestedProducts = JSON.parse(JSON.stringify(rawSuggestions));
+  } catch (err) {
+    console.error('[LP Page] Failed to fetch initial suggestions:', err);
+  }
+
   const firstProduct = products[0];
   const bannerImage = (raw.customHero?.customBannerImage && getDirectImageLink(raw.customHero.customBannerImage.trim())) || firstProduct?.images?.[0]?.url || '/og-image.jpg';
 
@@ -172,7 +185,10 @@ export default async function LpPage({ params }: LpPageProps) {
   return (
     <>
       <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+      <link rel="preconnect" href="https://lh3.googleusercontent.com" crossOrigin="anonymous" />
       <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
       {bannerImage && (
         <link
           rel="preload"
@@ -186,7 +202,7 @@ export default async function LpPage({ params }: LpPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
       />
-      <LandingPageClient page={page} />
+      <LandingPageClient page={page} initialSuggestedProducts={initialSuggestedProducts} />
     </>
   );
 }

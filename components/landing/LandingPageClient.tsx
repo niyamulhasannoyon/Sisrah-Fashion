@@ -27,6 +27,7 @@ import {
   Minus,
   Trash2,
   X,
+  Ruler,
 } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -50,6 +51,10 @@ interface ProductData {
     offerPrice?: number;
     image?: { url: string; public_id?: string };
   }>;
+  sizeGuide?: {
+    rows?: Array<{ size: string; chest?: string; length?: string; shoulder?: string; sleeve?: string }>;
+    note?: string;
+  };
   rating?: number;
   numReviews?: number;
 }
@@ -93,6 +98,69 @@ interface LandingPageData {
 
 interface LandingPageClientProps {
   page: LandingPageData;
+  initialSuggestedProducts?: ProductData[];
+}
+
+interface SizeMeasurements {
+  chest?: string;
+  length?: string;
+  shoulder?: string;
+  sleeve?: string;
+  extra?: Array<{ label: string; value: string }>;
+}
+
+function getSizeMeasurements(product: ProductData | null, sizeStr: string): SizeMeasurements | null {
+  if (!sizeStr) return null;
+  const cleanSize = sizeStr.trim().toUpperCase();
+
+  // 1. Catch directly from product sizeGuide configured on main website product detail
+  if (product?.sizeGuide?.rows && Array.isArray(product.sizeGuide.rows) && product.sizeGuide.rows.length > 0) {
+    const match = product.sizeGuide.rows.find(
+      (r: any) => r.size && r.size.trim().toUpperCase() === cleanSize
+    ) as Record<string, any> | undefined;
+    if (match) {
+      const result: SizeMeasurements = {
+        chest: match.chest ? String(match.chest) : undefined,
+        length: match.length ? String(match.length) : undefined,
+        shoulder: match.shoulder ? String(match.shoulder) : undefined,
+        sleeve: match.sleeve ? String(match.sleeve) : undefined,
+      };
+
+      const extra: Array<{ label: string; value: string }> = [];
+      Object.keys(match).forEach((k) => {
+        if (!['_id', 'size', 'chest', 'length', 'shoulder', 'sleeve'].includes(k) && match[k]) {
+          extra.push({ label: k, value: String(match[k]) });
+        }
+      });
+      if (extra.length > 0) result.extra = extra;
+
+      if (result.chest || result.length || result.shoulder || result.sleeve || (result.extra && result.extra.length > 0)) {
+        return result;
+      }
+    }
+  }
+
+  // 2. Default standard sizing measurements (matching main website product detail defaults)
+  const defaultMap: Record<string, SizeMeasurements> = {
+    S: { chest: '38"', length: '27"', shoulder: '17"' },
+    M: { chest: '40"', length: '28"', shoulder: '18"' },
+    L: { chest: '42"', length: '29"', shoulder: '19"' },
+    XL: { chest: '44"', length: '30"', shoulder: '20"' },
+    XXL: { chest: '46"', length: '31"', shoulder: '21"' },
+    XXXL: { chest: '48"', length: '32"', shoulder: '22"' },
+  };
+
+  if (defaultMap[cleanSize]) {
+    return defaultMap[cleanSize];
+  }
+
+  for (const k of Object.keys(defaultMap)) {
+    if (cleanSize.includes(k)) {
+      return defaultMap[k];
+    }
+  }
+
+  return null;
 }
 
 interface MainOrderItem {
@@ -340,11 +408,11 @@ function trackLpEvent(slug: string, eventType: 'pageview' | 'click', clickText?:
 }
 
 // ── Main Component ──
-export default function LandingPageClient({ page }: LandingPageClientProps) {
+export default function LandingPageClient({ page, initialSuggestedProducts = [] }: LandingPageClientProps) {
   const { settings, fetchSettings } = useSettingsStore();
   const [mounted, setMounted] = useState(false);
-  const [suggestedProducts, setSuggestedProducts] = useState<ProductData[]>([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+  const [suggestedProducts, setSuggestedProducts] = useState<ProductData[]>(initialSuggestedProducts);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(!initialSuggestedProducts || initialSuggestedProducts.length === 0);
   const suggestedScrollRef = useRef<HTMLDivElement>(null);
 
   const scrollSuggestions = (direction: 'left' | 'right') => {
@@ -422,8 +490,12 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
   const [isOrdering, setIsOrdering] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<any>(null);
 
-  // Load suggestions
+  // Load suggestions (defer or skip if pre-loaded server side)
   useEffect(() => {
+    if (initialSuggestedProducts && initialSuggestedProducts.length > 0) {
+      setLoadingSuggestions(false);
+      return;
+    }
     const loadSuggestions = async () => {
       try {
         const res = await fetch('/api/products');
@@ -442,7 +514,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       }
     };
     loadSuggestions();
-  }, [page.productIds]);
+  }, [page.productIds, initialSuggestedProducts]);
 
   // Fetch settings & track view
   useEffect(() => {
@@ -899,28 +971,44 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
       {/* ── Hero Banner Section ── */}
       <div className="relative bg-slate-950 overflow-hidden">
         <div className="aspect-[4/3] sm:aspect-[4/2] md:aspect-[21/9] relative">
-          <div className="sm:hidden w-full h-full absolute inset-0">
-            <Image
-              src={mobileHeroImage}
-              alt={heading}
-              fill
-              priority
-              fetchPriority="high"
-              sizes="100vw"
-              className="object-cover object-top"
-            />
-          </div>
-          <div className="hidden sm:block w-full h-full absolute inset-0">
-            <Image
-              src={desktopHeroImage}
-              alt={heading}
-              fill
-              priority
-              fetchPriority="high"
-              sizes="100vw"
-              className="object-cover object-top"
-            />
-          </div>
+          {mobileHeroImage !== desktopHeroImage ? (
+            <>
+              <div className="sm:hidden w-full h-full absolute inset-0">
+                <Image
+                  src={mobileHeroImage}
+                  alt={heading}
+                  fill
+                  priority
+                  fetchPriority="high"
+                  sizes="100vw"
+                  className="object-cover object-top"
+                />
+              </div>
+              <div className="hidden sm:block w-full h-full absolute inset-0">
+                <Image
+                  src={desktopHeroImage}
+                  alt={heading}
+                  fill
+                  priority
+                  fetchPriority="high"
+                  sizes="100vw"
+                  className="object-cover object-top"
+                />
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full absolute inset-0">
+              <Image
+                src={desktopHeroImage}
+                alt={heading}
+                fill
+                priority
+                fetchPriority="high"
+                sizes="100vw"
+                className="object-cover object-top"
+              />
+            </div>
+          )}
           {/* Strong Gradient Overlay for crisp text contrast */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent pointer-events-none" />
 
@@ -1110,7 +1198,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
 
                     {/* Size Selector */}
                     {primaryProduct.variants && primaryProduct.variants.length > 0 && (
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         <span className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500">
                           Size: <span className="text-gray-900">{item.size}</span>
                         </span>
@@ -1126,7 +1214,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                               }}
                               className={`min-w-[44px] min-h-[44px] px-3 py-2 rounded-xl border text-xs font-bold transition-all duration-200 cursor-pointer ${
                                 item.size === size
-                                  ? 'bg-gray-900 text-white border-gray-900 shadow-md'
+                                  ? 'bg-gray-900 text-white border-gray-900 shadow-md scale-105'
                                   : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 active:scale-[0.95]'
                               }`}
                             >
@@ -1134,6 +1222,45 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                             </button>
                           ))}
                         </div>
+
+                        {/* Selected Size Measurements Row */}
+                        {(() => {
+                          const m = getSizeMeasurements(primaryProduct, item.size);
+                          if (!m) return null;
+                          return (
+                            <div className="mt-2.5 bg-slate-900 text-white rounded-xl p-3 border border-slate-800 shadow-sm animate-in fade-in duration-200 font-sans">
+                              <div className="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-slate-800">
+                                <span className="text-[11px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                                  <Ruler size={14} className="shrink-0 text-amber-400" />
+                                  {item.size} সাইজ পরিমাপ ({item.size} Specs):
+                                </span>
+                                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                                  Garment Specs
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2 text-xs">
+                                {m.chest && (
+                                  <div className="flex items-center gap-1.5 bg-slate-800/90 px-2.5 py-1 rounded-lg border border-slate-700/80">
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Chest (চেস্ট):</span>
+                                    <span className="font-black text-amber-300">{m.chest}</span>
+                                  </div>
+                                )}
+                                {m.length && (
+                                  <div className="flex items-center gap-1.5 bg-slate-800/90 px-2.5 py-1 rounded-lg border border-slate-700/80">
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Length (দৈর্ঘ্য):</span>
+                                    <span className="font-black text-amber-300">{m.length}</span>
+                                  </div>
+                                )}
+                                {m.shoulder && (
+                                  <div className="flex items-center gap-1.5 bg-slate-800/90 px-2.5 py-1 rounded-lg border border-slate-700/80">
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Shoulder (কাধ):</span>
+                                    <span className="font-black text-amber-300">{m.shoulder}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 
@@ -1904,7 +2031,7 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                               onClick={() => setModalSize(s)}
                               className={`min-w-[40px] px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                                 modalSize === s
-                                  ? 'bg-gray-900 text-white border-gray-900 shadow-md'
+                                  ? 'bg-gray-900 text-white border-gray-900 shadow-md scale-105'
                                   : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
                               }`}
                             >
@@ -1912,6 +2039,39 @@ export default function LandingPageClient({ page }: LandingPageClientProps) {
                             </button>
                           ))}
                         </div>
+
+                        {/* Modal Size Measurements Row */}
+                        {(() => {
+                          const m = getSizeMeasurements(detailProduct, modalSize);
+                          if (!m) return null;
+                          return (
+                            <div className="mt-2 bg-slate-900 text-white rounded-xl p-2.5 border border-slate-800 shadow-sm font-sans">
+                              <div className="flex items-center justify-between gap-2 mb-1.5 pb-1 border-b border-slate-800">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                                  <Ruler size={13} className="shrink-0 text-amber-400" />
+                                  {modalSize} Specs:
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                                {m.chest && (
+                                  <span className="bg-slate-800 px-2 py-0.5 rounded text-amber-300 font-bold">
+                                    Chest: {m.chest}
+                                  </span>
+                                )}
+                                {m.length && (
+                                  <span className="bg-slate-800 px-2 py-0.5 rounded text-amber-300 font-bold">
+                                    Length: {m.length}
+                                  </span>
+                                )}
+                                {m.shoulder && (
+                                  <span className="bg-slate-800 px-2 py-0.5 rounded text-amber-300 font-bold">
+                                    Shoulder: {m.shoulder}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 

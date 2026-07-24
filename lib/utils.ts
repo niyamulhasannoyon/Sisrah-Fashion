@@ -31,6 +31,11 @@ export function getDirectImageLink(url: string | undefined | null): string {
   if (fileId) {
     return `https://lh3.googleusercontent.com/d/${fileId}`;
   }
-  
+
+  // Cloudinary performance optimization: add auto format & quality if absent
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('f_auto') && !url.includes('q_auto')) {
+    return url.replace('/upload/', '/upload/f_auto,q_auto/');
+  }
+
   return url;
 }
