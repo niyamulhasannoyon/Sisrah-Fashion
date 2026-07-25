@@ -17,6 +17,10 @@ export function LifestyleBanner() {
     setImgSrc(displayImage);
   }, [displayImage]);
 
+  const title = settings?.ethosTitle || "OUR ETHOS";
+  const headline = settings?.ethosHeadline || "জলবায়ুর সাথে সামঞ্জস্যপূর্ণ বুনন। সচেতন জীবনযাত্রা।";
+  const description = settings?.ethosDescription || "আমরা বিশ্বসেরা বাতাস চলাচলকারী কাপড়—যেমন খাঁটি লিনেন ও সুতি বেছে নিই এমন পোশাক তৈরি করতে যা আমাদের আবহাওয়াকে সম্মান করে। প্রতিটি সেলাই ও বোতামের উদ্দেশ্য একটাই: আপনাকে স্বাচ্ছন্দ্যে নিঃশ্বাস নিতে দেওয়া।";
+
   return (
     <section className="w-full bg-[#121214] text-white py-16 lg:py-24 border-t border-white/10">
       <div className="mx-auto grid max-w-7xl gap-8 lg:gap-12 px-4 sm:px-6 lg:px-8 md:grid-cols-2 items-center">
@@ -37,18 +41,18 @@ export function LifestyleBanner() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
         </div>
 
-        {/* Brand Ethos Text (English UI tag + Bengali emotional storytelling copy) */}
+        {/* Brand Ethos Text */}
         <div className="flex flex-col gap-4 sm:gap-5">
           <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#A31F24]">
-            OUR ETHOS
+            {title}
           </span>
 
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight font-bengali text-white">
-            {settings?.ethosHeadline || "জলবায়ুর সাথে সামঞ্জস্যপূর্ণ বুনন। সচেতন জীবনযাত্রা।"}
+            {headline}
           </h2>
 
           <p className="text-xs sm:text-sm lg:text-base text-gray-300 leading-relaxed font-bengali font-normal">
-            {settings?.ethosDescription || "আমরা বিশ্বসেরা বাতাস চলাচলকারী কাপড়—যেমন খাঁটি লিনেন ও সুতি বেছে নিই এমন পোশাক তৈরি করতে যা আমাদের আবহাওয়াকে সম্মান করে। প্রতিটি সেলাই ও বোতামের উদ্দেশ্য একটাই: আপনাকে স্বাচ্ছন্দ্যে নিঃশ্বাস নিতে দেওয়া।"}
+            {description}
           </p>
 
           <div className="pt-2">

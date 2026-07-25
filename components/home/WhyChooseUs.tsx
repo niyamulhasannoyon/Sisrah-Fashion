@@ -1,35 +1,41 @@
 'use client';
 
 import { Truck, Award, RefreshCw, Banknote } from 'lucide-react';
-
-const features = [
-  {
-    icon: Banknote,
-    title: 'Cash on Delivery',
-    bnTitle: 'ক্যাশ অন ডেলিভারি',
-    description: 'পণ্য হাতে পেয়ে দেখে নেওয়ার সুবিধা সারা বাংলাদেশে।',
-  },
-  {
-    icon: Truck,
-    title: 'Free Delivery',
-    bnTitle: 'ফ্রি ডেলিভারি ৳২০০০+',
-    description: '৳২০০০ বা তার বেশি অর্ডারে সারা দেশে ডেলিভারি সম্পূর্ণ ফ্রি।',
-  },
-  {
-    icon: RefreshCw,
-    title: 'Easy 7-Day Exchange',
-    bnTitle: '৭ দিনের সহজ এক্সচেঞ্জ',
-    description: 'সাইজ বা ফিটিং নিয়ে সমস্যা হলে ৭ দিনের মধ্যে সহজে এক্সচেঞ্জ।',
-  },
-  {
-    icon: Award,
-    title: '100% Original Fabric',
-    bnTitle: '১০০% প্রিমিয়াম কোয়ালিটি',
-    description: 'আরামদায়ক ফেব্রিকস ও ফিনিশিংয়ের গ্যারান্টি।',
-  },
-];
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export function WhyChooseUs() {
+  const { settings } = useSettingsStore();
+
+  const title = settings?.whyShopTitle || 'WHY SHOP WITH US';
+  const headline = settings?.whyShopHeadline || 'আপনার নির্ভরযোগ্য শপিং অভিজ্ঞতা';
+
+  const features = [
+    {
+      icon: Banknote,
+      title: settings?.whyShopFeature1Title || 'Cash on Delivery',
+      bnTitle: settings?.whyShopFeature1BnTitle || 'ক্যাশ অন ডেলিভারি',
+      description: settings?.whyShopFeature1Desc || 'পণ্য হাতে পেয়ে দেখে নেওয়ার সুবিধা সারা বাংলাদেশে।',
+    },
+    {
+      icon: Truck,
+      title: settings?.whyShopFeature2Title || 'Free Delivery',
+      bnTitle: settings?.whyShopFeature2BnTitle || 'ফ্রি ডেলিভারি ৳২০০০+',
+      description: settings?.whyShopFeature2Desc || '৳২০০০ বা তার বেশি অর্ডারে সারা দেশে ডেলিভারি সম্পূর্ণ ফ্রি।',
+    },
+    {
+      icon: RefreshCw,
+      title: settings?.whyShopFeature3Title || 'Easy 7-Day Exchange',
+      bnTitle: settings?.whyShopFeature3BnTitle || '৭ দিনের সহজ এক্সচেঞ্জ',
+      description: settings?.whyShopFeature3Desc || 'সাইজ বা ফিটিং নিয়ে সমস্যা হলে ৭ দিনের মধ্যে সহজে এক্সচেঞ্জ।',
+    },
+    {
+      icon: Award,
+      title: settings?.whyShopFeature4Title || '100% Original Fabric',
+      bnTitle: settings?.whyShopFeature4BnTitle || '১০০% প্রিমিয়াম কোয়ালিটি',
+      description: settings?.whyShopFeature4Desc || 'আরামদায়ক ফেব্রিকস ও ফিনিশিংয়ের গ্যারান্টি।',
+    },
+  ];
+
   return (
     <section className="bg-slate-50/60 py-12 sm:py-16 border-t border-slate-100 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -37,10 +43,10 @@ export function WhyChooseUs() {
         {/* Header Block */}
         <div className="text-center mb-10 sm:mb-12 flex flex-col items-center justify-center">
           <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#A31F24] mb-1.5">
-            WHY SHOP WITH US
+            {title}
           </span>
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 font-bengali">
-            আপনার নির্ভরযোগ্য শপিং অভিজ্ঞতা
+            {headline}
           </h2>
           <div className="w-10 h-0.5 bg-[#A31F24] mt-3 rounded-full" />
         </div>

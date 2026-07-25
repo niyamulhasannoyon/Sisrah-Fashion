@@ -16,8 +16,33 @@ const SettingsSchema = new Schema({
   // Customizable homepage copy
   heroHeadline: String,
   heroSubheadline: String,
+
+  // Ethos Section Copy
+  ethosTitle: String,
   ethosHeadline: String,
   ethosDescription: String,
+
+  // Why Shop With Us Section Copy
+  whyShopTitle: String,
+  whyShopHeadline: String,
+  whyShopFeature1Title: String,
+  whyShopFeature1BnTitle: String,
+  whyShopFeature1Desc: String,
+  whyShopFeature2Title: String,
+  whyShopFeature2BnTitle: String,
+  whyShopFeature2Desc: String,
+  whyShopFeature3Title: String,
+  whyShopFeature3BnTitle: String,
+  whyShopFeature3Desc: String,
+  whyShopFeature4Title: String,
+  whyShopFeature4BnTitle: String,
+  whyShopFeature4Desc: String,
+
+  // Community Gallery Section Copy
+  communityTitle: String,
+  communityHeadline: String,
+  communitySubheadline: String,
+  instagramHandle: String,
   
   // Footer / contact
   contactEmail: String,

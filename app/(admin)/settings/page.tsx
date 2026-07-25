@@ -34,8 +34,27 @@ export default function AdminSettings() {
     categoryImageFusion: '',
     heroHeadline: '',
     heroSubheadline: '',
+    ethosTitle: '',
     ethosHeadline: '',
     ethosDescription: '',
+    whyShopTitle: '',
+    whyShopHeadline: '',
+    whyShopFeature1Title: '',
+    whyShopFeature1BnTitle: '',
+    whyShopFeature1Desc: '',
+    whyShopFeature2Title: '',
+    whyShopFeature2BnTitle: '',
+    whyShopFeature2Desc: '',
+    whyShopFeature3Title: '',
+    whyShopFeature3BnTitle: '',
+    whyShopFeature3Desc: '',
+    whyShopFeature4Title: '',
+    whyShopFeature4BnTitle: '',
+    whyShopFeature4Desc: '',
+    communityTitle: '',
+    communityHeadline: '',
+    communitySubheadline: '',
+    instagramHandle: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -191,6 +210,7 @@ export default function AdminSettings() {
               { id: 'seo', label: 'SEO & Analytics', icon: Sliders, desc: 'Meta Pixel & GA4 IDs' },
               { id: 'announcement', label: 'Announcements', icon: Sliders, desc: 'Top promo bar config' },
               { id: 'hero', label: 'Hero Banner & Story', icon: ImageIcon, desc: 'Homepage slides & copy' },
+              { id: 'homepage_sections', label: 'Why Shop, Ethos & Insta', icon: Sliders, desc: 'Dynamic section copy' },
               { id: 'categories', label: 'Category Banners', icon: Layers, desc: 'Grid banner backgrounds' },
               { id: 'shipping', label: 'Shipping & Delivery', icon: Truck, desc: 'Rates & free shipping rules' },
               { id: 'community', label: 'Community Gallery', icon: Users, desc: 'Tag-to-be-featured uploads' }
@@ -412,6 +432,274 @@ export default function AdminSettings() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Tab: Homepage Copy & Ethos Sections */}
+            {activeTab === 'homepage_sections' && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {/* 1. WHY SHOP WITH US Section */}
+                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                  <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                    "WHY SHOP WITH US" Section (আপনার নির্ভরযোগ্য শপিং অভিজ্ঞতা)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Section Sub-Title (English)</label>
+                      <input 
+                        type="text" 
+                        value={settings.whyShopTitle || ''}
+                        onChange={e => setSettings({...settings, whyShopTitle: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm"
+                        placeholder="WHY SHOP WITH US"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Main Headline (Bengali)</label>
+                      <input 
+                        type="text" 
+                        value={settings.whyShopHeadline || ''}
+                        onChange={e => setSettings({...settings, whyShopHeadline: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm font-bengali"
+                        placeholder="আপনার নির্ভরযোগ্য শপিং অভিজ্ঞতা"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 4 Features Editor */}
+                  <div className="space-y-4 pt-2">
+                    <p className="text-xs font-black uppercase text-slate-400 tracking-wider">4 Features List</p>
+                    
+                    {/* Feature 1 */}
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                      <span className="text-xs font-bold text-slate-700">Feature #1: Cash on Delivery</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input 
+                          type="text"
+                          placeholder="Sub-label (e.g. Cash on Delivery)"
+                          value={settings.whyShopFeature1Title || ''}
+                          onChange={e => setSettings({...settings, whyShopFeature1Title: e.target.value})}
+                          className="p-2.5 bg-white border border-slate-200 rounded-lg text-xs"
+                        />
+                        <input 
+                          type="text"
+                          placeholder="Bengali Title (e.g. ক্যাশ অন ডেলিভারি)"
+                          value={settings.whyShopFeature1BnTitle || ''}
+                          onChange={e => setSettings({...settings, whyShopFeature1BnTitle: e.target.value})}
+                          className="p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bengali"
+                        />
+                      </div>
+                      <input 
+                        type="text"
+                        placeholder="Description (e.g. পণ্য হাতে পেয়ে দেখে নেওয়ার সুবিধা সারা বাংলাদেশে।)"
+                        value={settings.whyShopFeature1Desc || ''}
+                        onChange={e => setSettings({...settings, whyShopFeature1Desc: e.target.value})}
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bengali"
+                      />
+                    </div>
+
+                    {/* Feature 2 */}
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                      <span className="text-xs font-bold text-slate-700">Feature #2: Free Delivery</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input 
+                          type="text"
+                          placeholder="Sub-label (e.g. Free Delivery)"
+                          value={settings.whyShopFeature2Title || ''}
+                          onChange={e => setSettings({...settings, whyShopFeature2Title: e.target.value})}
+                          className="p-2.5 bg-white border border-slate-200 rounded-lg text-xs"
+                        />
+                        <input 
+                          type="text"
+                          placeholder="Bengali Title (e.g. ফ্রি ডেলিভারি ৳২০০০+)"
+                          value={settings.whyShopFeature2BnTitle || ''}
+                          onChange={e => setSettings({...settings, whyShopFeature2BnTitle: e.target.value})}
+                          className="p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bengali"
+                        />
+                      </div>
+                      <input 
+                        type="text"
+                        placeholder="Description (e.g. ৳২০০০ বা তার বেশি অর্ডারে সারা দেশে ডেলিভারি সম্পূর্ণ ফ্রি।)"
+                        value={settings.whyShopFeature2Desc || ''}
+                        onChange={e => setSettings({...settings, whyShopFeature2Desc: e.target.value})}
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bengali"
+                      />
+                    </div>
+
+                    {/* Feature 3 */}
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                      <span className="text-xs font-bold text-slate-700">Feature #3: 7-Day Exchange</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input 
+                          type="text"
+                          placeholder="Sub-label (e.g. Easy 7-Day Exchange)"
+                          value={settings.whyShopFeature3Title || ''}
+                          onChange={e => setSettings({...settings, whyShopFeature3Title: e.target.value})}
+                          className="p-2.5 bg-white border border-slate-200 rounded-lg text-xs"
+                        />
+                        <input 
+                          type="text"
+                          placeholder="Bengali Title (e.g. ৭ দিনের সহজ এক্সচেঞ্জ)"
+                          value={settings.whyShopFeature3BnTitle || ''}
+                          onChange={e => setSettings({...settings, whyShopFeature3BnTitle: e.target.value})}
+                          className="p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bengali"
+                        />
+                      </div>
+                      <input 
+                        type="text"
+                        placeholder="Description (e.g. সাইজ বা ফিটিং নিয়ে সমস্যা হলে ৭ দিনের মধ্যে সহজে এক্সচেঞ্জ।)"
+                        value={settings.whyShopFeature3Desc || ''}
+                        onChange={e => setSettings({...settings, whyShopFeature3Desc: e.target.value})}
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bengali"
+                      />
+                    </div>
+
+                    {/* Feature 4 */}
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                      <span className="text-xs font-bold text-slate-700">Feature #4: 100% Original Fabric</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input 
+                          type="text"
+                          placeholder="Sub-label (e.g. 100% Original Fabric)"
+                          value={settings.whyShopFeature4Title || ''}
+                          onChange={e => setSettings({...settings, whyShopFeature4Title: e.target.value})}
+                          className="p-2.5 bg-white border border-slate-200 rounded-lg text-xs"
+                        />
+                        <input 
+                          type="text"
+                          placeholder="Bengali Title (e.g. ১০০% প্রিমিয়াম কোয়ালিটি)"
+                          value={settings.whyShopFeature4BnTitle || ''}
+                          onChange={e => setSettings({...settings, whyShopFeature4BnTitle: e.target.value})}
+                          className="p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bengali"
+                        />
+                      </div>
+                      <input 
+                        type="text"
+                        placeholder="Description (e.g. আরামদায়ক ফেব্রিকস ও ফিনিশিংয়ের গ্যারান্টি।)"
+                        value={settings.whyShopFeature4Desc || ''}
+                        onChange={e => setSettings({...settings, whyShopFeature4Desc: e.target.value})}
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bengali"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. COMMUNITY GALLERY Section */}
+                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                  <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                    "COMMUNITY GALLERY" Section (আমাদের হ্যাপি কাস্টমারদের স্টাইল)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Section Sub-Title (English)</label>
+                      <input 
+                        type="text" 
+                        value={settings.communityTitle || ''}
+                        onChange={e => setSettings({...settings, communityTitle: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm"
+                        placeholder="COMMUNITY GALLERY"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Main Headline (Bengali)</label>
+                      <input 
+                        type="text" 
+                        value={settings.communityHeadline || ''}
+                        onChange={e => setSettings({...settings, communityHeadline: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm font-bengali"
+                        placeholder="আমাদের হ্যাপি কাস্টমারদের স্টাইল ."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Instagram Handle</label>
+                      <input 
+                        type="text" 
+                        value={settings.instagramHandle || ''}
+                        onChange={e => setSettings({...settings, instagramHandle: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm font-sans"
+                        placeholder="@as_sidrat_official"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Instagram Sub-Description Text (Bengali)</label>
+                      <input 
+                        type="text" 
+                        value={settings.communitySubheadline || ''}
+                        onChange={e => setSettings({...settings, communitySubheadline: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm font-bengali"
+                        placeholder="ইনস্টাগ্রামে আমাদের ফলো করুন @as_sidrat_official নতুন সব কালেকশনের আউটফিট ইনস্পিরেশনের জন্য।"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. OUR ETHOS Section */}
+                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                  <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                    "OUR ETHOS" Section (জলবায়ুর সাথে সামঞ্জস্যপূর্ণ বুনন)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Section Sub-Title (English)</label>
+                      <input 
+                        type="text" 
+                        value={settings.ethosTitle || ''}
+                        onChange={e => setSettings({...settings, ethosTitle: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm"
+                        placeholder="OUR ETHOS"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Ethos Headline (Bengali)</label>
+                      <input 
+                        type="text" 
+                        value={settings.ethosHeadline || ''}
+                        onChange={e => setSettings({...settings, ethosHeadline: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm font-bengali"
+                        placeholder="জলবায়ুর সাথে সামঞ্জস্যপূর্ণ বুনন। সচেতন জীবনযাত্রা।"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Ethos Description Story (Bengali)</label>
+                    <textarea 
+                      rows={4}
+                      value={settings.ethosDescription || ''}
+                      onChange={e => setSettings({...settings, ethosDescription: e.target.value})}
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm font-bengali leading-relaxed"
+                      placeholder="আমরা বিশ্বসেরা বাতাস চলাচলকারী কাপড়—যেমন খাঁটি লিনেন ও সুতি বেছে নিই এমন পোশাক তৈরি করতে যা আমাদের আবহাওয়াকে সম্মান করে। প্রতিটি সেলাই ও বোতামের উদ্দেশ্য একটাই: আপনাকে স্বাচ্ছন্দ্যে নিঃশ্বাস নিতে দেওয়া।"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Ethos Banner Image</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={settings.ethosImage || ''}
+                        onChange={e => setSettings({...settings, ethosImage: e.target.value})}
+                        className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white text-sm"
+                        placeholder="Ethos Image URL..."
+                      />
+                      <label className="px-4 py-3 bg-slate-100 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-200 transition-all flex items-center gap-2 shrink-0">
+                        <UploadCloud size={18} />
+                        <span className="text-[10px] font-black uppercase">Upload</span>
+                        <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                          if (!e.target.files?.[0]) return;
+                          setSaving(true);
+                          const data = await uploadToCloudinary(e.target.files[0]);
+                          setSettings({...settings, ethosImage: data.secure_url});
+                          setSaving(false);
+                        }} />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             )}
 

@@ -8,6 +8,11 @@ import { Image as ImageIcon } from 'lucide-react';
 export function SocialGallery() {
   const { settings } = useSettingsStore();
 
+  const title = settings?.communityTitle || 'COMMUNITY GALLERY';
+  const headline = settings?.communityHeadline || 'আমাদের হ্যাপি কাস্টমারদের স্টাইল .';
+  const subheadline = settings?.communitySubheadline || 'ইনস্টাগ্রামে আমাদের ফলো করুন @as_sidrat_official নতুন সব কালেকশনের আউটফিট ইনস্পিরেশনের জন্য।';
+  const instaHandle = settings?.instagramHandle || '@as_sidrat_official';
+
   const defaultImages = [
     { url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop' },
     { url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop' },
@@ -27,23 +32,23 @@ export function SocialGallery() {
         {/* Header Block */}
         <div className="mb-10 text-center flex flex-col items-center">
           <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#A31F24] mb-1">
-            COMMUNITY GALLERY
+            {title}
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 font-bengali">
-            আমাদের হ্যাপি কাস্টমারদের স্টাইল <span className="text-[#A31F24]">.</span>
+            {headline}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 font-bengali mt-1.5 max-w-md">
-            ইনস্টাগ্রামে আমাদের ফলো করুন <span className="font-bold text-slate-900 font-sans">@as_sidrat_official</span> নতুন সব কালেকশনের আউটফিট ইনস্পিরেশনের জন্য।
+          <p className="text-xs sm:text-sm text-slate-600 font-bengali mt-1.5 max-w-lg">
+            {subheadline}
           </p>
         </div>
         
         {/* Horizontal Scroll Layout */}
         <div className="flex overflow-x-auto gap-4 pb-6 px-4 -mx-4 custom-scrollbar snap-x">
-          {images.map((img, idx) => (
+          {images.map((img: any, idx: number) => (
             <div key={idx} className="relative w-60 sm:w-72 md:w-80 aspect-[4/5] shrink-0 snap-center rounded-2xl overflow-hidden group cursor-pointer shadow-xs border border-slate-100">
               <Image 
                 src={img.url} 
-                alt="AS SIDRAT Community Style" 
+                alt={`AS SIDRAT Community Style ${idx + 1}`} 
                 fill
                 sizes="(max-width: 768px) 240px, 320px"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -53,7 +58,7 @@ export function SocialGallery() {
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
                 <ImageIcon className="text-white" size={28} />
                 <span className="text-white text-[10px] font-bold uppercase tracking-widest border-b border-white pb-0.5">
-                  SHOP THE LOOK
+                  SHOP THE LOOK ({instaHandle})
                 </span>
               </div>
             </div>
