@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Settings,
-  LogOut, Bell, Search, Tag, BarChart3, MessageSquare, UserCog, FileText,
+  LogOut, Bell, Search, Tag, BarChart3, MessageSquare, UserCog, FileText, AlertTriangle,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -21,6 +21,7 @@ const ALL_NAV_ITEMS = [
   { key: 'dashboard',     name: 'Dashboard',     href: '/dashboard',     icon: LayoutDashboard },
   { key: 'analytics',     name: 'Analytics',     href: '/analytics',     icon: BarChart3 },
   { key: 'products',      name: 'Products',      href: '/products',      icon: Package },
+  { key: 'inventory',     name: 'Stock Control', href: '/inventory',     icon: AlertTriangle },
   { key: 'orders',        name: 'Orders',        href: '/orders',        icon: ShoppingCart },
   { key: 'customers',     name: 'Customers',     href: '/users',         icon: Users },
   { key: 'landing-pages', name: 'Landing Pages', href: '/landing-pages', icon: FileText },
