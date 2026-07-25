@@ -1,4 +1,4 @@
-import { NextResponse } from 'next';
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';

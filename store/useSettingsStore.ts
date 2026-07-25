@@ -16,8 +16,30 @@ interface Settings {
   // Customizable homepage copy
   heroHeadline?: string;
   heroSubheadline?: string;
+
+  ethosTitle?: string;
   ethosHeadline?: string;
   ethosDescription?: string;
+
+  whyShopTitle?: string;
+  whyShopHeadline?: string;
+  whyShopFeature1Title?: string;
+  whyShopFeature1BnTitle?: string;
+  whyShopFeature1Desc?: string;
+  whyShopFeature2Title?: string;
+  whyShopFeature2BnTitle?: string;
+  whyShopFeature2Desc?: string;
+  whyShopFeature3Title?: string;
+  whyShopFeature3BnTitle?: string;
+  whyShopFeature3Desc?: string;
+  whyShopFeature4Title?: string;
+  whyShopFeature4BnTitle?: string;
+  whyShopFeature4Desc?: string;
+
+  communityTitle?: string;
+  communityHeadline?: string;
+  communitySubheadline?: string;
+  instagramHandle?: string;
   
   // Footer / contact
   contactEmail?: string;

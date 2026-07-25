@@ -1,4 +1,4 @@
-import { NextResponse } from 'next';
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 
 export const dynamic = 'force-dynamic';
