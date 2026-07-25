@@ -53,8 +53,18 @@ export function HeroSection() {
 
             {/* Main Headline (Bengali font tuned for crisp readability) */}
             <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white leading-snug sm:leading-tight lg:leading-[1.18] font-bengali drop-shadow-sm">
+              <span className="sr-only">AS SIDRAT | Premium T-Shirt, Shirt & BD Clothing Brand — </span>
               {headline}
             </h1>
+
+            {/* Hidden Semantic Keyword Block for Search Crawlers */}
+            <div className="sr-only">
+              <h2>AS SIDRAT — Premium T-Shirt, Linen Shirt & BD Clothing Store</h2>
+              <p>
+                Shop AS SIDRAT (Sidrat, Sidrat Fashion) for premium t-shirts, organic cotton t-shirts, 
+                bd t-shirts, linen shirts, gents shirts, and high-quality minimalist clothes with cash on delivery in Bangladesh.
+              </p>
+            </div>
 
             {/* Subtitle / Description (Bengali font) */}
             <p className="text-xs sm:text-sm lg:text-base text-gray-300 leading-relaxed font-bengali max-w-xl font-normal">

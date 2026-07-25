@@ -19,6 +19,10 @@ import Product from '@/models/Product';
 import LandingPage from '@/models/LandingPage';
 import Settings from '@/models/Settings';
 
+// Enable Incremental Static Regeneration (ISR) so Next.js caches sitemap.xml for 24h
+// This ensures Googlebot gets an instant response without database cold-start timeouts
+export const revalidate = 86400;
+
 // Base URL configuration
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app';
 
@@ -170,7 +174,7 @@ function generateLandingPageEntries(
 ): MetadataRoute.Sitemap {
   return pages.map(page => ({
     url: `${BASE_URL}/lp/${page.slug}`,
-    lastModified: new Date(page.lastmod),
+    lastModified: page.lastmod,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));
@@ -239,7 +243,7 @@ function generateProductPages(
 ): MetadataRoute.Sitemap {
   return products.map(product => ({
     url: `${BASE_URL}/product/${product.slug}`,
-    lastModified: new Date(product.lastmod),
+    lastModified: product.lastmod,
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }));

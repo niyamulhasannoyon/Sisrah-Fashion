@@ -6,14 +6,15 @@ import { Loader2 } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Shop Premium Minimalist Collection - AS SIDRAT',
-  description: 'Explore the complete AS SIDRAT collection. Premium linen shirts, tailored pants, panjabis, and kaftans designed for tropical weather and modern aesthetics.',
+  title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT BD',
+  description: 'Explore the complete AS SIDRAT collection. Premium t-shirts, bd t-shirts, linen shirts, gents shirts, pants & modern clothes with Cash on Delivery in Bangladesh.',
+  keywords: ['sidrat', 'as sidrat', 't shirt', 't-shirt', 'premium t shirt', 'bd t shirt', 'shirt', 'cloths', 'clothes', 'AS SIDRAT Clothing'],
   alternates: {
     canonical: '/shop',
   },
   openGraph: {
-    title: 'Shop Premium Minimalist Collection - AS SIDRAT',
-    description: 'Explore the complete AS SIDRAT collection. Premium linen shirts, tailored pants, panjabis, and kaftans designed for tropical weather.',
+    title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT BD',
+    description: 'Explore the complete AS SIDRAT collection. Premium t-shirts, bd t-shirts, linen shirts & minimalist clothes with Cash on Delivery.',
     url: '/shop',
     type: 'website',
     siteName: 'AS SIDRAT',
@@ -21,8 +22,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Shop Premium Minimalist Collection - AS SIDRAT',
-    description: 'Explore the complete AS SIDRAT collection. Premium linen shirts, tailored pants, panjabis, and kaftans designed for tropical weather.',
+    title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT BD',
+    description: 'Explore the complete AS SIDRAT collection. Premium t-shirts, bd t-shirts, linen shirts & minimalist clothes with Cash on Delivery.',
   }
 };
 

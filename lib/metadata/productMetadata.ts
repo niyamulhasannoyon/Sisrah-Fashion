@@ -76,15 +76,22 @@ export function generateProductMetadata(product: ProductMetadataInput, baseUrl: 
   };
 
   return {
-    title: `${productTitle} - AS SIDRAT | Buy Shirt Online Bangladesh`,
+    title: `${productTitle} - AS SIDRAT | Premium T-Shirt & Shirt BD`,
     description: productDescription,
     keywords: [
       productTitle,
       product.category || 'Fashion',
       ...(product.tags || []),
+      'sidrat',
+      'as sidrat',
+      't shirt',
+      'premium t shirt',
+      'bd t shirt',
+      'shirt',
+      'cloths',
       'AS SIDRAT',
+      'AS SIDRAT Clothing',
       'Premium Fashion Bangladesh',
-      'Premium Clothing Dhaka',
     ],
     metadataBase: new URL(baseUrl),
     alternates: {
