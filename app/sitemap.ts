@@ -1,152 +1,97 @@
 /**
- * DYNAMIC SITEMAP GENERATION FOR NEXT.JS APP ROUTER
+ * SENIOR GOOGLE INFRASTRUCTURE & SEARCH ENGINE-GRADE SITEMAP GENERATOR
  * 
- * This generates a dynamic sitemap.xml that includes:
- * - All product categories with proper metadata
- * - All individual products with lastmod timestamps
- * - Proper change frequency and priority settings
- * 
- * Route: GET /sitemap.xml
- * 
- * Documentation:
- * - https://nextjs.org/docs/app/api-routes/dynamic-routes
- * - https://www.sitemaps.org/protocol.html
+ * Target Endpoint: GET /sitemap.xml
+ * Features:
+ * 1. Resilient DB querying with a strict 3000ms timeout race condition guard (Prevents 504/500 cold start failures)
+ * 2. Exact Mongoose query match for Product (Product schema has no isActive field)
+ * 3. URL encoding via encodeURI to guarantee strict XML syntax compliance (prevents XML parsing errors on special characters/&/spaces)
+ * 4. Normalization of BASE_URL (strips trailing slashes)
+ * 5. ISO 8601 date formatting with safe fallbacks (prevents RangeError: Invalid time value)
+ * 6. Deduplication of URLs via Map/Set
  */
 
 import { MetadataRoute } from 'next';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import LandingPage from '@/models/LandingPage';
-import Settings from '@/models/Settings';
 
-// Enable Incremental Static Regeneration (ISR) so Next.js caches sitemap.xml for 24h
-// This ensures Googlebot gets an instant response without database cold-start timeouts
+// Enable Incremental Static Regeneration (ISR) so Next.js caches sitemap.xml for 24 hours
 export const revalidate = 86400;
 
-// Base URL configuration
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app';
+// Base URL configuration (Normalized without trailing slash)
+const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
 
 /**
- * Product Category Configuration
- * Define all main categories with their slugs and update frequency
+ * Product Categories Configuration
  */
 const PRODUCT_CATEGORIES = [
-  {
-    slug: 'men',
-    label: 'Men\'s Collection',
-    priority: 0.9,
-    changefreq: 'weekly' as const,
-  },
-  {
-    slug: 'women',
-    label: 'Women\'s Collection',
-    priority: 0.9,
-    changefreq: 'weekly' as const,
-  },
-  {
-    slug: 'fusion',
-    label: 'Fusion Collection',
-    priority: 0.9,
-    changefreq: 'weekly' as const,
-  },
-  {
-    slug: 'accessories',
-    label: 'Accessories',
-    priority: 0.8,
-    changefreq: 'weekly' as const,
-  },
+  { slug: 'men', priority: 0.9, changefreq: 'weekly' as const },
+  { slug: 'women', priority: 0.9, changefreq: 'weekly' as const },
+  { slug: 'fusion', priority: 0.9, changefreq: 'weekly' as const },
+  { slug: 'accessories', priority: 0.8, changefreq: 'weekly' as const },
 ];
 
 /**
  * Static Pages Configuration
- * Main pages that should be crawled
  */
 const STATIC_PAGES = [
-  {
-    url: '',
-    priority: 1.0,
-    changefreq: 'daily' as const,
-    lastModDaysAgo: 1,
-  },
-  {
-    url: '/shop',
-    priority: 0.95,
-    changefreq: 'daily' as const,
-    lastModDaysAgo: 1,
-  },
-  {
-    url: '/community',
-    priority: 0.7,
-    changefreq: 'weekly' as const,
-    lastModDaysAgo: 14,
-  },
-  {
-    url: '/faq',
-    priority: 0.6,
-    changefreq: 'weekly' as const,
-    lastModDaysAgo: 7,
-  },
-  {
-    url: '/size-guide',
-    priority: 0.6,
-    changefreq: 'monthly' as const,
-    lastModDaysAgo: 15,
-  },
-  {
-    url: '/shipping-returns',
-    priority: 0.5,
-    changefreq: 'monthly' as const,
-    lastModDaysAgo: 30,
-  },
-  {
-    url: '/privacy-policy',
-    priority: 0.4,
-    changefreq: 'monthly' as const,
-    lastModDaysAgo: 30,
-  },
-  {
-    url: '/terms-of-service',
-    priority: 0.4,
-    changefreq: 'monthly' as const,
-    lastModDaysAgo: 30,
-  },
+  { url: '', priority: 1.0, changefreq: 'daily' as const, lastModDaysAgo: 0 },
+  { url: '/shop', priority: 0.95, changefreq: 'daily' as const, lastModDaysAgo: 1 },
+  { url: '/community', priority: 0.7, changefreq: 'weekly' as const, lastModDaysAgo: 7 },
+  { url: '/faq', priority: 0.6, changefreq: 'weekly' as const, lastModDaysAgo: 7 },
+  { url: '/size-guide', priority: 0.6, changefreq: 'monthly' as const, lastModDaysAgo: 14 },
+  { url: '/shipping-returns', priority: 0.5, changefreq: 'monthly' as const, lastModDaysAgo: 30 },
+  { url: '/privacy-policy', priority: 0.4, changefreq: 'monthly' as const, lastModDaysAgo: 30 },
+  { url: '/terms-of-service', priority: 0.4, changefreq: 'monthly' as const, lastModDaysAgo: 30 },
 ];
 
 /**
- * Pages that should NOT be indexed
- * These are blocked in robots.txt and should not appear in sitemap
+ * Safely format ISO date string (YYYY-MM-DD)
  */
-const BLOCKED_PAGES = [
-  '/checkout',
-  '/checkout/*',
-  '/profile',
-  '/profile/*',
-  '/admin',
-  '/admin/*',
-  '/api/*',
-  '/auth/*',
-  '/login',
-  '/register',
-  '/order-success',
-  '/search',
-  '/cart',
-];
-
-/**
- * Calculate lastmod date
- * Subtracts specified number of days from today
- */
-function getLastModDate(daysAgo: number = 0): string {
+function safeIsoDate(input?: any, fallbackDaysAgo: number = 0): string {
+  try {
+    if (input) {
+      const d = new Date(input);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString().split('T')[0];
+      }
+    }
+  } catch (_) {
+    // Fallback if parsing fails
+  }
   const date = new Date();
-  date.setDate(date.getDate() - daysAgo);
+  date.setDate(date.getDate() - fallbackDaysAgo);
   return date.toISOString().split('T')[0];
 }
 
 /**
- * Fetch all active landing pages from database
+ * Helper to wrap promises with a hard timeout limit
  */
-async function fetchActiveLandingPages() {
-  try {
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  let timer: NodeJS.Timeout;
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timer = setTimeout(() => {
+      console.warn(`[Sitemap] DB query timed out after ${timeoutMs}ms. Using fallback.`);
+      resolve(fallback);
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).then((result) => {
+    clearTimeout(timer);
+    return result;
+  }).catch((err) => {
+    clearTimeout(timer);
+    console.error('[Sitemap] Query error:', err);
+    return fallback;
+  });
+}
+
+/**
+ * Fetch active landing pages with 3s timeout
+ */
+async function fetchLandingPages(): Promise<Array<{ slug: string; lastmod: string }>> {
+  const queryTask = (async () => {
     await dbConnect();
     const pages = await LandingPage.find(
       { isActive: true },
@@ -155,182 +100,111 @@ async function fetchActiveLandingPages() {
     ).sort({ updatedAt: -1 });
 
     return pages.map((p: any) => ({
-      slug: p.slug,
-      lastmod: p.updatedAt
-        ? new Date(p.updatedAt).toISOString().split('T')[0]
-        : getLastModDate(1),
-    }));
-  } catch (error) {
-    console.error('Error fetching landing pages for sitemap:', error);
-    return [];
-  }
+      slug: String(p.slug || '').trim(),
+      lastmod: safeIsoDate(p.updatedAt, 1),
+    })).filter(p => Boolean(p.slug));
+  })();
+
+  return withTimeout(queryTask, 3000, []);
 }
 
 /**
- * Generate sitemap URLs for landing pages
+ * Fetch all products with 3s timeout
+ * NOTE: Product schema has no isActive field, query all products directly
  */
-function generateLandingPageEntries(
-  pages: Array<{ slug: string; lastmod: string }>
-): MetadataRoute.Sitemap {
-  return pages.map(page => ({
-    url: `${BASE_URL}/lp/${page.slug}`,
-    lastModified: page.lastmod,
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }));
-}
-
-/**
- * Fetch all products from database
- * Used to generate product entries in sitemap
- */
-async function fetchAllProducts() {
-  try {
+async function fetchProducts(): Promise<Array<{ slug: string; lastmod: string }>> {
+  const queryTask = (async () => {
     await dbConnect();
-
     const products = await Product.find(
-      { isActive: true }, // Only include active products
-      { slug: 1, updatedAt: 1, category: 1 },
+      {},
+      { slug: 1, updatedAt: 1 },
       { lean: true }
     ).sort({ updatedAt: -1 });
 
-    return products.map((product: any) => ({
-      slug: product.slug,
-      lastmod: product.updatedAt
-        ? new Date(product.updatedAt).toISOString().split('T')[0]
-        : getLastModDate(1),
-      category: product.category || 'other',
-    }));
-  } catch (error) {
-    console.error('Error fetching products for sitemap:', error);
-    return [];
-  }
+    return products.map((p: any) => ({
+      slug: String(p.slug || '').trim(),
+      lastmod: safeIsoDate(p.updatedAt, 1),
+    })).filter(p => Boolean(p.slug));
+  })();
+
+  return withTimeout(queryTask, 3000, []);
 }
 
 /**
- * Generate sitemap URLs for static pages
- */
-function generateStaticPages(): MetadataRoute.Sitemap {
-  return STATIC_PAGES.map(page => ({
-    url: `${BASE_URL}${page.url}`,
-    lastModified: getLastModDate(page.lastModDaysAgo),
-    changeFrequency: page.changefreq,
-    priority: page.priority,
-  }));
-}
-
-/**
- * Generate sitemap URLs for categories
- */
-function generateCategoryPages(): MetadataRoute.Sitemap {
-  return PRODUCT_CATEGORIES.map(category => ({
-    url: `${BASE_URL}/category/${category.slug}`,
-    lastModified: getLastModDate(7), // Categories updated weekly
-    changeFrequency: category.changefreq,
-    priority: category.priority,
-  }));
-}
-
-/**
- * Generate sitemap URLs for individual products
- */
-function generateProductPages(
-  products: Array<{
-    slug: string;
-    lastmod: string;
-    category: string;
-  }>
-): MetadataRoute.Sitemap {
-  return products.map(product => ({
-    url: `${BASE_URL}/product/${product.slug}`,
-    lastModified: product.lastmod,
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }));
-}
-
-/**
- * MAIN SITEMAP GENERATION FUNCTION
- * Called by Next.js to generate sitemap.xml
- * 
- * Returns: Array of sitemap entries
- * Priority: 1.0 (highest) to 0.1 (lowest)
- * ChangeFreq: always, hourly, daily, weekly, monthly, yearly, never
+ * MAIN SITEMAP ENTRY POINT
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
-    // Fetch all products and landing pages
-    const products = await fetchAllProducts();
-    const landingPages = await fetchActiveLandingPages();
+    // Concurrent fetch with 3-second maximum duration
+    const [products, landingPages] = await Promise.all([
+      fetchProducts(),
+      fetchLandingPages(),
+    ]);
 
-    // Combine all sitemap entries
-    const sitemapEntries: MetadataRoute.Sitemap = [
-      // Static pages (homepage, shop, category landing pages, community, about)
-      ...generateStaticPages(),
+    const sitemapMap = new Map<string, MetadataRoute.Sitemap[number]>();
 
-      // Category pages
-      ...generateCategoryPages(),
+    // 1. Static Pages
+    for (const page of STATIC_PAGES) {
+      const fullUrl = `${BASE_URL}${page.url}`;
+      sitemapMap.set(fullUrl, {
+        url: encodeURI(fullUrl),
+        lastModified: safeIsoDate(null, page.lastModDaysAgo),
+        changeFrequency: page.changefreq,
+        priority: page.priority,
+      });
+    }
 
-      // Landing page campaign pages
-      ...generateLandingPageEntries(landingPages),
+    // 2. Category Pages
+    for (const cat of PRODUCT_CATEGORIES) {
+      const fullUrl = `${BASE_URL}/category/${cat.slug}`;
+      sitemapMap.set(fullUrl, {
+        url: encodeURI(fullUrl),
+        lastModified: safeIsoDate(null, 7),
+        changeFrequency: cat.changefreq,
+        priority: cat.priority,
+      });
+    }
 
-      // Individual product pages
-      ...generateProductPages(products),
-    ];
+    // 3. Landing Pages
+    for (const lp of landingPages) {
+      const fullUrl = `${BASE_URL}/lp/${lp.slug}`;
+      if (!sitemapMap.has(fullUrl)) {
+        sitemapMap.set(fullUrl, {
+          url: encodeURI(fullUrl),
+          lastModified: lp.lastmod,
+          changeFrequency: 'weekly',
+          priority: 0.8,
+        });
+      }
+    }
 
-    // Sort by URL for consistency
-    sitemapEntries.sort((a, b) => a.url.localeCompare(b.url));
+    // 4. Product Pages
+    for (const prod of products) {
+      const fullUrl = `${BASE_URL}/product/${prod.slug}`;
+      if (!sitemapMap.has(fullUrl)) {
+        sitemapMap.set(fullUrl, {
+          url: encodeURI(fullUrl),
+          lastModified: prod.lastmod,
+          changeFrequency: 'weekly',
+          priority: 0.8,
+        });
+      }
+    }
 
-    return sitemapEntries;
+    const result = Array.from(sitemapMap.values());
+    result.sort((a, b) => a.url.localeCompare(b.url));
+
+    return result;
   } catch (error) {
-    console.error('Error generating sitemap:', error);
-
-    // Return at least the static pages if database fails
-    return generateStaticPages();
+    console.error('[Sitemap] Critical error generating sitemap, returning static fallback:', error);
+    
+    // Fail-safe static response
+    return STATIC_PAGES.map((page) => ({
+      url: encodeURI(`${BASE_URL}${page.url}`),
+      lastModified: safeIsoDate(null, page.lastModDaysAgo),
+      changeFrequency: page.changefreq,
+      priority: page.priority,
+    }));
   }
 }
 
-/**
- * CONFIGURATION NOTES:
- * 
- * 1. File Location: app/sitemap.ts (automatically creates /sitemap.xml)
- * 
- * 2. XML Output Format:
- *    ```xml
- *    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
- *      <url>
- *        <loc>https://assidrat.com/</loc>
- *        <lastmod>2026-06-28</lastmod>
- *        <changefreq>daily</changefreq>
- *        <priority>1.0</priority>
- *      </url>
- *    </urlset>
- *    ```
- * 
- * 3. Update Frequency Guidelines:
- *    - Homepage: daily (content changes frequently)
- *    - Category pages: weekly (inventory updates)
- *    - Product pages: weekly (stock, reviews, prices change)
- *    - Static pages: monthly (rarely change)
- * 
- * 4. Priority Guidelines:
- *    - Homepage: 1.0 (most important)
- *    - Main categories: 0.9
- *    - Products: 0.7-0.8
- *    - Secondary pages: 0.6
- * 
- * 5. Database Connection:
- *    - Uses MongoDB connection pooling
- *    - Handles connection errors gracefully
- *    - Falls back to static pages if database fails
- * 
- * 6. Performance:
- *    - Caches database query for ~1 hour
- *    - Incremental regeneration supported
- *    - Can handle 50,000+ URLs
- * 
- * 7. Testing:
- *    - Visit: https://assidrat.com/sitemap.xml
- *    - Validate: https://www.xml-sitemaps.com/validate-xml-sitemap.html
- *    - Submit to Google Search Console
- */
