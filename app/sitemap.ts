@@ -138,7 +138,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const page of STATIC_PAGES) {
       const fullUrl = `${BASE_URL}${page.url}`;
       sitemapMap.set(fullUrl, {
-        url: encodeURI(fullUrl),
+        url: fullUrl,
         lastModified: safeIsoDate(null, page.lastModDaysAgo),
         changeFrequency: page.changefreq,
         priority: page.priority,
@@ -149,7 +149,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const cat of PRODUCT_CATEGORIES) {
       const fullUrl = `${BASE_URL}/category/${cat.slug}`;
       sitemapMap.set(fullUrl, {
-        url: encodeURI(fullUrl),
+        url: fullUrl,
         lastModified: safeIsoDate(null, 7),
         changeFrequency: cat.changefreq,
         priority: cat.priority,
@@ -161,7 +161,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const fullUrl = `${BASE_URL}/lp/${lp.slug}`;
       if (!sitemapMap.has(fullUrl)) {
         sitemapMap.set(fullUrl, {
-          url: encodeURI(fullUrl),
+          url: fullUrl,
           lastModified: lp.lastmod,
           changeFrequency: 'weekly',
           priority: 0.8,
@@ -174,7 +174,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const fullUrl = `${BASE_URL}/product/${prod.slug}`;
       if (!sitemapMap.has(fullUrl)) {
         sitemapMap.set(fullUrl, {
-          url: encodeURI(fullUrl),
+          url: fullUrl,
           lastModified: prod.lastmod,
           changeFrequency: 'weekly',
           priority: 0.8,
@@ -189,7 +189,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (error) {
     console.error('[Sitemap] Error generating sitemap, executing fail-safe response:', error);
     return STATIC_PAGES.map((page) => ({
-      url: encodeURI(`${BASE_URL}${page.url}`),
+      url: `${BASE_URL}${page.url}`,
       lastModified: safeIsoDate(null, page.lastModDaysAgo),
       changeFrequency: page.changefreq,
       priority: page.priority,
