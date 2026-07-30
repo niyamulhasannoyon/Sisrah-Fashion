@@ -2,13 +2,30 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import { sendAdminOrderNotification } from '@/lib/email';
+import { orderLimiter } from '@/lib/rateLimiter';
+import { sanitizeInput } from '@/lib/validation';
 const SSLCommerzPayment = require('sslcommerz-lts');
 
 export async function POST(req: Request) {
+  // Apply rate limiting guard (5 order attempts per 3 minutes)
+  const rateLimitResult = orderLimiter.check(req);
+  if (rateLimitResult.blocked) {
+    return rateLimitResult.response || NextResponse.json({ error: 'Too many order requests. Please wait a moment.' }, { status: 429 });
+  }
+
   try {
     await dbConnect();
     const body = await req.json();
     const { items, formData, paymentMethod, total, shippingFee, discount } = body;
+
+    // Sanitize shipping form data
+    const sanitizedFormData = {
+      name: sanitizeInput(formData?.name || formData?.fullName || ''),
+      phone: sanitizeInput(formData?.phone || ''),
+      district: sanitizeInput(formData?.district || formData?.city || ''),
+      address: sanitizeInput(formData?.address || ''),
+      orderNotes: sanitizeInput(formData?.orderNotes || ''),
+    };
 
     // 1. Create the Order in MongoDB (Status: Pending)
     const newOrder = await Order.create({
@@ -20,7 +37,7 @@ export async function POST(req: Request) {
         selectedColor: item.selectedColor || item.color || '',
         quantity: item.quantity || 1,
       })),
-      shippingInfo: formData,
+      shippingInfo: sanitizedFormData,
       totalAmount: total + (shippingFee || 0),
       paymentMethod,
       paymentStatus: 'Pending',

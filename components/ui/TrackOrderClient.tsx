@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { Loader2, Search, Package, Truck, CheckCircle, Clock, ShoppingBag } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -237,8 +238,8 @@ function TrackOrderContent() {
               <div className="space-y-4">
                 {order.orderItems.map((item: any, idx: number) => (
                   <div key={idx} className="flex gap-4 items-center">
-                    <div className="w-12 h-16 bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
-                      <img src={item.images?.[0]?.url || item.image} alt={item.title} width="48" height="64" className="w-full h-full object-cover" />
+                    <div className="relative w-12 h-16 bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
+                      <Image src={item.images?.[0]?.url || item.image} alt={item.title} fill sizes="48px" className="object-cover" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-bold text-gray-900 line-clamp-1">{item.title}</p>

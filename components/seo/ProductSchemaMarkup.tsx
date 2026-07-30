@@ -1,10 +1,9 @@
-'use client';
-
 import React from 'react';
 
 interface ProductSchemaProps {
   product: {
     id?: string;
+    _id?: string;
     title: string;
     description: string;
     slug: string;
@@ -12,15 +11,15 @@ interface ProductSchemaProps {
     offerPrice?: number;
     sku?: string;
     category?: string;
-    images: Array<{
+    images?: Array<{
       url: string;
       public_id?: string;
     }>;
     rating?: number;
     numReviews?: number;
     variants?: Array<{
-      size: string;
-      color: string;
+      size?: string;
+      color?: string;
       stock: number;
       price?: number;
     }>;
@@ -32,41 +31,45 @@ interface ProductSchemaProps {
 /**
  * ProductSchemaMarkup Component
  * 
- * Renders JSON-LD Product Schema for SEO and rich snippets
- * Supports Google Search Console, social media crawlers, and voice assistants
- * 
- * @param product - Product data from database
- * @param baseUrl - Base URL of your site (default: https://assidrat.com)
+ * Renders JSON-LD Product & Breadcrumb Schema for Google Rich Snippets & Search Console.
  */
-export default function ProductSchemaMarkup({ product, baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app' }: ProductSchemaProps) {
-  // Determine current price and discount
+export default function ProductSchemaMarkup({
+  product,
+  baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app',
+}: ProductSchemaProps) {
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, '');
   const currentPrice = product.offerPrice && product.offerPrice > 0 ? product.offerPrice : product.basePrice;
   const originalPrice = product.basePrice;
   const hasDiscount = product.offerPrice && product.offerPrice > 0 && product.offerPrice < product.basePrice;
 
   // Determine stock availability
-  const inStock = product.variants?.some(v => v.stock > 0) ?? true;
+  const inStock = product.variants && product.variants.length > 0
+    ? product.variants.some(v => v.stock > 0)
+    : true;
   const availability = inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
 
-  // Generate product URL
-  const productUrl = `${baseUrl}/product/${product.slug}`;
+  const productUrl = `${normalizedBaseUrl}/product/${product.slug}`;
 
-  // Map images to proper schema format
-  const imageArray = product.images
-    .filter(img => img.url) // Filter out empty images
-    .map(img => img.url)
-    .slice(0, 3); // Limit to 3 images per Google recommendations
+  // Image array (ensuring absolute URLs)
+  const rawImages = product.images || [];
+  const imageArray = rawImages
+    .filter(img => Boolean(img?.url))
+    .map(img => (img.url.startsWith('http') ? img.url : `${normalizedBaseUrl}${img.url}`))
+    .slice(0, 5);
 
-  // Generate SKU (fallback to slug if not provided)
-  const sku = product.sku || `${product.slug.toUpperCase()}-${product.id?.slice(-6) || 'NO-ID'}`;
+  if (imageArray.length === 0) {
+    imageArray.push(`${normalizedBaseUrl}/images/hero-model.jpg`);
+  }
 
-  const productSchema = {
+  const sku = product.sku || `${product.slug.toUpperCase()}-${String(product._id || product.id || 'NO-ID').slice(-6)}`;
+
+  const productSchema: Record<string, any> = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: product.title,
     description: product.description,
     sku: sku,
-    productID: product.id || product.slug,
+    productID: String(product._id || product.id || product.slug),
     url: productUrl,
     brand: {
       '@type': 'Brand',
@@ -79,13 +82,13 @@ export default function ProductSchemaMarkup({ product, baseUrl = process.env.NEX
       url: productUrl,
       priceCurrency: 'BDT',
       price: currentPrice.toString(),
-      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       itemCondition: 'https://schema.org/NewCondition',
       availability: availability,
       seller: {
         '@type': 'Organization',
         name: 'AS SIDRAT',
-        url: baseUrl,
+        url: normalizedBaseUrl,
       },
       ...(hasDiscount && {
         priceSpecification: [
@@ -104,17 +107,22 @@ export default function ProductSchemaMarkup({ product, baseUrl = process.env.NEX
         ],
       }),
     },
-    ...(product.rating &&
-      product.numReviews && {
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: product.rating.toFixed(1),
-          reviewCount: product.numReviews,
-          bestRating: '5',
-          worstRating: '1',
-        },
-      }),
   };
+
+  if (product.rating && product.numReviews && product.numReviews > 0) {
+    productSchema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: Number(product.rating).toFixed(1),
+      reviewCount: product.numReviews,
+      bestRating: '5',
+      worstRating: '1',
+    };
+  }
+
+  const categorySlug = (product.category || 'clothing').toLowerCase().replace(/\s+/g, '-');
+  const categoryName = product.category
+    ? product.category.charAt(0).toUpperCase() + product.category.slice(1)
+    : 'Clothing';
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -124,13 +132,13 @@ export default function ProductSchemaMarkup({ product, baseUrl = process.env.NEX
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: baseUrl,
+        item: normalizedBaseUrl,
       },
       {
         '@type': 'ListItem',
         position: 2,
-        name: product.category ? product.category.toUpperCase() : 'Shop',
-        item: product.category ? `${baseUrl}/category/${product.category}` : `${baseUrl}/shop`,
+        name: categoryName,
+        item: `${normalizedBaseUrl}/category/${categorySlug}`,
       },
       {
         '@type': 'ListItem',
@@ -144,7 +152,9 @@ export default function ProductSchemaMarkup({ product, baseUrl = process.env.NEX
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify([productSchema, breadcrumbSchema], null, 2) }}
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify([productSchema, breadcrumbSchema], null, 0),
+      }}
       suppressHydrationWarning
     />
   );

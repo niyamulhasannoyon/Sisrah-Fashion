@@ -6,7 +6,7 @@ export interface ProductMetadataInput {
   slug: string;
   basePrice: number;
   offerPrice?: number;
-  images?: { url: string; public_id: string }[];
+  images?: { url: string; public_id?: string }[];
   category?: string;
   tags?: string[];
   rating?: number;
@@ -15,125 +15,120 @@ export interface ProductMetadataInput {
 }
 
 /**
- * Truncates text to a maximum length, adding ellipsis if needed
- * Useful for keeping meta descriptions under 160 characters
+ * Truncates text to a maximum length for meta descriptions (under 160 chars)
  */
-const truncateText = (text: string | undefined, maxLength: number = 160): string => {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength).trim() + '...';
+const truncateText = (text: string | undefined, maxLength: number = 158): string => {
+  if (!text) return 'Explore premium clothing, t-shirts & linen shirts at AS SIDRAT in Bangladesh.';
+  const cleaned = text.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+  if (cleaned.length <= maxLength) return cleaned;
+  return cleaned.substring(0, maxLength).trim() + '...';
 };
 
 /**
- * Checks if product is in stock
+ * Capitalizes category name for clean title formatting
  */
-const isInStock = (variants?: Array<{ stock: number }>): boolean => {
-  if (!variants || variants.length === 0) return true;
-  return variants.some(v => v.stock > 0);
+const formatCategory = (category?: string): string => {
+  if (!category || !category.trim()) return 'Clothing';
+  const cleanCat = category.trim();
+  return cleanCat.charAt(0).toUpperCase() + cleanCat.slice(1);
 };
 
 /**
- * Generates comprehensive SEO metadata for product pages
- * Supports Open Graph, Twitter Cards, and structured data
+ * Generates comprehensive dynamic SEO metadata for product pages
+ * Enforces title pattern: [Product Name] - Best [Category] in Bangladesh | AS SIDRAT
  */
-export function generateProductMetadata(product: ProductMetadataInput, baseUrl: string = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app'): Metadata {
-  const productTitle = product.title || 'Premium Fashion';
-  const productDescription = truncateText(product.description, 160);
-  const productImage = product.images?.[0]?.url || '/images/placeholder.jpg';
+export function generateProductMetadata(
+  product: ProductMetadataInput,
+  baseUrl: string = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app'
+): Metadata {
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, '');
+  const productTitle = product.title?.trim() || 'Premium Apparel';
+  const categoryFormatted = formatCategory(product.category);
+
+  // Required title format: [Product Name] - Premium [Category] | AS SIDRAT Bangladesh
+  const seoTitle = `${productTitle} - Premium ${categoryFormatted} | AS SIDRAT Bangladesh`;
+
+  const metaDescription = truncateText(
+    `${product.description ? product.description + ' ' : ''}Buy ${productTitle} online in Bangladesh from AS SIDRAT with Cash on Delivery across BD.`
+  );
+
+  const rawImage = product.images?.[0]?.url;
+  const productImage = rawImage
+    ? rawImage.startsWith('http')
+      ? rawImage
+      : `${normalizedBaseUrl}${rawImage}`
+    : `${normalizedBaseUrl}/images/hero-model.jpg`;
+
   const displayPrice = product.offerPrice && product.offerPrice > 0 ? product.offerPrice : product.basePrice;
   const currency = 'BDT';
-  const productUrl = `${baseUrl}/product/${product.slug}`;
-  const inStock = isInStock(product.variants);
+  const canonicalUrl = `${normalizedBaseUrl}/product/${product.slug}`;
+  const inStock = !product.variants || product.variants.length === 0 || product.variants.some(v => v.stock > 0);
 
-  // Structured data for Google Rich Snippets
-  const schemaMarkup = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: productTitle,
-    description: productDescription,
-    image: productImage,
-    brand: {
-      '@type': 'Brand',
-      name: 'AS SIDRAT',
-    },
-    url: productUrl,
-    offers: {
-      '@type': 'Offer',
-      url: productUrl,
-      priceCurrency: currency,
-      price: displayPrice.toString(),
-      availability: inStock
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
-    },
-    ...(product.rating && {
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: product.rating.toString(),
-        reviewCount: (product.numReviews || 0).toString(),
-      },
-    }),
-  };
+  const keywords = Array.from(
+    new Set([
+      productTitle.toLowerCase(),
+      `${productTitle.toLowerCase()} bd`,
+      `${productTitle.toLowerCase()} price in bangladesh`,
+      categoryFormatted.toLowerCase(),
+      ...(product.tags || []).map(t => t.toLowerCase()),
+      'shirt',
+      't-shirt',
+      'men fashion bangladesh',
+      'as sidrat',
+      'sidrat',
+      'premium clothing',
+      'linen shirt bd',
+      'bd t shirt',
+      'online shopping bd',
+    ])
+  );
 
   return {
-    title: `${productTitle} - AS SIDRAT | Premium T-Shirt & Shirt BD`,
-    description: productDescription,
-    keywords: [
-      productTitle,
-      product.category || 'Fashion',
-      ...(product.tags || []),
-      'sidrat',
-      'as sidrat',
-      't shirt',
-      'premium t shirt',
-      'bd t shirt',
-      'shirt',
-      'cloths',
-      'AS SIDRAT',
-      'AS SIDRAT Clothing',
-      'Premium Fashion Bangladesh',
-    ],
-    metadataBase: new URL(baseUrl),
+    title: seoTitle,
+    description: metaDescription,
+    keywords,
+    metadataBase: new URL(normalizedBaseUrl),
     alternates: {
-      canonical: productUrl,
+      canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${productTitle} - AS SIDRAT | Buy Shirt Online Bangladesh`,
-      description: productDescription,
-      url: productUrl,
+      title: seoTitle,
+      description: metaDescription,
+      url: canonicalUrl,
       type: 'website',
+      siteName: 'AS SIDRAT',
+      locale: 'en_BD',
       images: [
         {
           url: productImage,
           width: 1200,
           height: 800,
-          alt: productTitle,
+          alt: `${productTitle} - AS SIDRAT Bangladesh`,
           type: 'image/jpeg',
         },
       ],
-      siteName: 'AS SIDRAT',
-      locale: 'en_BD',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${productTitle} - AS SIDRAT | Buy Shirt Online Bangladesh`,
-      description: productDescription,
+      title: seoTitle,
+      description: metaDescription,
       images: [productImage],
       creator: '@AS_SIDRAT',
     },
     other: {
       'product:price:amount': displayPrice.toString(),
       'product:price:currency': currency,
-      'product:category': product.category || 'Fashion',
+      'product:category': categoryFormatted,
       'product:availability': inStock ? 'In Stock' : 'Out of Stock',
-      ...(product.rating && {
-        'product:rating': product.rating.toString(),
-        'product:review_count': (product.numReviews || 0).toString(),
-      }),
+      ...(product.rating ? { 'product:rating': product.rating.toString() } : {}),
+      ...(product.numReviews ? { 'product:review_count': product.numReviews.toString() } : {}),
     },
     robots: {
       index: true,
       follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
     },
   };
 }

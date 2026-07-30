@@ -174,7 +174,7 @@ export function Navbar() {
                   >
                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden text-slate-700 text-xs font-bold">
                       {user?.image ? (
-                        <img src={user.image} alt={user.name || 'User'} className="w-full h-full object-cover" />
+                        <Image src={user.image} alt={user.name || 'User'} width={32} height={32} className="w-full h-full object-cover" />
                       ) : (
                         user?.name ? user.name.charAt(0).toUpperCase() : <User size={16} />
                       )}
@@ -294,7 +294,7 @@ export function Navbar() {
                 {/* Header */}
                 <div className="flex justify-between items-center border-b border-slate-100 pb-4">
                   {settings?.logo ? (
-                    <img src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" width="100" height="28" className="h-7 w-auto object-contain" />
+                    <Image src={getDirectImageLink(settings.logo)} alt="AS SIDRAT" width={100} height={28} className="h-7 w-auto object-contain" />
                   ) : (
                     <span className="text-sm font-bold tracking-widest text-slate-900 uppercase">AS SIDRAT</span>
                   )}

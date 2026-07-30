@@ -931,9 +931,11 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
         <div className="max-w-2xl mx-auto px-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             {settings?.logo ? (
-              <img
+              <Image
                 src={getDirectImageLink(settings.logo)}
                 alt="AS SIDRAT Logo"
+                width={140}
+                height={48}
                 className="h-10 sm:h-12 w-auto object-contain"
               />
             ) : (
@@ -1578,10 +1580,12 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
                       className="flex gap-3 cursor-pointer hover:opacity-90 transition-opacity"
                     >
                       <div className="relative w-16 h-20 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
-                        <img
+                        <Image
                           src={pImages[0]}
                           alt={p.title}
-                          className="w-full h-full object-cover object-top"
+                          fill
+                          sizes="64px"
+                          className="object-cover object-top"
                         />
                         {isAdded && (
                           <div className="absolute top-1 right-1 bg-emerald-600 text-white rounded-full p-0.5 shadow-sm">
@@ -1973,10 +1977,12 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
                 <div className="overflow-y-auto flex-1">
                   {/* Image Gallery */}
                   <div className="relative aspect-[4/3] w-full bg-slate-50 border-b border-gray-100">
-                    <img
+                    <Image
                       src={modalImages[modalImageIdx] || modalImages[0]}
                       alt={detailProduct.title}
-                      className="w-full h-full object-cover object-top transition-all duration-300"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 600px"
+                      className="object-cover object-top transition-all duration-300"
                     />
                     <div className="absolute top-4 left-4 bg-[#A31F24] text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
                       {detailProduct.category}

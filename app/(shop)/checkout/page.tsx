@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -327,8 +328,8 @@ export default function CheckoutPage() {
                     <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
                       {cart.map((item, idx) => (
                         <div key={idx} className="flex gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                          <div className="w-14 h-[60px] bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-50">
-                            <img src={item.image} alt={item.title} width="56" height="60" className="w-full h-full object-cover" />
+                          <div className="relative w-14 h-[60px] bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-50">
+                            <Image src={item.image} alt={item.title} fill sizes="56px" className="object-cover" />
                           </div>
                           <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
                             <div className="flex justify-between items-start gap-1">
@@ -778,8 +779,8 @@ export default function CheckoutPage() {
                 <div className="space-y-6 mb-10 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar-white">
                   {cart.map((item, idx) => (
                     <div key={idx} className="flex gap-4">
-                      <div className="w-16 h-20 bg-white/5 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                        <img src={item.image} alt={item.title} width="64" height="80" className="w-full h-full object-cover" />
+                      <div className="relative w-16 h-20 bg-white/5 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                        <Image src={item.image} alt={item.title} fill sizes="64px" className="object-cover" />
                       </div>
                       <div className="flex-1 flex flex-col justify-center">
                         <div className="flex justify-between items-start">

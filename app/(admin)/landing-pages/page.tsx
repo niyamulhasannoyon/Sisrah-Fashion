@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { 
@@ -63,10 +64,12 @@ function ImagePreview({ url, alt, onRemove, aspect = 'aspect-[21/9]', label = 'B
 
   return (
     <div className={`relative w-full ${aspect} rounded-xl overflow-hidden border border-slate-200 bg-slate-50 group`}>
-      <img
+      <Image
         src={getDirectImageLink(url)}
         alt={alt}
-        className="w-full h-full object-cover"
+        fill
+        sizes="(max-width: 768px) 100vw, 400px"
+        className="object-cover"
         onError={() => setHasError(true)}
       />
       {onRemove && (
@@ -1260,8 +1263,8 @@ export default function AdminLandingPages() {
                                   }`}
                                 />
                                 {t.image && isValidImageUrl(t.image) && (
-                                  <div className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full overflow-hidden border border-slate-200 bg-slate-50">
-                                    <img src={t.image} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                  <div className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full overflow-hidden border border-slate-200 bg-slate-50 relative">
+                                    <Image src={t.image} alt="" fill sizes="24px" className="object-cover" />
                                   </div>
                                 )}
                               </div>

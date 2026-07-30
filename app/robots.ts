@@ -24,6 +24,8 @@ export default function robots(): MetadataRoute.Robots {
           '/llms-full.txt',
         ],
         disallow: [
+          '/api/',
+          '/api/*',
           '/checkout',
           '/checkout/*',
           '/profile',
@@ -45,13 +47,12 @@ export default function robots(): MetadataRoute.Robots {
           '/staff',
           '/users',
           '/customers',
-          '/api/',
           '/search',
           '/cart',
         ],
       },
       {
-        userAgent: ['Googlebot', 'Google-Extended', 'GoogleOther'],
+        userAgent: ['Googlebot', 'Google-Extended', 'GoogleOther', 'Bingbot'],
         allow: [
           '/',
           '/shop',
@@ -62,21 +63,21 @@ export default function robots(): MetadataRoute.Robots {
           '/sitemap.xml',
         ],
         disallow: [
+          '/api/',
+          '/api/*',
           '/checkout',
           '/profile',
           '/admin',
           '/cart',
-          '/api/',
           '/search',
         ],
       },
       {
         userAgent: ['GPTBot', 'ChatGPT-User', 'ClaudeBot', 'anthropic-ai', 'PerplexityBot', 'cohere-ai'],
         allow: ['/', '/llms.txt', '/llms-full.txt', '/shop', '/category/', '/product/', '/lp/', '/community'],
-        disallow: ['/checkout', '/profile', '/admin', '/cart', '/api/'],
+        disallow: ['/api/', '/api/*', '/checkout', '/profile', '/admin', '/cart'],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
   };
 }
-

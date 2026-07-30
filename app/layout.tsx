@@ -1,26 +1,35 @@
 import type { Metadata } from 'next';
 import { Montserrat, Hind_Siliguri } from 'next/font/google';
 import './globals.css';
+import StoreInitializer from '@/components/layout/StoreInitializer';
+import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
+import OrganizationSchema from '@/components/seo/OrganizationSchema';
+import dbConnect from '@/lib/dbConnect';
+import Settings from '@/models/Settings';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
   variable: '--font-montserrat',
   weight: ['400', '500', '600', '700'],
-  display: 'swap'
+  display: 'swap',
 });
 
 const hindSiliguri = Hind_Siliguri({
   subsets: ['bengali'],
   variable: '--font-hind-siliguri',
   weight: ['400', '500', '600', '700'],
-  display: 'swap'
+  display: 'swap',
 });
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app';
+const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
 
 export const metadata: Metadata = {
-  title: 'AS SIDRAT | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
-  description: 'AS SIDRAT (Sidrat) is Bangladesh\'s leading online brand for premium t-shirts, linen shirts, bd t-shirts, and modern minimalist clothing. High quality fabrics, perfect fit, with cash on delivery across BD.',
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: 'AS SIDRAT | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
+    template: '%s | AS SIDRAT',
+  },
+  description: "AS SIDRAT (Sidrat) is Bangladesh's premier online clothing brand for premium t-shirts, linen shirts, bd t-shirts, and modern minimalist menswear. High quality fabrics with cash on delivery across Bangladesh.",
   keywords: [
     'sidrat',
     'as sidrat',
@@ -41,13 +50,19 @@ export const metadata: Metadata = {
     't shirt price in bd',
     'mens clothing bd',
     'clothing brand bangladesh',
-    'Fashion Bangladesh',
-    'Sisrah Fashion'
+    'men fashion bangladesh',
+    'Sisrah Fashion',
   ],
-  authors: [{ name: 'AS SIDRAT' }],
-  metadataBase: new URL(BASE_URL),
+  authors: [{ name: 'AS SIDRAT', url: BASE_URL }],
+  creator: 'AS SIDRAT',
+  publisher: 'AS SIDRAT',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   alternates: {
-    canonical: '/',
+    canonical: BASE_URL,
   },
   icons: {
     icon: [
@@ -63,12 +78,12 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'AS SIDRAT | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
-    description: 'AS SIDRAT - Buy premium t-shirts, linen shirts, bd t-shirts, and modern clothes in Bangladesh with Cash on Delivery.',
+    description: 'AS SIDRAT - Buy premium t-shirts, linen shirts, bd t-shirts, and modern clothing in Bangladesh with Cash on Delivery.',
     url: BASE_URL,
     siteName: 'AS SIDRAT',
     images: [
       {
-        url: '/images/hero-model.jpg',
+        url: `${BASE_URL}/images/hero-model.jpg`,
         width: 1200,
         height: 630,
         alt: 'AS SIDRAT Premium T-Shirt & Shirt Brand Bangladesh',
@@ -81,20 +96,24 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AS SIDRAT | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
     description: 'AS SIDRAT - Buy premium t-shirts, linen shirts, bd t-shirts, and modern clothes in Bangladesh.',
-    images: ['/images/hero-model.jpg'],
+    images: [`${BASE_URL}/images/hero-model.jpg`],
+    creator: '@AS_SIDRAT',
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   verification: {
     google: '7t916kantTbYn_dqGMqfKi5pitEUT6_74AR_fqWpjf0',
   },
 };
-
-import StoreInitializer from '@/components/layout/StoreInitializer';
-import dbConnect from '@/lib/dbConnect';
-import Settings from '@/models/Settings';
 
 export const revalidate = 60;
 
@@ -103,7 +122,6 @@ async function getSettings() {
     await dbConnect();
     let settings = await Settings.findOne().lean();
     if (!settings) {
-      // Prevent compiler tree-shaking and create empty document if not present
       const doc = new Settings({});
       await doc.save();
       settings = doc.toObject();
@@ -115,70 +133,8 @@ async function getSettings() {
   }
 }
 
-import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
-
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings();
-
-  const organizationSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'AS SIDRAT',
-    alternateName: ['AS SIDRAT', 'Sidrat', 'as sidrat', 'Sidrat Fashion', 'Sidrat T-Shirt', 'AS SIDRAT Clothing', 'Sisrah Fashion'],
-    url: BASE_URL,
-    logo: settings?.logo || `${BASE_URL}/favicon.png`,
-    description: "Bangladesh's premier professional minimalist clothing brand specializing in climate-responsive linen shirts, premium organic cotton t-shirts, and modern menswear.",
-    slogan: 'Bangladesh\'s premier professional minimalist clothing brand',
-    knowsAbout: [
-      'Minimalist Fashion Bangladesh',
-      'Linen Shirts BD',
-      'Premium T-Shirts Bangladesh',
-      'Professional Menswear Bangladesh',
-      'Climate-responsive apparel',
-      'AS SIDRAT Clothing'
-    ],
-    foundingLocation: {
-      '@type': 'Place',
-      name: 'Dhaka, Bangladesh',
-    },
-    sameAs: [
-      settings?.facebookUrl || 'https://www.facebook.com',
-      settings?.instagramUrl || 'https://www.instagram.com',
-      settings?.youtubeUrl || 'https://www.youtube.com',
-    ].filter(Boolean),
-    contactPoint: {
-      '@type': 'ContactPoint',
-      telephone: settings?.whatsappNumber || '+8801733919156',
-      contactType: 'customer service',
-      areaServed: 'BD',
-      availableLanguage: ['en', 'bn'],
-    },
-  };
-
-  const storeSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'OnlineStore',
-    name: 'AS SIDRAT | Premium T-Shirt & Shirt Brand Bangladesh',
-    alternateName: ['Sidrat', 'as sidrat', 'AS SIDRAT Clothing'],
-    url: BASE_URL,
-    description: 'Buy premium t-shirts, linen shirts, bd t-shirts, and minimalist clothing in Bangladesh with cash on delivery.',
-    priceRange: '৳৳',
-    currenciesAccepted: 'BDT',
-    paymentAccepted: 'Cash on Delivery, Mobile Banking',
-  };
-
-  const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'AS SIDRAT',
-    url: BASE_URL,
-    alternateName: ['AS SIDRAT', 'Sidrat', 'as sidrat', 'Sidrat Fashion', 'AS SIDRAT Clothing', 'Sisrah Fashion'],
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${BASE_URL}/shop?search={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
-  };
 
   return (
     <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
@@ -189,12 +145,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify([websiteSchema, organizationSchema, storeSchema]),
-          }}
-        />
+        <OrganizationSchema settings={settings} baseUrl={BASE_URL} />
       </head>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans" suppressHydrationWarning>
         <AnalyticsScripts

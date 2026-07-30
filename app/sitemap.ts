@@ -1,25 +1,12 @@
-/**
- * SENIOR GOOGLE INFRASTRUCTURE & SEARCH ENGINE-GRADE SITEMAP GENERATOR
- * 
- * Target Endpoint: GET /sitemap.xml
- * Features:
- * 1. Resilient DB querying with a strict 3000ms timeout race condition guard (Prevents 504/500 cold start failures)
- * 2. Exact Mongoose query match for Product (Product schema has no isActive field)
- * 3. URL encoding via encodeURI to guarantee strict XML syntax compliance (prevents XML parsing errors on special characters/&/spaces)
- * 4. Normalization of BASE_URL (strips trailing slashes)
- * 5. ISO 8601 date formatting with safe fallbacks (prevents RangeError: Invalid time value)
- * 6. Deduplication of URLs via Map/Set
- */
-
 import { MetadataRoute } from 'next';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import LandingPage from '@/models/LandingPage';
 
-// Enable Incremental Static Regeneration (ISR) so Next.js caches sitemap.xml for 24 hours
-export const revalidate = 86400;
+// Enable Incremental Static Regeneration (ISR) so Next.js caches sitemap.xml
+export const revalidate = 86400; // 24 hours
 
-// Base URL configuration (Normalized without trailing slash)
+// Normalized base URL without trailing slash
 const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
 
 /**
@@ -33,7 +20,7 @@ const PRODUCT_CATEGORIES = [
 ];
 
 /**
- * Static Pages Configuration
+ * Core Static Pages Configuration
  */
 const STATIC_PAGES = [
   { url: '', priority: 1.0, changefreq: 'daily' as const, lastModDaysAgo: 0 },
@@ -66,29 +53,31 @@ function safeIsoDate(input?: any, fallbackDaysAgo: number = 0): string {
 }
 
 /**
- * Helper to wrap promises with a hard timeout limit
+ * Wrapper for database promises with hard timeout guard (Prevents 500/504 cold starts)
  */
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
   let timer: NodeJS.Timeout;
   const timeoutPromise = new Promise<T>((resolve) => {
     timer = setTimeout(() => {
-      console.warn(`[Sitemap] DB query timed out after ${timeoutMs}ms. Using fallback.`);
+      console.warn(`[Sitemap] DB query timed out after ${timeoutMs}ms. Returning fallback.`);
       resolve(fallback);
     }, timeoutMs);
   });
 
-  return Promise.race([promise, timeoutPromise]).then((result) => {
-    clearTimeout(timer);
-    return result;
-  }).catch((err) => {
-    clearTimeout(timer);
-    console.error('[Sitemap] Query error:', err);
-    return fallback;
-  });
+  return Promise.race([promise, timeoutPromise])
+    .then((result) => {
+      clearTimeout(timer);
+      return result;
+    })
+    .catch((err) => {
+      clearTimeout(timer);
+      console.error('[Sitemap] Query error:', err);
+      return fallback;
+    });
 }
 
 /**
- * Fetch active landing pages with 3s timeout
+ * Fetch active landing pages with 3000ms timeout
  */
 async function fetchLandingPages(): Promise<Array<{ slug: string; lastmod: string }>> {
   const queryTask = (async () => {
@@ -99,18 +88,19 @@ async function fetchLandingPages(): Promise<Array<{ slug: string; lastmod: strin
       { lean: true }
     ).sort({ updatedAt: -1 });
 
-    return pages.map((p: any) => ({
-      slug: String(p.slug || '').trim(),
-      lastmod: safeIsoDate(p.updatedAt, 1),
-    })).filter(p => Boolean(p.slug));
+    return pages
+      .map((p: any) => ({
+        slug: String(p.slug || '').trim(),
+        lastmod: safeIsoDate(p.updatedAt, 1),
+      }))
+      .filter((p) => Boolean(p.slug));
   })();
 
   return withTimeout(queryTask, 3000, []);
 }
 
 /**
- * Fetch all products with 3s timeout
- * NOTE: Product schema has no isActive field, query all products directly
+ * Fetch all product slugs with 3000ms timeout
  */
 async function fetchProducts(): Promise<Array<{ slug: string; lastmod: string }>> {
   const queryTask = (async () => {
@@ -121,21 +111,22 @@ async function fetchProducts(): Promise<Array<{ slug: string; lastmod: string }>
       { lean: true }
     ).sort({ updatedAt: -1 });
 
-    return products.map((p: any) => ({
-      slug: String(p.slug || '').trim(),
-      lastmod: safeIsoDate(p.updatedAt, 1),
-    })).filter(p => Boolean(p.slug));
+    return products
+      .map((p: any) => ({
+        slug: String(p.slug || '').trim(),
+        lastmod: safeIsoDate(p.updatedAt, 1),
+      }))
+      .filter((p) => Boolean(p.slug));
   })();
 
   return withTimeout(queryTask, 3000, []);
 }
 
 /**
- * MAIN SITEMAP ENTRY POINT
+ * Main Dynamic XML Sitemap Entry Point (GET /sitemap.xml)
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
-    // Concurrent fetch with 3-second maximum duration
     const [products, landingPages] = await Promise.all([
       fetchProducts(),
       fetchLandingPages(),
@@ -178,7 +169,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
 
-    // 4. Product Pages
+    // 4. Dynamic Product Pages
     for (const prod of products) {
       const fullUrl = `${BASE_URL}/product/${prod.slug}`;
       if (!sitemapMap.has(fullUrl)) {
@@ -196,9 +187,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return result;
   } catch (error) {
-    console.error('[Sitemap] Critical error generating sitemap, returning static fallback:', error);
-    
-    // Fail-safe static response
+    console.error('[Sitemap] Error generating sitemap, executing fail-safe response:', error);
     return STATIC_PAGES.map((page) => ({
       url: encodeURI(`${BASE_URL}${page.url}`),
       lastModified: safeIsoDate(null, page.lastModDaysAgo),
@@ -207,4 +196,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
   }
 }
-

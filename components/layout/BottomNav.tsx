@@ -9,6 +9,8 @@ import { useWishlistStore } from '@/store/useWishlistStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useEffect, useState, useMemo } from 'react';
 
+import Image from 'next/image';
+
 export default function BottomNav() {
   const pathname = usePathname();
   const { cart: cartItems, toggleCart } = useCartStore();
@@ -194,10 +196,12 @@ export default function BottomNav() {
                         className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-100 transition active:scale-[0.98]"
                       >
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-gray-50 border border-gray-150">
-                          <img 
+                          <Image 
                             src={p.images?.[0]?.url || '/images/placeholder.jpg'} 
                             alt={p.title} 
-                            className="w-full h-full object-cover" 
+                            fill
+                            sizes="48px"
+                            className="object-cover" 
                           />
                         </div>
                         <div className="flex flex-col min-w-0">

@@ -285,7 +285,7 @@ function LoginContent() {
         >
           <div className="relative w-20 h-20 mx-auto rounded-full bg-slate-100 border-2 border-[#A31F24]/20 flex items-center justify-center overflow-hidden shadow-inner">
             {user.image ? (
-              <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+              <Image src={user.image} alt={user.name} fill sizes="80px" className="object-cover" />
             ) : (
               <span className="text-2xl font-bold text-[#A31F24]">{user.name?.charAt(0).toUpperCase()}</span>
             )}
