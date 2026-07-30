@@ -34,6 +34,32 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'sirah-fashion.vercel.app',
+          },
+        ],
+        destination: 'https://assidrat.vercel.app/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'sisrah-fashion.vercel.app',
+          },
+        ],
+        destination: 'https://assidrat.vercel.app/:path*',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
