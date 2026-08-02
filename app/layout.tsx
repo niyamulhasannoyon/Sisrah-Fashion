@@ -6,6 +6,7 @@ import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
 import OrganizationSchema from '@/components/seo/OrganizationSchema';
 import dbConnect from '@/lib/dbConnect';
 import Settings from '@/models/Settings';
+import { getDirectImageLink } from '@/lib/utils';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -66,13 +67,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.png', sizes: 'any' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png', sizes: '512x512' },
       { url: '/icon.png', type: 'image/png', sizes: '32x32' },
-      { url: '/favicon.png', type: 'image/png', sizes: '192x192' },
     ],
     shortcut: '/favicon.png',
     apple: [
-      { url: '/favicon.png', sizes: '180x180' },
       { url: '/apple-icon.png', sizes: '180x180' },
     ],
   },
@@ -135,6 +135,7 @@ async function getSettings() {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings();
+  const faviconUrl = settings?.favicon ? getDirectImageLink(settings.favicon) : null;
 
   return (
     <html lang="en" className={`${montserrat.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
@@ -145,6 +146,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        {faviconUrl ? (
+          <link rel="icon" href={faviconUrl} />
+        ) : (
+          <>
+            <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+            <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
+            <link rel="icon" href="/icon.png" type="image/png" sizes="32x32" />
+            <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" />
+          </>
+        )}
         <OrganizationSchema settings={settings} baseUrl={BASE_URL} />
       </head>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans" suppressHydrationWarning>
