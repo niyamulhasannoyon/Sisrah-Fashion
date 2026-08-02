@@ -27,14 +27,19 @@ const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.a
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'AS SIDRAT | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
-    template: '%s | AS SIDRAT',
+    default: 'AS SIDRAT (Sidrat) | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
+    template: '%s | AS SIDRAT (Sidrat)',
   },
-  description: "AS SIDRAT (Sidrat) is Bangladesh's premier online clothing brand for premium t-shirts, linen shirts, bd t-shirts, and modern minimalist menswear. High quality fabrics with cash on delivery across Bangladesh.",
+  description: "AS SIDRAT (Sidrat) is Bangladesh's premier online fashion & clothing brand for premium t-shirts, linen shirts, bd t-shirts, and modern minimalist menswear. High quality fabrics with cash on delivery across Bangladesh.",
   keywords: [
     'sidrat',
+    'Sidrat',
+    'SIDRAT',
     'as sidrat',
+    'AS SIDRAT',
     'sidrat fashion',
+    'sidrat clothing',
+    'sidrat t shirt',
     'as sidrat clothing',
     't shirt',
     't-shirt',
@@ -54,7 +59,7 @@ export const metadata: Metadata = {
     'men fashion bangladesh',
     'Sisrah Fashion',
   ],
-  authors: [{ name: 'AS SIDRAT', url: BASE_URL }],
+  authors: [{ name: 'AS SIDRAT (Sidrat)', url: BASE_URL }],
   creator: 'AS SIDRAT',
   publisher: 'AS SIDRAT',
   formatDetection: {
@@ -77,16 +82,16 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: 'AS SIDRAT | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
-    description: 'AS SIDRAT - Buy premium t-shirts, linen shirts, bd t-shirts, and modern clothing in Bangladesh with Cash on Delivery.',
+    title: 'AS SIDRAT (Sidrat) | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
+    description: 'AS SIDRAT (Sidrat) - Buy premium t-shirts, linen shirts, bd t-shirts, and modern clothing in Bangladesh with Cash on Delivery.',
     url: BASE_URL,
-    siteName: 'AS SIDRAT',
+    siteName: 'AS SIDRAT | Sidrat Fashion BD',
     images: [
       {
         url: `${BASE_URL}/images/hero-model.jpg`,
         width: 1200,
         height: 630,
-        alt: 'AS SIDRAT Premium T-Shirt & Shirt Brand Bangladesh',
+        alt: 'AS SIDRAT (Sidrat) Premium T-Shirt & Shirt Brand Bangladesh',
       },
     ],
     locale: 'en_BD',
@@ -94,8 +99,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AS SIDRAT | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
-    description: 'AS SIDRAT - Buy premium t-shirts, linen shirts, bd t-shirts, and modern clothes in Bangladesh.',
+    title: 'AS SIDRAT (Sidrat) | Premium T-Shirt, Shirt & Clothing Brand Bangladesh',
+    description: 'AS SIDRAT (Sidrat) - Buy premium t-shirts, linen shirts, bd t-shirts, and modern clothes in Bangladesh.',
     images: [`${BASE_URL}/images/hero-model.jpg`],
     creator: '@AS_SIDRAT',
   },

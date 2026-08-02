@@ -4,7 +4,7 @@ import Product from '@/models/Product';
 import LandingPage from '@/models/LandingPage';
 
 // Enable Incremental Static Regeneration (ISR) so Next.js caches sitemap.xml
-export const revalidate = 86400; // 24 hours
+export const revalidate = 3600; // 1 hour
 
 // Normalized base URL without trailing slash
 const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');

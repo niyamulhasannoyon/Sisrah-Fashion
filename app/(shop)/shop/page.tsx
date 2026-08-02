@@ -5,25 +5,27 @@ import { Loader2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
+const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
+
 export const metadata: Metadata = {
-  title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT BD',
-  description: 'Explore the complete AS SIDRAT collection. Premium t-shirts, bd t-shirts, linen shirts, gents shirts, pants & modern clothes with Cash on Delivery in Bangladesh.',
-  keywords: ['sidrat', 'as sidrat', 't shirt', 't-shirt', 'premium t shirt', 'bd t shirt', 'shirt', 'cloths', 'clothes', 'AS SIDRAT Clothing'],
+  title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT (Sidrat) BD',
+  description: 'Explore the complete Sidrat (AS SIDRAT) clothing collection. Premium t-shirts, bd t-shirts, linen shirts, gents shirts, pants & modern clothes with Cash on Delivery in Bangladesh.',
+  keywords: ['sidrat', 'Sidrat', 'as sidrat', 'AS SIDRAT', 'sidrat fashion', 'sidrat t shirt', 't shirt', 't-shirt', 'premium t shirt', 'bd t shirt', 'shirt', 'cloths', 'clothes', 'AS SIDRAT Clothing'],
   alternates: {
-    canonical: '/shop',
+    canonical: `${BASE_URL}/shop`,
   },
   openGraph: {
-    title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT BD',
-    description: 'Explore the complete AS SIDRAT collection. Premium t-shirts, bd t-shirts, linen shirts & minimalist clothes with Cash on Delivery.',
-    url: '/shop',
+    title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT (Sidrat) BD',
+    description: 'Explore the complete Sidrat (AS SIDRAT) clothing collection. Premium t-shirts, bd t-shirts, linen shirts & minimalist clothes with Cash on Delivery.',
+    url: `${BASE_URL}/shop`,
     type: 'website',
-    siteName: 'AS SIDRAT',
+    siteName: 'AS SIDRAT | Sidrat Fashion BD',
     locale: 'en_BD',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT BD',
-    description: 'Explore the complete AS SIDRAT collection. Premium t-shirts, bd t-shirts, linen shirts & minimalist clothes with Cash on Delivery.',
+    title: 'Shop Premium T-Shirt & Shirt Collection - AS SIDRAT (Sidrat) BD',
+    description: 'Explore the complete Sidrat (AS SIDRAT) clothing collection. Premium t-shirts, bd t-shirts, linen shirts & minimalist clothes with Cash on Delivery.',
   }
 };
 

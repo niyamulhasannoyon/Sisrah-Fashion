@@ -140,14 +140,16 @@ export default async function LpPage({ params }: LpPageProps) {
   const firstProduct = products[0];
   const bannerImage = (raw.customHero?.customBannerImage && getDirectImageLink(raw.customHero.customBannerImage.trim())) || firstProduct?.images?.[0]?.url || '/og-image.jpg';
 
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
+
   // ── Build Schema.org markup for the landing page ──
   const schemaMarkup = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: page.pageTitle,
-    description: page.customHero?.customSubheading || `Shop ${page.pageTitle} at AS SIDRAT`,
-    url: `https://assidrat.com/lp/${slug}`,
-    brand: { '@type': 'Brand', name: 'AS SIDRAT' },
+    description: page.customHero?.customSubheading || `Shop ${page.pageTitle} at AS SIDRAT (Sidrat)`,
+    url: `${baseUrl}/lp/${slug}`,
+    brand: { '@type': 'Brand', name: 'AS SIDRAT', alternateName: 'Sidrat' },
     ...(products.length > 0 && {
       mainEntity: page.layoutType === 'single-product'
         ? {

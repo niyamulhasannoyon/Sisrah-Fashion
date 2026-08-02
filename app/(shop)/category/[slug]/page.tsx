@@ -63,16 +63,69 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }).lean();
   const safeProducts = JSON.parse(JSON.stringify(products));
 
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
+  const categoryUrl = `${baseUrl}/category/${slug}`;
+
+  const categorySchema = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: baseUrl,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: category,
+          item: categoryUrl,
+        },
+      ],
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: `${category} Collection - AS SIDRAT (Sidrat)`,
+      url: categoryUrl,
+      numberOfItems: safeProducts.length,
+      itemListElement: safeProducts.map((p: any, idx: number) => ({
+        '@type': 'ListItem',
+        position: idx + 1,
+        item: {
+          '@type': 'Product',
+          name: p.title,
+          url: `${baseUrl}/product/${p.slug}`,
+          image: p.images?.[0]?.url ? (p.images[0].url.startsWith('http') ? p.images[0].url : `${baseUrl}${p.images[0].url}`) : `${baseUrl}/images/hero-model.jpg`,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'BDT',
+            price: (p.offerPrice && p.offerPrice > 0 ? p.offerPrice : p.basePrice).toString(),
+            availability: 'https://schema.org/InStock',
+          },
+        },
+      })),
+    },
+  ];
+
   return (
-    <Suspense
-      fallback={
-        <div className="py-20 flex flex-col items-center justify-center min-h-[50vh]">
-          <Loader2 className="animate-spin text-[#A31F24]" size={36} />
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-3">Loading Category...</p>
-        </div>
-      }
-    >
-      <ProductListing products={safeProducts} categoryName={category} />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(categorySchema) }}
+      />
+      <Suspense
+        fallback={
+          <div className="py-20 flex flex-col items-center justify-center min-h-[50vh]">
+            <Loader2 className="animate-spin text-[#A31F24]" size={36} />
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-3">Loading Category...</p>
+          </div>
+        }
+      >
+        <ProductListing products={safeProducts} categoryName={category} />
+      </Suspense>
+    </>
   );
 }
