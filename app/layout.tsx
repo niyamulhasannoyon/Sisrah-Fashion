@@ -4,6 +4,7 @@ import './globals.css';
 import StoreInitializer from '@/components/layout/StoreInitializer';
 import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
 import OrganizationSchema from '@/components/seo/OrganizationSchema';
+import WebSiteSchema from '@/components/seo/WebSiteSchema';
 import dbConnect from '@/lib/dbConnect';
 import Settings from '@/models/Settings';
 import { getDirectImageLink } from '@/lib/utils';
@@ -161,7 +162,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" />
           </>
         )}
+        <link rel="preload" href="/images/hero-model.jpg" as="image" type="image/jpeg" />
         <OrganizationSchema settings={settings} baseUrl={BASE_URL} />
+        <WebSiteSchema baseUrl={BASE_URL} />
       </head>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans" suppressHydrationWarning>
         <AnalyticsScripts

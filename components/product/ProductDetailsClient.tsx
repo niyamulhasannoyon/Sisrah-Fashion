@@ -2,11 +2,12 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2, Ruler } from 'lucide-react';
+import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2, Ruler, Truck, RefreshCw } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import MobileStickyCart from '@/components/product/MobileStickyCart';
 import SizeGuideModal from '@/components/product/SizeGuideModal';
 import WhatsAppButton from '@/components/product/WhatsAppButton';
+import StockScarcityBadge from '@/components/product/StockScarcityBadge';
 import { formatCurrency, getDirectImageLink } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackViewContent, trackAddToCart } from '@/lib/analytics/trackEvents';
@@ -492,6 +493,8 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
             </button>
           </div>
 
+          <StockScarcityBadge stock={currentVariant?.stock ?? 4} />
+
           <div className="mt-2">
             <WhatsAppButton 
               productName={product.title} 
@@ -500,6 +503,49 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
               selectedSize={selectedSize}
               selectedColor={selectedColor}
             />
+          </div>
+
+          {/* 4-Pillar BD Trust Signals Card */}
+          <div className="grid grid-cols-2 gap-3 p-4 bg-stone-900/90 border border-stone-800 rounded-2xl text-stone-200 mt-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#A31F24]/20 border border-[#A31F24]/40 flex items-center justify-center text-[#A31F24] shrink-0 font-bold text-[11px]">
+                COD
+              </div>
+              <div>
+                <h5 className="font-bold text-white text-[11px]">ক্যাশ অন ডেলিভারি</h5>
+                <p className="text-[10px] text-stone-400">সমগ্র বাংলাদেশে প্রযোজ্য</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                <RefreshCw size={15} />
+              </div>
+              <div>
+                <h5 className="font-bold text-white text-[11px]">৭ দিনের রিটার্ন</h5>
+                <p className="text-[10px] text-stone-400">সহজ এক্সচেঞ্জ পলিসি</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                <ShieldCheck size={15} />
+              </div>
+              <div>
+                <h5 className="font-bold text-white text-[11px]">১০০% প্রিমিয়াম ফেব্রিক</h5>
+                <p className="text-[10px] text-stone-400">অরিজিনাল কোয়ালিটি</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 shrink-0">
+                <Truck size={15} />
+              </div>
+              <div>
+                <h5 className="font-bold text-white text-[11px]">২৪-৪৮ ঘণ্টা শিপিং</h5>
+                <p className="text-[10px] text-stone-400">দ্রুততম ডেলিভারি</p>
+              </div>
+            </div>
           </div>
 
           {product.description && (
