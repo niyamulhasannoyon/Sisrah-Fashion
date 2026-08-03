@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2, Ruler, Truck, RefreshCw } from 'lucide-react';
+import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2, Ruler, Truck, RefreshCw, FileText } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import MobileStickyCart from '@/components/product/MobileStickyCart';
 import SizeGuideModal from '@/components/product/SizeGuideModal';
@@ -288,7 +288,7 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
   return (
     <div className="container mx-auto px-4 py-6 lg:py-16 pb-48 md:pb-8">
       <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 relative">
-        <div className="w-full lg:w-3/5 flex flex-col gap-4">
+        <div className="w-full lg:w-3/5 lg:sticky lg:top-[100px] h-fit flex flex-col gap-4">
           {/* Main Image Container - Swipeable on mobile, click triggers full-screen zoom */}
           <motion.div 
             className="w-full bg-loomra-surface relative group cursor-zoom-in overflow-hidden aspect-[4/5] max-h-[600px] 2xl:max-h-[750px] rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center select-none"
@@ -547,17 +547,28 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
               </div>
             </div>
           </div>
-
-          {product.description && (
-            <div className="mt-6 border-t border-loomra-surface pt-6 flex flex-col gap-3">
-              <span className="text-small font-bold uppercase tracking-widest text-loomra-black">Description & Details</span>
-              <p className="text-small text-loomra-muted leading-relaxed whitespace-pre-line font-light">
-                {product.description}
-              </p>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* ── Product Description & Details (Below 2-Column Split) ── */}
+      {product.description && (
+        <div className="mt-12 lg:mt-16 border-t border-gray-200/70 pt-10">
+          <div className="max-w-4xl">
+            <div className="flex items-center gap-2.5 mb-6">
+              <div className="w-8 h-8 rounded-xl bg-[#A31F24]/10 border border-[#A31F24]/20 flex items-center justify-center text-[#A31F24]">
+                <FileText size={18} />
+              </div>
+              <h3 className="text-base sm:text-lg font-black uppercase tracking-widest text-gray-900">
+                Description & Details <span className="text-[#A31F24]">.</span>
+              </h3>
+            </div>
+            
+            <div className="bg-stone-50/90 border border-stone-200/80 rounded-2xl p-6 sm:p-8 text-stone-800 text-sm sm:text-base leading-relaxed whitespace-pre-line font-bengali shadow-xs">
+              {product.description}
+            </div>
+          </div>
+        </div>
+      )}
 
       <AnimatePresence>
         {showSticky && (
