@@ -7,11 +7,23 @@ import { TrendingSlider } from '@/components/home/TrendingSlider';
 import { LifestyleBanner } from '@/components/home/LifestyleBanner';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+import Settings from '@/models/Settings';
 
 const SocialGallery = dynamic(() => import('@/components/home/SocialGallery').then((mod) => mod.SocialGallery));
 const ReviewMarquee = dynamic(() => import('@/components/home/ReviewMarquee').then((mod) => mod.ReviewMarquee));
 
 export const revalidate = 60;
+
+async function getSettings() {
+  try {
+    await dbConnect();
+    const settings = await Settings.findOne().lean();
+    return settings ? JSON.parse(JSON.stringify(settings)) : null;
+  } catch (error) {
+    console.error('Error fetching settings for HomePage:', error);
+    return null;
+  }
+}
 
 async function getNewDropProducts() {
   try {
@@ -66,16 +78,17 @@ async function getTrendingProducts() {
 }
 
 export default async function HomePage() {
-  const [newDropProducts, trendingProducts] = await Promise.all([
+  const [newDropProducts, trendingProducts, settings] = await Promise.all([
     getNewDropProducts(),
-    getTrendingProducts()
+    getTrendingProducts(),
+    getSettings(),
   ]);
 
   return (
     <div className="bg-loomra-white text-loomra-black font-sans scroll-smooth">
       <main>
         {/* Hero */}
-        <HeroSection />
+        <HeroSection initialSettings={settings} />
         
         {/* Category Grid */}
         <CategoryGrid />
@@ -98,3 +111,4 @@ export default async function HomePage() {
     </div>
   );
 }
+

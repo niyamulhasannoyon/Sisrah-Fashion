@@ -119,7 +119,7 @@ export default function LiveSalesProof() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="fixed bottom-20 left-4 z-40 max-w-sm sm:max-w-md bg-stone-900/95 backdrop-blur-md text-white border border-stone-800 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3.5"
+          className="fixed bottom-20 left-4 right-4 sm:right-auto max-w-[calc(100vw-32px)] sm:max-w-md z-40 bg-stone-900/95 backdrop-blur-md text-white border border-stone-800 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3.5"
         >
           <Link href={targetHref} className="relative w-12 h-14 rounded-xl overflow-hidden shrink-0 bg-stone-800 border border-stone-700 block">
             <Image

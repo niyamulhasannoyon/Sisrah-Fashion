@@ -58,20 +58,15 @@ export default function ProductImage({
     <div
       className={`relative w-full ${aspectClass} bg-neutral-200 rounded-lg overflow-hidden group ${className}`}
     >
-      {/* Skeleton loader while image loads */}
-      {!loaded && (
-        <div className="absolute inset-0 animate-pulse bg-neutral-200 z-10" />
-      )}
-
       {/* Primary Image */}
       <Image
         src={src}
         alt={alt}
         fill
         sizes={sizes}
-        className={`object-cover object-center transition-all duration-500 ${
-          loaded ? 'opacity-100' : 'opacity-0'
-        } ${hoverSrc ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
+        className={`object-cover object-center transition-all duration-300 ${
+          hoverSrc ? 'group-hover:opacity-0' : 'group-hover:scale-105'
+        }`}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         loading="lazy"

@@ -162,7 +162,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" />
           </>
         )}
-        <link rel="preload" href="/images/hero-model.jpg" as="image" type="image/jpeg" />
         <OrganizationSchema settings={settings} baseUrl={BASE_URL} />
         <WebSiteSchema baseUrl={BASE_URL} />
       </head>

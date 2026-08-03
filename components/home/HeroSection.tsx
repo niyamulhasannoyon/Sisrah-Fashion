@@ -9,8 +9,9 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
 import { ArrowRight, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 
-export function HeroSection() {
-  const { settings } = useSettingsStore();
+export function HeroSection({ initialSettings }: { initialSettings?: any }) {
+  const { settings: storeSettings } = useSettingsStore();
+  const settings = storeSettings || initialSettings;
   const [activeSlide, setActiveSlide] = useState(0);
 
   const headline = settings?.heroHeadline || LOOMRA_COPY.hero.primary.headline;
@@ -124,7 +125,7 @@ export function HeroSection() {
               }}
             >
               <AnimatePresence mode="wait">
-                {slides.map((slide, index) => {
+                {slides.map((slide: any, index: number) => {
                   if (index !== activeSlide) return null;
                   const desktopSrc = getDirectImageLink(slide.url);
                   const mobileSrc = slide.mobileUrl ? getDirectImageLink(slide.mobileUrl) : desktopSrc;
@@ -132,41 +133,22 @@ export function HeroSection() {
                   return (
                     <motion.div
                       key={index}
-                      initial={{ opacity: 0, scale: 1.05 }}
+                      initial={index === 0 ? false : { opacity: 0, scale: 1.05 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
                       className="absolute inset-0 w-full h-full"
                     >
-                      {/* Desktop Imagery */}
-                      <div className={`relative w-full h-full ${slide.mobileUrl ? 'hidden md:block' : 'block'}`}>
-                        <Image
-                          src={desktopSrc}
-                          alt="AS SIDRAT — Premium Lifestyle Fashion"
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-                          priority={index === 0}
-                          fetchPriority={index === 0 ? "high" : "auto"}
-                          className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                          quality={85}
-                        />
-                      </div>
-
-                      {/* Mobile Imagery */}
-                      {slide.mobileUrl && (
-                        <div className="relative w-full h-full block md:hidden">
-                          <Image
-                            src={mobileSrc}
-                            alt="AS SIDRAT — Premium Lifestyle Fashion (Mobile)"
-                            fill
-                            sizes="100vw"
-                            priority={index === 0}
-                            fetchPriority={index === 0 ? "high" : "auto"}
-                            className="object-cover object-center"
-                            quality={85}
-                          />
-                        </div>
-                      )}
+                      <Image
+                        src={desktopSrc}
+                        alt="AS SIDRAT — Premium Lifestyle Fashion"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                        priority={index === 0}
+                        fetchPriority={index === 0 ? "high" : "auto"}
+                        className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                        quality={85}
+                      />
 
                       {/* Gradient Overlay for photo contrast */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
@@ -184,7 +166,7 @@ export function HeroSection() {
               {/* Slider Dots */}
               {slides.length > 1 && (
                 <div className="absolute top-4 right-4 z-20 flex gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
-                  {slides.map((_, index) => (
+                  {slides.map((_: any, index: number) => (
                     <button
                       key={index}
                       onClick={() => setActiveSlide(index)}
