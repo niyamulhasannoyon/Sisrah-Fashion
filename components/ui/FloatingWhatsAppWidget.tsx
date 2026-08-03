@@ -28,7 +28,7 @@ export default function FloatingWhatsAppWidget({
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+    <div className="hidden md:flex fixed bottom-5 right-5 z-50 flex-col items-end">
       {/* Expanded WhatsApp Quick Chat Card */}
       {isOpen && (
         <div className="mb-3 w-80 sm:w-88 bg-stone-950 border border-stone-800 text-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
