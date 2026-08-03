@@ -5,85 +5,86 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, X, ShoppingBag } from 'lucide-react';
+import { getDirectImageLink } from '@/lib/utils';
 
 interface ProofItem {
   id: string;
   name: string;
   location: string;
   productTitle: string;
-  productSlug: string;
+  productSlug?: string;
   image: string;
   timeAgo: string;
 }
 
-const RECENT_ORDERS: ProofItem[] = [
-  {
-    id: '1',
-    name: 'Tanvir A.',
-    location: 'Mirpur, Dhaka',
-    productTitle: 'Minimalist Premium Linen Shirt - White',
-    productSlug: 'minimalist-linen-shirt-white',
-    image: '/images/hero-model.jpg',
-    timeAgo: '2 mins ago',
-  },
-  {
-    id: '2',
-    name: 'Rahim K.',
-    location: 'Gulshan, Dhaka',
-    productTitle: 'Heavyweight Premium Cotton T-Shirt - Black',
-    productSlug: 'heavyweight-cotton-tshirt-black',
-    image: '/images/hero-model.jpg',
-    timeAgo: '5 mins ago',
-  },
-  {
-    id: '3',
-    name: 'Siam M.',
-    location: 'Agrabad, Chattogram',
-    productTitle: 'Executive Oxford Linen Shirt - Navy',
-    productSlug: 'executive-oxford-shirt-navy',
-    image: '/images/hero-model.jpg',
-    timeAgo: '9 mins ago',
-  },
-  {
-    id: '4',
-    name: 'Shakil H.',
-    location: 'Dhanmondi, Dhaka',
-    productTitle: 'Organic Crewneck Oversized T-Shirt',
-    productSlug: 'organic-crewneck-oversized-tshirt',
-    image: '/images/hero-model.jpg',
-    timeAgo: '14 mins ago',
-  },
-  {
-    id: '5',
-    name: 'Mahmudul R.',
-    location: 'Zindabazar, Sylhet',
-    productTitle: 'Structured Tailored Cotton Polo',
-    productSlug: 'structured-tailored-cotton-polo',
-    image: '/images/hero-model.jpg',
-    timeAgo: '18 mins ago',
-  },
+const CUSTOMER_LOCATIONS = [
+  { name: 'Tanvir A.', location: 'Mirpur, Dhaka' },
+  { name: 'Rahim K.', location: 'Gulshan, Dhaka' },
+  { name: 'Siam M.', location: 'Agrabad, Chattogram' },
+  { name: 'Shakil H.', location: 'Dhanmondi, Dhaka' },
+  { name: 'Mahmudul R.', location: 'Zindabazar, Sylhet' },
+  { name: 'Fahim R.', location: 'Banani, Dhaka' },
+  { name: 'Asif M.', location: 'Uttara, Dhaka' },
+  { name: 'Jahid H.', location: 'Rajshahi' },
+  { name: 'Nayeem I.', location: 'Khulna' },
+  { name: 'Saiful B.', location: 'Gazipur' },
 ];
 
+const TIME_AGOS = ['2 mins ago', '5 mins ago', '8 mins ago', '12 mins ago', '15 mins ago', '19 mins ago'];
+
 export default function LiveSalesProof() {
+  const [proofItems, setProofItems] = useState<ProofItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
+  // Fetch real active products to build live sales notifications dynamically
   useEffect(() => {
-    if (isDismissed) return;
+    let isMounted = true;
+    async function loadRealProducts() {
+      try {
+        const res = await fetch('/api/products?limit=10');
+        const data = await res.json();
+        
+        if (isMounted && data?.success && Array.isArray(data.products) && data.products.length > 0) {
+          const items: ProofItem[] = data.products.map((prod: any, idx: number) => {
+            const customer = CUSTOMER_LOCATIONS[idx % CUSTOMER_LOCATIONS.length];
+            const rawImage = prod.images?.[0]?.url || '/images/hero-model.jpg';
+            return {
+              id: prod._id || String(idx),
+              name: customer.name,
+              location: customer.location,
+              productTitle: prod.title,
+              productSlug: prod.slug,
+              image: getDirectImageLink(rawImage),
+              timeAgo: TIME_AGOS[idx % TIME_AGOS.length],
+            };
+          });
+          setProofItems(items);
+        }
+      } catch (err) {
+        console.error('Error fetching products for sales proof:', err);
+      }
+    }
+    loadRealProducts();
+    return () => { isMounted = false; };
+  }, []);
 
-    // First appearance after 4 seconds
+  useEffect(() => {
+    if (isDismissed || proofItems.length === 0) return;
+
+    // Initial appearance after 4 seconds
     const initialTimer = setTimeout(() => {
       setIsVisible(true);
     }, 4000);
 
     return () => clearTimeout(initialTimer);
-  }, [isDismissed]);
+  }, [isDismissed, proofItems]);
 
   useEffect(() => {
     if (isDismissed || !isVisible) return;
 
-    // Hide after 6 seconds of display
+    // Hide toast after 6 seconds
     const hideTimer = setTimeout(() => {
       setIsVisible(false);
     }, 6000);
@@ -92,20 +93,23 @@ export default function LiveSalesProof() {
   }, [isVisible, isDismissed]);
 
   useEffect(() => {
-    if (isDismissed || isVisible) return;
+    if (isDismissed || isVisible || proofItems.length === 0) return;
 
-    // Show next order notification every 14 seconds
+    // Cycle to next notification every 14 seconds
     const nextTimer = setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % RECENT_ORDERS.length);
+      setCurrentIndex((prev) => (prev + 1) % proofItems.length);
       setIsVisible(true);
     }, 14000);
 
     return () => clearTimeout(nextTimer);
-  }, [isVisible, isDismissed]);
+  }, [isVisible, isDismissed, proofItems]);
 
-  if (isDismissed) return null;
+  if (isDismissed || proofItems.length === 0) return null;
 
-  const currentOrder = RECENT_ORDERS[currentIndex];
+  const currentOrder = proofItems[currentIndex];
+  if (!currentOrder) return null;
+
+  const targetHref = currentOrder.productSlug ? `/product/${currentOrder.productSlug}` : '/shop';
 
   return (
     <AnimatePresence>
@@ -117,14 +121,14 @@ export default function LiveSalesProof() {
           transition={{ duration: 0.4, ease: 'easeOut' }}
           className="fixed bottom-20 left-4 z-40 max-w-sm sm:max-w-md bg-stone-900/95 backdrop-blur-md text-white border border-stone-800 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3.5"
         >
-          <div className="relative w-12 h-14 rounded-xl overflow-hidden shrink-0 bg-stone-800 border border-stone-700">
+          <Link href={targetHref} className="relative w-12 h-14 rounded-xl overflow-hidden shrink-0 bg-stone-800 border border-stone-700 block">
             <Image
               src={currentOrder.image}
               alt={currentOrder.productTitle}
               fill
               className="object-cover"
             />
-          </div>
+          </Link>
 
           <div className="flex-1 min-w-0 pr-4">
             <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
@@ -132,7 +136,7 @@ export default function LiveSalesProof() {
               <span>Verified Order from {currentOrder.location}</span>
             </div>
             <Link
-              href={`/product/${currentOrder.productSlug}`}
+              href={targetHref}
               className="block text-xs font-semibold text-stone-100 truncate hover:text-[#A31F24] transition-colors mt-0.5"
             >
               {currentOrder.productTitle}
