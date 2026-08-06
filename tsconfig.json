@@ -25,6 +25,9 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@/*": [
+        "*"
+      ],
       "@/components/*": [
         "components/*"
       ],
@@ -36,6 +39,12 @@
       ],
       "@/store/*": [
         "store/*"
+      ],
+      "@/types": [
+        "types/index.ts"
+      ],
+      "@/types/*": [
+        "types/*"
       ]
     },
     "plugins": [

@@ -202,7 +202,6 @@ export default function AdminLandingPages() {
     p.title.toLowerCase().includes(productSearch.toLowerCase())
   );
 
-  // ── Cloudinary Upload (for banner) ──
   const uploadBannerImage = async (file: File, isMobile: boolean = false) => {
     if (isMobile) {
       setUploadingMobileBanner(true);
@@ -210,10 +209,12 @@ export default function AdminLandingPages() {
       setUploadingBanner(true);
     }
     try {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dj3uym3gv';
+      const preset = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || 'loomra_preset';
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'loomra_preset');
-      const res = await fetch(`https://api.cloudinary.com/v1_1/dj3uym3gv/image/upload`, {
+      formData.append('upload_preset', preset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
         method: 'POST',
         body: formData,
       });

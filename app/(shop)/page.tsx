@@ -8,71 +8,68 @@ import { LifestyleBanner } from '@/components/home/LifestyleBanner';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import Settings from '@/models/Settings';
+import type { ProductItem, SiteSettings } from '@/types';
 
 const SocialGallery = dynamic(() => import('@/components/home/SocialGallery').then((mod) => mod.SocialGallery));
 const ReviewMarquee = dynamic(() => import('@/components/home/ReviewMarquee').then((mod) => mod.ReviewMarquee));
 
 export const revalidate = 60;
 
-async function getSettings() {
+async function getSettings(): Promise<SiteSettings | null> {
   try {
     await dbConnect();
     const settings = await Settings.findOne().lean();
     return settings ? JSON.parse(JSON.stringify(settings)) : null;
   } catch (error) {
-    console.error('Error fetching settings for HomePage:', error);
+    console.error('Failed to resolve site settings:', error);
     return null;
   }
 }
 
-async function getNewDropProducts() {
+async function getNewDropProducts(): Promise<ProductItem[]> {
   try {
     await dbConnect();
-    // 1. Get products explicitly marked as New Arrival
     let newDropProducts = await Product.find({ isNewArrival: true })
                                          .sort({ createdAt: -1 })
                                          .limit(8)
-                                         .lean(); 
-    
-    // 2. Fallback: If we have fewer than 8 marked products, fill with latest arrivals
+                                         .lean();
+
     if (newDropProducts.length < 8) {
       const dropIds = newDropProducts.map(p => p._id);
-      const additionalProducts = await Product.find({ _id: { $nin: dropIds } })
-                                               .sort({ createdAt: -1 })
-                                               .limit(8 - newDropProducts.length)
-                                               .lean();
-      
-      newDropProducts = [...newDropProducts, ...additionalProducts];
+      const fallbackProducts = await Product.find({ _id: { $nin: dropIds } })
+                                             .sort({ createdAt: -1 })
+                                             .limit(8 - newDropProducts.length)
+                                             .lean();
+
+      newDropProducts = [...newDropProducts, ...fallbackProducts];
     }
     return JSON.parse(JSON.stringify(newDropProducts));
   } catch (error) {
-    console.error('Error fetching new drop products:', error);
+    console.error('Failed to load new drop products:', error);
     return [];
   }
 }
 
-async function getTrendingProducts() {
+async function getTrendingProducts(): Promise<ProductItem[]> {
   try {
     await dbConnect();
-    // 1. Get products explicitly marked as trending
     let trendingProducts = await Product.find({ isTrending: true })
                                          .sort({ createdAt: -1 })
                                          .limit(8)
-                                         .lean(); 
-    
-    // 2. If we have fewer than 8 trending products, fill the rest with latest products
+                                         .lean();
+
     if (trendingProducts.length < 8) {
       const trendingIds = trendingProducts.map(p => p._id);
-      const additionalProducts = await Product.find({ _id: { $nin: trendingIds } })
-                                               .sort({ createdAt: -1 })
-                                               .limit(8 - trendingProducts.length)
-                                               .lean();
-      
-      trendingProducts = [...trendingProducts, ...additionalProducts];
+      const fallbackProducts = await Product.find({ _id: { $nin: trendingIds } })
+                                             .sort({ createdAt: -1 })
+                                             .limit(8 - trendingProducts.length)
+                                             .lean();
+
+      trendingProducts = [...trendingProducts, ...fallbackProducts];
     }
     return JSON.parse(JSON.stringify(trendingProducts));
   } catch (error) {
-    console.error('Error fetching trending products:', error);
+    console.error('Failed to load trending products:', error);
     return [];
   }
 }
@@ -85,30 +82,17 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="bg-loomra-white text-loomra-black font-sans scroll-smooth">
+    <div className="bg-surface-paper text-neutral-900 font-sans scroll-smooth">
       <main>
-        {/* Hero */}
         <HeroSection initialSettings={settings} />
-        
-        {/* Category Grid */}
         <CategoryGrid />
-        
-        {/* New Drop */}
         <NewDrop initialProducts={newDropProducts} />
-        
-        {/* Trending */}
         <TrendingSlider initialProducts={trendingProducts} />
-        
-        {/* Lifestyle Banner */}
         <LifestyleBanner />
-        
-        {/* Static sections */}
         <WhyChooseUs />
         <SocialGallery />
         <ReviewMarquee />
-
       </main>
     </div>
   );
 }
-

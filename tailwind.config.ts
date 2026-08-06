@@ -8,6 +8,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          DEFAULT: '#A31F24',
+          dark: '#8B1A1E',
+          light: '#C42B30',
+          subtle: 'rgba(163, 31, 36, 0.08)',
+        },
+        editorial: {
+          dark: '#111113',
+          card: '#18181B',
+          muted: '#27272A',
+          border: '#3F3F46',
+        },
+        surface: {
+          DEFAULT: '#FAFAFA',
+          paper: '#FFFFFF',
+          dark: '#121214',
+          subtle: '#F4F4F5',
+        },
         loomra: {
           red: '#A31F24',
           black: '#1A1A1A',
@@ -17,7 +35,7 @@ const config: Config = {
         }
       },
       fontFamily: {
-        sans: ['var(--font-montserrat)', 'sans-serif'],
+        sans: ['var(--font-montserrat)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         bengali: ['var(--font-hind-siliguri)', 'sans-serif']
       },
       fontSize: {
@@ -27,14 +45,10 @@ const config: Config = {
         body: ['1rem', { lineHeight: '1.5rem', fontWeight: '400' }],
         small: ['0.875rem', { lineHeight: '1.25rem', fontWeight: '400' }]
       },
-      spacing: {
-        '8px': '0.5rem',
-        '16px': '1rem',
-        '24px': '1.5rem',
-        '32px': '2rem',
-        '40px': '2.5rem',
-        '48px': '3rem',
-        '64px': '4rem'
+      boxShadow: {
+        'subtle': '0 2px 10px rgba(0, 0, 0, 0.03)',
+        'elevated': '0 10px 30px -5px rgba(0, 0, 0, 0.08)',
+        'glow': '0 0 25px rgba(163, 31, 36, 0.25)',
       },
       container: {
         center: true,
@@ -50,3 +64,4 @@ const config: Config = {
 };
 
 export default config;
+
