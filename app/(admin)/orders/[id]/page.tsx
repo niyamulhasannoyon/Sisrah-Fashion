@@ -592,7 +592,8 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Verification panel if Mobile payment and not confirmed */}
-            {(order.paymentMethod === 'bKash' || order.paymentMethod === 'Nagad' || order.paymentMethod === 'Mobile Banking') && order.paymentStatus !== 'Paid' && order.paymentStatus !== 'Partially Paid' && (
+            {/* Verification panel if Mobile payment / AmaderPay and not confirmed */}
+            {(order.paymentMethod?.includes('AmaderPay') || order.paymentMethod === 'bKash' || order.paymentMethod === 'Nagad' || order.paymentMethod === 'Mobile Banking') && order.paymentStatus !== 'Paid' && order.paymentStatus !== 'Partially Paid' && (
               <div className="border border-slate-200 p-4 rounded-xl space-y-3 bg-slate-50/50">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-slate-500 block">Verify Transaction ID</label>
@@ -617,22 +618,45 @@ export default function OrderDetailPage() {
                   )}
                 </div>
 
-                <button
-                  onClick={handleVerifyConfirmPayment}
-                  disabled={!isTxnIdMatched || updating}
-                  className={`w-full text-[10px] font-black uppercase tracking-wider py-2.5 rounded-lg transition-all shadow-sm flex items-center justify-center gap-1.5 ${
-                    isTxnIdMatched 
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer' 
-                      : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
-                  }`}
-                >
-                  {updating ? <Loader2 className="animate-spin" size={12} /> : null}
-                  Confirm Payment
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={handleVerifyConfirmPayment}
+                    disabled={!isTxnIdMatched || updating}
+                    className={`w-full text-[10px] font-black uppercase tracking-wider py-2.5 rounded-lg transition-all shadow-sm flex items-center justify-center gap-1.5 ${
+                      isTxnIdMatched 
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer' 
+                        : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                    }`}
+                  >
+                    {updating ? <Loader2 className="animate-spin" size={12} /> : null}
+                    Confirm Payment
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/orders/check-status?orderId=${order.orderId}`);
+                        const data = await res.json();
+                        if (data.success && data.paymentStatus === 'Paid') {
+                          alert(`Payment verified on AmaderPay! TrxID: ${data.transactionId || 'N/A'}`);
+                          window.location.reload();
+                        } else {
+                          alert(`AmaderPay Status: ${data.paymentStatus || 'Pending'}. (SMS auto-match has not completed yet).`);
+                        }
+                      } catch (err) {
+                        alert('Failed to check AmaderPay status.');
+                      }
+                    }}
+                    className="w-full text-[10px] font-bold uppercase tracking-wider py-2 bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-lg transition border border-pink-200 flex items-center justify-center gap-1"
+                  >
+                    ⚡ Re-check AmaderPay Gateway Status
+                  </button>
+                </div>
               </div>
             )}
 
-            {(order.paymentMethod === 'bKash' || order.paymentMethod === 'Nagad' || order.paymentMethod === 'Mobile Banking') && (order.paymentStatus === 'Paid' || order.paymentStatus === 'Partially Paid') && (
+            {(order.paymentMethod?.includes('AmaderPay') || order.paymentMethod === 'bKash' || order.paymentMethod === 'Nagad' || order.paymentMethod === 'Mobile Banking') && (order.paymentStatus === 'Paid' || order.paymentStatus === 'Partially Paid') && (
               <div className="flex flex-col gap-2 pt-2">
                 <div className="p-2.5 rounded-lg border text-center text-xs font-bold uppercase tracking-wide bg-green-50 text-green-800 border-green-150">
                   ✓ Payment Confirmed
