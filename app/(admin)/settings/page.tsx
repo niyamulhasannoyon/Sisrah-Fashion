@@ -256,7 +256,7 @@ export default function AdminSettings() {
                       value={settings.whatsappNumber || ''}
                       onChange={e => setSettings({...settings, whatsappNumber: e.target.value})}
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
-                      placeholder="e.g. +8801733919156"
+                      placeholder="e.g. +8801975745270"
                     />
                   </div>
                   <div className="flex flex-col gap-2">

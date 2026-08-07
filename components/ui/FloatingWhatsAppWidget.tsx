@@ -1,19 +1,28 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare, X, Send, ShieldCheck, Clock } from 'lucide-react';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 interface FloatingWhatsAppWidgetProps {
   whatsappNumber?: string;
 }
 
 export default function FloatingWhatsAppWidget({
-  whatsappNumber = '+8801733919156',
+  whatsappNumber: propWhatsappNumber,
 }: FloatingWhatsAppWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const { settings, fetchSettings } = useSettingsStore();
 
-  const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
+  useEffect(() => {
+    if (!settings) {
+      fetchSettings();
+    }
+  }, [settings, fetchSettings]);
+
+  const activeWhatsappNumber = propWhatsappNumber || settings?.whatsappNumber || '+8801975745270';
+  const cleanNumber = activeWhatsappNumber.replace(/[^0-9]/g, '');
 
   const quickQueries = [
     'আমি ক্যাশ অন ডেলিভারিতে অর্ডার করতে চাই।',
@@ -28,10 +37,10 @@ export default function FloatingWhatsAppWidget({
   };
 
   return (
-    <div className="hidden md:flex fixed bottom-5 right-5 z-50 flex-col items-end">
+    <div className="flex fixed bottom-20 right-4 md:bottom-5 md:right-5 z-40 md:z-50 flex-col items-end">
       {/* Expanded WhatsApp Quick Chat Card */}
       {isOpen && (
-        <div className="mb-3 w-80 sm:w-88 bg-stone-950 border border-stone-800 text-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="mb-3 w-[calc(100vw-2rem)] max-w-sm sm:w-88 bg-stone-950 border border-stone-800 text-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           {/* Header */}
           <div className="bg-gradient-to-r from-emerald-700 to-teal-800 p-4 text-white flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -112,10 +121,11 @@ export default function FloatingWhatsAppWidget({
         <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-stone-900 rounded-full animate-ping" />
         <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-stone-900 rounded-full" />
         <MessageSquare size={24} className="fill-white/20" />
-        <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 text-xs font-bold transition-all duration-300">
+        <span className="hidden sm:inline-block max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-2 text-xs font-bold transition-all duration-300">
           WhatsApp Support
         </span>
       </button>
     </div>
   );
 }
+

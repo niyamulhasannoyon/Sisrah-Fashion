@@ -29,7 +29,7 @@ export default function WhatsAppButton({
     }
   }, [settings, fetchSettings]);
 
-  const rawPhone = settings?.whatsappNumber || "8801733919156";
+  const rawPhone = settings?.whatsappNumber || "8801975745270";
   const brandPhone = rawPhone.replace(/\+/g, '').replace(/\s+/g, '');
 
   const handleWhatsAppOrder = () => {

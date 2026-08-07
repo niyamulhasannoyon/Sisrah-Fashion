@@ -66,7 +66,7 @@ export default function OrganizationSchema({
     ].filter(Boolean),
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: settings?.whatsappNumber || '+8801733919156',
+      telephone: settings?.whatsappNumber || '+8801975745270',
       contactType: 'customer service',
       areaServed: 'BD',
       availableLanguage: ['en', 'bn'],
