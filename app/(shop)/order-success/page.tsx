@@ -10,6 +10,8 @@ function SuccessContent() {
   const orderId = searchParams.get('id');
   const phone = searchParams.get('phone');
   const paymentParam = searchParams.get('payment');
+  const trxIdParam = searchParams.get('trx_id');
+  const statusParam = searchParams.get('status');
 
   const [orderState, setOrderState] = useState<{
     loading: boolean;
@@ -19,8 +21,9 @@ function SuccessContent() {
     totalAmount?: number;
   }>({
     loading: true,
-    paymentStatus: paymentParam === 'success' ? 'Paid' : 'Pending',
+    paymentStatus: (paymentParam === 'success' || statusParam === 'verified') ? 'Paid' : 'Pending',
     paymentMethod: 'AmaderPay',
+    transactionId: trxIdParam || undefined,
   });
 
   const [trxInput, setTrxInput] = useState('');
@@ -35,6 +38,34 @@ function SuccessContent() {
       localStorage.setItem('loomra_latest_order_phone', phone);
     }
   }, [orderId, phone]);
+
+  // Handle gateway redirect with verified TrxID
+  useEffect(() => {
+    if (orderId && (trxIdParam || statusParam === 'verified')) {
+      fetch('/api/orders/update-trx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: orderId,
+          transactionId: trxIdParam || 'AmaderPay-Verified',
+          markAsPaid: true,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setOrderState((prev) => ({
+              ...prev,
+              loading: false,
+              paymentStatus: 'Paid',
+              transactionId: data.transactionId || trxIdParam,
+            }));
+            setPollingActive(false);
+          }
+        })
+        .catch((err) => console.error('[Auto Update Trx Error]:', err));
+    }
+  }, [orderId, trxIdParam, statusParam]);
 
   const checkStatus = useCallback(async () => {
     if (!orderId) return;

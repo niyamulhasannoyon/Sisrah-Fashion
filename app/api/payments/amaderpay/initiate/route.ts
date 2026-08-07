@@ -31,11 +31,13 @@ export async function POST(req: Request) {
         const url = new URL(reqOrigin);
         siteBaseUrl = `${url.protocol}//${url.host}`;
       } catch (e) {
-        // Fallback to default site base URL
+        // Fallback
       }
     }
+    siteBaseUrl = siteBaseUrl.replace(/\/+$/, '');
 
-    const successUrl = `${siteBaseUrl}/api/payments/amaderpay/callback?orderId=${order.orderId}`;
+    // Directly redirect to /order-success with orderId parameter
+    const successUrl = `${siteBaseUrl}/order-success?id=${order.orderId}`;
     const cancelUrl = `${siteBaseUrl}/checkout?payment=cancelled`;
 
     const amaderPayResponse = await fetch(`${amaderpayBaseUrl}/api/v1/checkout/create`, {
