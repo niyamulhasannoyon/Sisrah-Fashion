@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
@@ -47,6 +48,13 @@ export async function PUT(
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
 
+    try {
+      revalidatePath('/products');
+      revalidatePath('/');
+      revalidatePath('/shop');
+      if (product.slug) revalidatePath(`/product/${product.slug}`);
+    } catch (e) {}
+
     return NextResponse.json({ success: true, product }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Update failed' }, { status: 400 });
@@ -69,8 +77,16 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
 
+    try {
+      revalidatePath('/products');
+      revalidatePath('/');
+      revalidatePath('/shop');
+      if (product.slug) revalidatePath(`/product/${product.slug}`);
+    } catch (e) {}
+
     return NextResponse.json({ success: true, data: {} }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Delete failed' }, { status: 400 });
   }
 }
+

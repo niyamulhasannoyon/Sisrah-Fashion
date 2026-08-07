@@ -55,7 +55,7 @@ export default function AdminProductsList() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products');
+      const res = await fetch('/api/products?admin=true', { cache: 'no-store' });
       if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
       if (data.success) setProducts(data.products);
@@ -75,14 +75,21 @@ export default function AdminProductsList() {
     if (!productToDelete) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/products/${productToDelete._id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/products/${productToDelete._id}`, {
+        method: 'DELETE',
+        cache: 'no-store',
+      });
       if (res.ok) {
-        setProducts(products.filter(p => p._id !== productToDelete._id));
+        setProducts((current) => current.filter((p) => p._id !== productToDelete._id));
         setIsDeleteModalOpen(false);
         setProductToDelete(null);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Failed to delete product.");
       }
     } catch (error) {
-      console.error("Failed to delete", error);
+      console.error("Failed to delete product:", error);
+      alert("Error deleting product.");
     } finally {
       setIsDeleting(false);
     }
@@ -295,12 +302,28 @@ export default function AdminProductsList() {
     setDuplicatingId(product._id);
 
     try {
-      const { _id, id, createdAt, updatedAt, reviews, rating, numReviews, ...rest } = product;
+      let targetProduct = product;
+      if (!product.description) {
+        const detailRes = await fetch(`/api/products/${product._id}`, { cache: 'no-store' });
+        if (detailRes.ok) {
+          const detailData = await detailRes.json();
+          if (detailData.success && detailData.product) {
+            targetProduct = detailData.product;
+          }
+        }
+      }
+
+      const { _id, id, createdAt, updatedAt, reviews, rating, numReviews, ...rest } = targetProduct;
       
       const duplicatedData = {
         ...rest,
-        title: `${product.title} (Copy)`,
-        slug: `${product.slug}-copy-${Date.now()}`,
+        title: `${targetProduct.title} (Copy)`,
+        slug: `${targetProduct.slug}-copy-${Date.now()}`,
+        description: targetProduct.description || targetProduct.title,
+        costPrice: targetProduct.costPrice || 0,
+        marketingCost: targetProduct.marketingCost || 0,
+        deliveryCost: targetProduct.deliveryCost || 0,
+        lowStockThreshold: targetProduct.lowStockThreshold ?? 10,
         reviews: [],
         rating: 0,
         numReviews: 0,
@@ -316,11 +339,14 @@ export default function AdminProductsList() {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.success) {
-          setProducts([data.product, ...products]);
+        if (data.success && data.product) {
+          setProducts((current) => [data.product, ...current]);
+        } else {
+          alert(data.error || "Failed to duplicate product.");
         }
       } else {
-        alert("Failed to duplicate product.");
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.error || "Failed to duplicate product.");
       }
     } catch (error) {
       console.error("Duplication error:", error);

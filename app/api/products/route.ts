@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
@@ -19,6 +20,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const isAdminQuery = searchParams.get('admin') === 'true';
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '24', 10)));
     const skip = (page - 1) * limit;
@@ -29,10 +31,18 @@ export async function GET(request: Request) {
       query.category = { $regex: new RegExp(`^${sanitizedCategory}$`, 'i') };
     }
 
-    // Execute lean query with projection and index-backed sorting
+    let productsQuery = Product.find(query);
+    
+    // Non-admin shop listing uses projection for lean payload.
+    // Admin listing requires full details (description, costs, lowStockThreshold, etc.)
+    if (!isAdminQuery) {
+      productsQuery = productsQuery.select(
+        'title slug basePrice offerPrice category images rating numReviews isTrending isNewArrival variants'
+      );
+    }
+
     const [products, total] = await Promise.all([
-      Product.find(query)
-        .select('title slug basePrice offerPrice category images rating numReviews isTrending isNewArrival variants')
+      productsQuery
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -54,8 +64,12 @@ export async function GET(request: Request) {
       { status: 200 }
     );
 
-    // Dynamic edge caching header with stale-while-revalidate strategy
-    response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
+    if (isAdminQuery) {
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    } else {
+      // Dynamic edge caching header with stale-while-revalidate strategy for public storefront
+      response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
+    }
     return response;
   } catch (error) {
     console.error('[API /products] Error fetching products:', error);
@@ -92,9 +106,13 @@ export async function POST(request: Request) {
     const sanitizedData = {
       title: String(body.title).trim(),
       slug,
-      description: String(body.description || '').trim(),
+      description: String(body.description || body.title || '').trim(),
       basePrice: Number(body.basePrice),
       offerPrice: Number(body.offerPrice || 0),
+      costPrice: Number(body.costPrice || 0),
+      marketingCost: Number(body.marketingCost || 0),
+      deliveryCost: Number(body.deliveryCost || 0),
+      lowStockThreshold: Number(body.lowStockThreshold ?? 10),
       category: String(body.category).trim(),
       subCategory: String(body.subCategory || '').trim(),
       tags: Array.isArray(body.tags) ? body.tags.map(String) : [],
@@ -107,6 +125,12 @@ export async function POST(request: Request) {
 
     const product = await Product.create(sanitizedData);
 
+    try {
+      revalidatePath('/products');
+      revalidatePath('/');
+      revalidatePath('/shop');
+    } catch (e) {}
+
     return NextResponse.json({ success: true, product }, { status: 201 });
   } catch (error: any) {
     console.error('[API /products] Error creating product:', error);
@@ -116,4 +140,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
 

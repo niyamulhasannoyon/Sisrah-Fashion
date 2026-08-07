@@ -234,8 +234,10 @@ export default function AddProductPage() {
 
       if (res.ok) {
         router.push('/products');
+        router.refresh();
       } else {
-        alert('Failed to add product');
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.error || 'Failed to add product');
       }
     } catch (error) {
       console.error(error);

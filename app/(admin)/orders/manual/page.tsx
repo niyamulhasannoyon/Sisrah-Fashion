@@ -46,7 +46,7 @@ export default function ManualOrderPage() {
 
   // Load products for search
   useEffect(() => {
-    fetch('/api/products')
+    fetch('/api/products?admin=true', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.success) setProducts(data.products);

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import { isAdmin } from '@/lib/adminAuth';
@@ -47,9 +48,16 @@ export async function PUT(request: Request) {
 
     await Product.updateMany({ _id: { $in: ids } }, updateQuery, { runValidators: true });
 
+    try {
+      revalidatePath('/products');
+      revalidatePath('/');
+      revalidatePath('/shop');
+    } catch (e) {}
+
     return NextResponse.json({ success: true, message: 'Bulk update completed' }, { status: 200 });
   } catch (error) {
     console.error('Bulk update failed:', error);
     return NextResponse.json({ success: false, error: 'Bulk update failed' }, { status: 500 });
   }
 }
+

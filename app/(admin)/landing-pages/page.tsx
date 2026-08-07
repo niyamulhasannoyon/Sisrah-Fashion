@@ -167,7 +167,7 @@ export default function AdminLandingPages() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await fetch('/api/products');
+      const res = await fetch('/api/products?admin=true', { cache: 'no-store' });
       const data = await res.json();
       if (data.success) setProducts(data.products);
     } catch (err) {

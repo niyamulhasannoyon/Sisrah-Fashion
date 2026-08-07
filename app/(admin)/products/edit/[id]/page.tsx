@@ -256,8 +256,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData),
       });
-      if (res.ok) router.push('/products');
-      else alert('Failed to update product');
+      if (res.ok) {
+        router.push('/products');
+        router.refresh();
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.error || 'Failed to update product');
+      }
     } catch (error) { console.error(error); } finally { setUpdating(false); }
   };
 

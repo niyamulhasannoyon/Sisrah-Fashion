@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import { isAdmin } from '@/lib/adminAuth';
@@ -47,9 +48,16 @@ export async function POST(request: Request) {
 
     await Product.bulkWrite(operations as any[]);
 
+    try {
+      revalidatePath('/products');
+      revalidatePath('/');
+      revalidatePath('/shop');
+    } catch (e) {}
+
     return NextResponse.json({ success: true, message: 'Imported inventory updates successfully', processed: operations.length }, { status: 200 });
   } catch (error) {
     console.error('Import failed:', error);
     return NextResponse.json({ success: false, error: 'Import failed' }, { status: 500 });
   }
 }
+
