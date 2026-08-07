@@ -28,6 +28,8 @@ import {
   Trash2,
   X,
   Ruler,
+  Banknote,
+  Zap,
 } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -485,6 +487,7 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
     address: '',
     city: 'Dhaka',
   });
+  const [paymentMethod, setPaymentMethod] = useState<'Cash on Delivery' | 'AmaderPay'>('Cash on Delivery');
   const [phoneError, setPhoneError] = useState('');
   const [formError, setFormError] = useState('');
   const [isOrdering, setIsOrdering] = useState(false);
@@ -804,7 +807,7 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
           shippingInfo,
           orderItems,
           totalAmount: finalTotal,
-          paymentMethod: 'Cash on Delivery',
+          paymentMethod: paymentMethod,
           paymentStatus: 'Pending',
           campaignSlug: page.slug,
           ...(comboDiscount > 0 && {
@@ -828,6 +831,26 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
           localStorage.setItem('loomra_latest_order_phone', data.phone);
         } catch (storageErr) {
           console.error('[LP Order Success] Failed to save to localStorage:', storageErr);
+        }
+
+        if (paymentMethod === 'AmaderPay') {
+          try {
+            const initRes = await fetch('/api/payments/amaderpay/initiate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId: data.orderId }),
+            });
+            const initData = await initRes.json();
+            if (initData.success && initData.checkoutUrl) {
+              window.location.href = initData.checkoutUrl;
+              return;
+            } else {
+              console.error('[AmaderPay LP Initiate Error]:', initData);
+              alert('Payment Gateway redirect failed: ' + (initData.error || 'Opening order confirmation.'));
+            }
+          } catch (initErr) {
+            console.error('[AmaderPay LP Initiate Exception]:', initErr);
+          }
         }
 
         setOrderSuccess({
@@ -1830,10 +1853,81 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
               </div>
             </div>
 
+            {/* ── Payment Method Selection ── */}
+            <div className="space-y-2 pt-1">
+              <label className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 block">
+                Payment Method (পেমেন্ট পদ্ধতি নির্বাচন করুন) *
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Cash on Delivery */}
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                  paymentMethod === 'Cash on Delivery'
+                    ? 'border-gray-900 bg-gray-50 shadow-sm'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    paymentMethod === 'Cash on Delivery' ? 'border-gray-900' : 'border-gray-300'
+                  }`}>
+                    {paymentMethod === 'Cash on Delivery' && <div className="w-2 h-2 bg-gray-900 rounded-full" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className={`text-xs font-black uppercase block leading-tight ${
+                      paymentMethod === 'Cash on Delivery' ? 'text-gray-900' : 'text-gray-700'
+                    }`}>
+                      Cash on Delivery
+                    </span>
+                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mt-0.5 font-bengali">
+                      হাতে পেয়ে মূল্য দিন
+                    </span>
+                  </div>
+                  <Banknote size={18} className={paymentMethod === 'Cash on Delivery' ? 'text-gray-900' : 'text-gray-300'} />
+                  <input type="radio" name="lp_payment" value="Cash on Delivery" checked={paymentMethod === 'Cash on Delivery'} onChange={() => setPaymentMethod('Cash on Delivery')} className="hidden" />
+                </label>
+
+                {/* AmaderPay Auto Gateway */}
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                  paymentMethod === 'AmaderPay'
+                    ? 'border-pink-600 bg-pink-50/40 shadow-sm ring-1 ring-pink-600/30'
+                    : 'border-gray-200 bg-white hover:border-pink-200'
+                }`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    paymentMethod === 'AmaderPay' ? 'border-pink-600' : 'border-gray-300'
+                  }`}>
+                    {paymentMethod === 'AmaderPay' && <div className="w-2 h-2 bg-pink-600 rounded-full" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                      <span className={`text-xs font-black uppercase block leading-tight ${
+                        paymentMethod === 'AmaderPay' ? 'text-pink-950' : 'text-gray-900'
+                      }`}>
+                        AmaderPay
+                      </span>
+                      <span className="bg-pink-600 text-white text-[7px] font-black uppercase px-1 py-0.2 rounded-full animate-pulse">
+                        Auto
+                      </span>
+                    </div>
+                    <span className="text-[9px] text-pink-700 font-bold uppercase tracking-wider block mt-0.5 font-bengali">
+                      bKash / Nagad / Rocket ⚡
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <span className="text-[8px] font-black px-1 py-0.5 rounded bg-[#E2125B] text-white">bKash</span>
+                    <span className="text-[8px] font-black px-1 py-0.5 rounded bg-[#F15A22] text-white">নগদ</span>
+                  </div>
+                  <input type="radio" name="lp_payment" value="AmaderPay" checked={paymentMethod === 'AmaderPay'} onChange={() => setPaymentMethod('AmaderPay')} className="hidden" />
+                </label>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={isOrdering}
-              className="w-full bg-[#A31F24] hover:bg-[#8D181D] hover:scale-[1.01] active:scale-[0.98] text-white py-4 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5 shadow-[0_6px_20px_rgba(163,31,36,0.3)] hover:shadow-[0_8px_25px_rgba(163,31,36,0.45)] font-sans cursor-pointer"
+              className={`w-full text-white py-4 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5 font-sans cursor-pointer ${
+                paymentMethod === 'AmaderPay'
+                  ? 'bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-[0_6px_20px_rgba(219,39,119,0.35)]'
+                  : 'bg-[#A31F24] hover:bg-[#8D181D] shadow-[0_6px_20px_rgba(163,31,36,0.3)]'
+              }`}
             >
               {isOrdering ? (
                 <div className="flex items-center gap-2 py-0.5">
@@ -1846,11 +1940,11 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
               ) : (
                 <>
                   <span className="flex items-center gap-1.5 font-black text-sm tracking-[0.05em] leading-none">
-                    <CheckCircle2 size={16} className="shrink-0" />
-                    CONFIRM ORDER — ৳{(totalPrice + getShippingCost()).toLocaleString()}
+                    {paymentMethod === 'AmaderPay' ? <Zap size={16} className="shrink-0 text-yellow-300 fill-yellow-300" /> : <CheckCircle2 size={16} className="shrink-0" />}
+                    {paymentMethod === 'AmaderPay' ? 'PAY NOW WITH AMADERPAY' : 'CONFIRM ORDER'} — ৳{(totalPrice + getShippingCost()).toLocaleString()}
                   </span>
                   <span className="text-[9px] font-bold text-white/80 lowercase tracking-wide font-bengali leading-none mt-1">
-                    হাতে পেয়ে মূল্য দিন (Cash on Delivery)
+                    {paymentMethod === 'AmaderPay' ? 'bKash, Nagad ও Rocket ইনস্ট্যান্ট পেমেন্ট গেটওয়ে ⚡' : 'হাতে পেয়ে মূল্য দিন (Cash on Delivery)'}
                   </span>
                 </>
               )}
