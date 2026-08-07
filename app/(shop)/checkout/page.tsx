@@ -6,7 +6,7 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart, Clock } from 'lucide-react';
+import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart, Clock, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackInitiateCheckout, trackPurchase } from '@/lib/analytics/trackEvents';
 
@@ -220,6 +220,26 @@ export default function CheckoutPage() {
         clearCart();
         localStorage.setItem('loomra_latest_order_id', data.orderId.toString());
         localStorage.setItem('loomra_latest_order_phone', data.phone);
+
+        if (paymentMethod === 'AmaderPay') {
+          try {
+            const initRes = await fetch('/api/payments/amaderpay/initiate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId: data.orderId }),
+            });
+            const initData = await initRes.json();
+            if (initData.success && initData.checkoutUrl) {
+              window.location.href = initData.checkoutUrl;
+              return;
+            } else {
+              alert('Payment Gateway redirect failed: ' + (initData.error || 'Opening order confirmation.'));
+            }
+          } catch (initErr) {
+            console.error('[AmaderPay Initiate Error]:', initErr);
+          }
+        }
+
         router.push(`/order-success?id=${data.orderId}&phone=${data.phone}`);
       } else {
         alert('Order failed: ' + (data.error || 'Unknown error'));
@@ -493,6 +513,40 @@ export default function CheckoutPage() {
 
                   {/* ── Premium Payment Method Cards ── */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* AmaderPay Auto Gateway */}
+                    <label className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 col-span-1 sm:col-span-2 ${
+                      paymentMethod === 'AmaderPay'
+                        ? 'border-pink-600 bg-pink-50/40 shadow-sm ring-1 ring-pink-600/30'
+                        : 'border-gray-100 bg-white hover:border-pink-200 hover:shadow-sm'
+                    }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                        paymentMethod === 'AmaderPay' ? 'border-pink-600' : 'border-gray-300'
+                      }`}>
+                        {paymentMethod === 'AmaderPay' && <div className="w-2 h-2 bg-pink-600 rounded-full" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`text-xs font-black uppercase tracking-tight block leading-tight ${
+                            paymentMethod === 'AmaderPay' ? 'text-pink-950' : 'text-gray-900'
+                          }`}>
+                            AmaderPay (bKash / Nagad / Rocket)
+                          </span>
+                          <span className="bg-pink-600 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full tracking-wider animate-pulse">
+                            Auto Pay
+                          </span>
+                        </div>
+                        <span className="text-[9px] text-pink-700/90 font-bold uppercase tracking-wider block mt-0.5">
+                          Instant Automatic Payment Verification ⚡
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-[#E2125B] text-white">bKash</span>
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-[#F15A22] text-white">নগদ</span>
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-purple-600 text-white">Rocket</span>
+                      </div>
+                      <input type="radio" name="payment" value="AmaderPay" checked={paymentMethod === 'AmaderPay'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
+                    </label>
+
                     {/* Cash on Delivery */}
                     <label className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                       paymentMethod === 'Cash on Delivery'
@@ -531,9 +585,9 @@ export default function CheckoutPage() {
                         <span className={`text-xs font-black uppercase tracking-tight block leading-tight ${
                           paymentMethod === 'bKash' ? 'text-gray-900' : 'text-gray-700'
                         }`}>
-                          bKash
+                          bKash Manual
                         </span>
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Pay via bKash MFS</span>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Send Money + TrxID</span>
                       </div>
                       <div className={`w-8 h-5 rounded flex items-center justify-center text-[8px] font-black select-none shrink-0 ${
                         paymentMethod === 'bKash' ? 'bg-[#E2125B] text-white' : 'bg-gray-100 text-gray-400'
@@ -558,9 +612,9 @@ export default function CheckoutPage() {
                         <span className={`text-xs font-black uppercase tracking-tight block leading-tight ${
                           paymentMethod === 'Nagad' ? 'text-gray-900' : 'text-gray-700'
                         }`}>
-                          Nagad
+                          Nagad Manual
                         </span>
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Pay via Nagad MFS</span>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Send Money + TrxID</span>
                       </div>
                       <div className={`w-8 h-5 rounded flex items-center justify-center text-[8px] font-black select-none shrink-0 ${
                         paymentMethod === 'Nagad' ? 'bg-[#F15A22] text-white' : 'bg-gray-100 text-gray-400'
@@ -593,6 +647,23 @@ export default function CheckoutPage() {
                       <input type="radio" name="payment" value="Due (Baki)" checked={paymentMethod === 'Due (Baki)'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
                     </label>
                   </div>
+
+                  {/* ── AmaderPay Info Block ── */}
+                  {paymentMethod === 'AmaderPay' && (
+                    <div className="mt-4 p-4 bg-gradient-to-br from-pink-900/10 via-pink-50/50 to-rose-50/30 rounded-xl border border-pink-200/80 space-y-2 animate-in fade-in duration-300">
+                      <div className="flex items-start gap-2.5">
+                        <Zap size={18} className="text-pink-600 mt-0.5 shrink-0" />
+                        <div className="text-xs text-stone-800 space-y-1">
+                          <p className="font-bold text-pink-950">
+                            স্বয়ংক্রিয় bKash / Nagad / Rocket পেমেন্ট গেটওয়ে
+                          </p>
+                          <p className="text-[11px] text-stone-600 leading-relaxed">
+                            অর্ডার সাবমিট করলে আপনাকে নিরাপদে AmaderPay পেমেন্ট পেজে রিডাইরেক্ট করা হবে। পেমেন্ট সম্পন্ন করার কয়েক সেকেন্ডের মধ্যেই আপনার অর্ডার অটোমেটিক ভেরিফাই ও কনফার্ম হয়ে যাবে!
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* ── COD Info Block ── */}
                   {paymentMethod === 'Cash on Delivery' && (

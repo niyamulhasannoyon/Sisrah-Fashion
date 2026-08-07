@@ -10,6 +10,8 @@ function SuccessContent() {
   const orderId = searchParams.get('id');
   const phone = searchParams.get('phone');
 
+  const paymentStatusParam = searchParams.get('payment');
+
   useEffect(() => {
     if (orderId && phone) {
       localStorage.setItem('loomra_latest_order_id', orderId);
@@ -28,6 +30,12 @@ function SuccessContent() {
       <p className="text-gray-500 max-w-md mx-auto mb-8 font-medium">
         Thank you for your purchase. Your order has been received and will begin processing right away.
       </p>
+
+      {paymentStatusParam === 'success' && (
+        <div className="mb-6 inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-full text-xs font-bold shadow-sm">
+          <span>⚡ Payment Successfully Verified (Paid)</span>
+        </div>
+      )}
       
       {orderId && (
         <div className="bg-white border border-gray-100 shadow-sm px-8 py-6 rounded-3xl mb-10 w-full max-w-sm">
