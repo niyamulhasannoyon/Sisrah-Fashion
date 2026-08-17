@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Settings,
-  LogOut, Bell, Search, Tag, BarChart3, MessageSquare, UserCog, FileText, AlertTriangle,
+  LogOut, Bell, Search, Tag, BarChart3, MessageSquare, UserCog, FileText, AlertTriangle, Bot,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -28,6 +28,7 @@ const ALL_NAV_ITEMS = [
   { key: 'reviews',       name: 'Reviews',       href: '/reviews',       icon: MessageSquare },
   { key: 'coupons',       name: 'Coupons',       href: '/coupons',       icon: Tag },
   { key: 'staff',         name: 'Staff',         href: '/staff',         icon: UserCog },
+  { key: 'ai-assistant',  name: 'AS SIDRAT AI',  href: '/ai-assistant',  icon: Bot },
   { key: 'settings',      name: 'Settings',      href: '/settings',      icon: Settings },
 ];
 

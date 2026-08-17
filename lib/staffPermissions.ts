@@ -13,6 +13,7 @@ export const ROLE_PERMISSIONS: Record<StaffRole, string[]> = {
     'reviews',
     'coupons',
     'staff',
+    'ai-assistant',
     'settings',
     'landing-pages',
   ],
@@ -22,6 +23,7 @@ export const ROLE_PERMISSIONS: Record<StaffRole, string[]> = {
     'orders',
     'customers',
     'reviews',
+    'ai-assistant',
     'landing-pages',
   ],
   support: [

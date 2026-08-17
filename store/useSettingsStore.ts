@@ -58,6 +58,18 @@ interface Settings {
   categoryImageWomen?: string;
   categoryImageFusion?: string;
   heroImages?: { url: string; mobileUrl?: string; public_id: string; mobilePublicId?: string }[];
+  
+  // AS SIDRAT AI Settings
+  aiEnabled?: boolean;
+  aiApiKey?: string;
+  aiModel?: string;
+  aiAssistantName?: string;
+  aiTone?: string;
+  aiSystemPrompt?: string;
+  aiRules?: string[];
+  aiFaqs?: { question: string; answer: string }[];
+  aiWelcomeMessage?: string;
+  aiQuickQueries?: string[];
 }
 
 interface SettingsState {
