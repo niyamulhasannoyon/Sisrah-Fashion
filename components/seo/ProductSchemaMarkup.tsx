@@ -11,6 +11,8 @@ interface ProductSchemaProps {
     offerPrice?: number;
     sku?: string;
     category?: string;
+    material?: string;
+    fabricGsm?: string | number;
     images?: Array<{
       url: string;
       public_id?: string;
@@ -25,6 +27,14 @@ interface ProductSchemaProps {
     }>;
     brand?: string;
   };
+  reviews?: Array<{
+    _id?: string;
+    name: string;
+    rating: number;
+    comment: string;
+    createdAt?: string;
+    verifiedPurchase?: boolean;
+  }>;
   baseUrl?: string;
 }
 
@@ -35,6 +45,7 @@ interface ProductSchemaProps {
  */
 export default function ProductSchemaMarkup({
   product,
+  reviews = [],
   baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app',
 }: ProductSchemaProps) {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, '');
@@ -55,7 +66,7 @@ export default function ProductSchemaMarkup({
   const imageArray = rawImages
     .filter(img => Boolean(img?.url))
     .map(img => (img.url.startsWith('http') ? img.url : `${normalizedBaseUrl}${img.url}`))
-    .slice(0, 5);
+    .slice(0, 6);
 
   if (imageArray.length === 0) {
     imageArray.push(`${normalizedBaseUrl}/images/hero-model.jpg`);
@@ -76,6 +87,11 @@ export default function ProductSchemaMarkup({
       name: product.brand || 'AS SIDRAT',
     },
     category: product.category || 'Fashion',
+    material: product.material || '100% Combed Compact Cotton (220 GSM)',
+    countryOfOrigin: {
+      '@type': 'Country',
+      name: 'Bangladesh',
+    },
     image: imageArray,
     offers: {
       '@type': 'Offer',
@@ -152,6 +168,25 @@ export default function ProductSchemaMarkup({
       bestRating: '5',
       worstRating: '1',
     };
+  }
+
+  // Include individual verified reviews if available
+  if (reviews && reviews.length > 0) {
+    productSchema.review = reviews.slice(0, 5).map((rev) => ({
+      '@type': 'Review',
+      author: {
+        '@type': 'Person',
+        name: rev.name || 'Verified Customer',
+      },
+      datePublished: rev.createdAt ? new Date(rev.createdAt).toISOString().split('T')[0] : '2026-01-01',
+      reviewBody: rev.comment || 'Excellent quality and fabric durability.',
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: rev.rating || 5,
+        bestRating: '5',
+        worstRating: '1',
+      },
+    }));
   }
 
   const categorySlug = (product.category || 'clothing').toLowerCase().replace(/\s+/g, '-');

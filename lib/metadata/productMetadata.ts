@@ -45,11 +45,11 @@ export function generateProductMetadata(
   const productTitle = product.title?.trim() || 'Premium Apparel';
   const categoryFormatted = formatCategory(product.category);
 
-  // Required title format: [Product Name] - Premium [Category] | AS SIDRAT Bangladesh
-  const seoTitle = `${productTitle} - Premium ${categoryFormatted} | AS SIDRAT Bangladesh`;
+  // Required title format: [Product Name] - Premium [Category] Price in BD | AS SIDRAT
+  const seoTitle = `${productTitle} - Premium ${categoryFormatted} Price in BD | AS SIDRAT`;
 
   const metaDescription = truncateText(
-    `${product.description ? product.description + ' ' : ''}Buy ${productTitle} online in Bangladesh from AS SIDRAT with Cash on Delivery across BD.`
+    `${product.description ? product.description + ' ' : ''}Buy ${productTitle} online in Bangladesh from AS SIDRAT. 100% combed compact cotton, 220 GSM heavyweight fabric, and cash on delivery across BD.`
   );
 
   const rawImage = product.images?.[0]?.url;
@@ -69,6 +69,14 @@ export function generateProductMetadata(
       productTitle.toLowerCase(),
       `${productTitle.toLowerCase()} bd`,
       `${productTitle.toLowerCase()} price in bangladesh`,
+      'best t-shirt brand in bangladesh',
+      'premium t-shirt bd',
+      'buy t-shirt online bangladesh',
+      '220 gsm t shirt bangladesh',
+      'combed compact cotton t shirt',
+      'সেরা টি শার্ট বাংলাদেশ',
+      'প্রিমিয়াম টি শার্ট দাম বাংলাদেশ',
+      'অনলাইনে টি শার্ট কিনুন',
       categoryFormatted.toLowerCase(),
       ...(product.tags || []).map(t => t.toLowerCase()),
       'shirt',
@@ -90,6 +98,10 @@ export function generateProductMetadata(
     metadataBase: new URL(normalizedBaseUrl),
     alternates: {
       canonical: canonicalUrl,
+      languages: {
+        'en-BD': canonicalUrl,
+        'bn-BD': canonicalUrl,
+      },
     },
     openGraph: {
       title: seoTitle,
@@ -102,7 +114,7 @@ export function generateProductMetadata(
         {
           url: productImage,
           width: 1200,
-          height: 800,
+          height: 630,
           alt: `${productTitle} - AS SIDRAT Bangladesh`,
           type: 'image/jpeg',
         },

@@ -65,7 +65,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <>
-      <ProductSchemaMarkup product={productData} />
+      <ProductSchemaMarkup product={productData} reviews={reviewsData} />
       <ProductDetailsClient product={productData} reviews={reviewsData} />
     </>
   );
