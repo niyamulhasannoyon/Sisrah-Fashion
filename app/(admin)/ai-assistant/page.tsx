@@ -5,6 +5,7 @@ import {
   Bot, Sparkles, Save, Plus, Trash2, RefreshCw, Send, CheckCircle2,
   AlertCircle, HelpCircle, Shield, Sliders, MessageSquare, Key, Play, CornerDownLeft
 } from 'lucide-react';
+import { cleanMarkdownArtifacts } from '@/lib/utils';
 
 interface FAQ {
   question: string;
@@ -29,31 +30,50 @@ export default function AiAssistantPage() {
   // Form State
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiApiKey, setAiApiKey] = useState('v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav');
-  const [aiModel, setAiModel] = useState('gemini-3.5-flash');
+  const [aiModel, setAiModel] = useState('gemini-3.6-flash');
   const [aiAssistantName, setAiAssistantName] = useState('AS SIDRAT AI Assistant');
-  const [aiTone, setAiTone] = useState('Professional & Polite Bengali');
+  const [aiTone, setAiTone] = useState('Friendly, warm, polite Bengali');
   const [aiSystemPrompt, setAiSystemPrompt] = useState(
-    'আপনি AS SIDRAT ব্র্যান্ডের অফিশিয়াল AI কাস্টমার কেয়ার অ্যাসিস্ট্যান্ট। গ্রাহকদের সাথে অত্যন্ত মার্জিত, পেশাদার এবং বন্ধুবৎসল বাংলায় কথা বলুন। ব্র্যান্ডের সুনাম বজায় রাখুন এবং সঠিক তথ্য দিন।'
+    `Role: You are the real-time customer support chat agent for the Bangladeshi clothing brand "AS SIDRAT" (assidrat.vercel.app).
+
+Tone and Personality:
+- Friendly, warm, polite, and natural—like talking to a helpful Bangladeshi store representative.
+- Reply in Bengali by default, or match the user's language (Banglish/English).
+- Keep replies brief and conversational (1-2 sentences maximum).
+
+Strict Formatting Rules:
+- NEVER use markdown symbols (*, **, _, #, -, etc.).
+- Output ONLY plain text with normal spacing and line breaks.
+
+Knowledge Base:
+- Products: Premium linen shirts, pure combed cotton t-shirts.
+- Delivery Charge and Time: Inside Dhaka 80 TK (2-3 business days), Outside Dhaka 120 TK (3-5 business days).
+- Return and Exchange: 7-day hassle-free exchange for unused items with tags.
+- Payment Methods: Cash on Delivery (COD), bKash, Nagad.
+- WhatsApp Support: +880 1975745270.
+
+Boundary:
+- If asked about unrelated topics, politely guide them back to AS SIDRAT shopping.`
   );
   const [aiRules, setAiRules] = useState<string[]>([
     'সবসময় গ্রাহককে সালাম জানান এবং অত্যন্ত মার্জিত বাংলায় বিনয়ী হয়ে সাহায্য প্রদান করুন।',
     'ওয়েবসাইতের রিয়েল-টাইম প্রোডাক্ট প্রাইস, স্টক এবং সাইজ অনুযায়ী সঠিক তথ্য সরবরাহ করুন।',
     'সমগ্র বাংলাদেশে ক্যাশ অন ডেলিভারি (Cash on Delivery) সুবিধা উপলব্ধ।',
-    'ঢাকার ভেতরে ডেলিভারি চার্জ ৭০ টাকা (২-৩ দিন) এবং ঢাকার বাইরে ১৩০ টাকা (৩-৫ দিন)।',
+    'ঢাকার ভেতরে ডেলিভারি চার্জ ৮০ টাকা (২-৩ দিন) এবং ঢাকার বাইরে ১২০ টাকা (৩-৫ দিন)।',
     'যেকোনো সাইজ এক্সচেঞ্জ বা রিটার্ন ৭ দিনের মধ্যে অক্ষত অবস্থায় গ্রহণ করা হয়।'
   ]);
   const [aiFaqs, setAiFaqs] = useState<FAQ[]>([
     { question: 'আপনাদের ডেলিভারি সময় কত দিন?', answer: 'ঢাকার ভেতরে সাধারণত ২-৩ কর্মদিবস এবং ঢাকার বাইরে ৩-৫ কর্মদিবসের মধ্যে ডেলিভারি সম্পন্ন হয়।' },
-    { question: 'পেমেন্ট পদ্ধতি কি কি?', answer: 'আমরা ক্যাশ অন ডেলিভারি (COD), বিকাশ, নগদ এবং যেকোনো কার্ডে পেমেন্ট গ্রহণ করি।' },
+    { question: 'পেমেন্ট পদ্ধতি কি কি?', answer: 'আমরা ক্যাশ অন ডেলিভারি (COD), বিকাশ ও নগদ গ্রহণ করি।' },
     { question: 'সাইজ পরিবর্তন করা যাবে কি?', answer: 'হ্যাঁ, প্রোডাক্ট পাওয়ার ৭ দিনের মধ্যে অক্ষত অবস্থায় ফ্রি সাইজ এক্সচেঞ্জ করার সুবিধা রয়েছে।' }
   ]);
   const [aiWelcomeMessage, setAiWelcomeMessage] = useState(
-    'আসসালামু আলাইকুম! AS SIDRAT AI Assistant-এ আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি?'
+    'আসসালামু আলাইকুম! আস সিদরাহ্-তে আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি?'
   );
   const [aiQuickQueries, setAiQuickQueries] = useState<string[]>([
     'আমি ক্যাশ অন ডেলিভারিতে অর্ডার করতে চাই।',
-    'বর্তমানে কি কি নতুন কালেকশন বা শার্ট আছে?',
-    'ডেলিভারি সময় ও চার্জ সম্পর্কে জানতে চাই।'
+    'আপনাদের ডেলিভারি চার্জ ও সময় কত?',
+    'নতুন প্রিমিয়াম শার্ট কালেকশন দেখতে চাই।'
   ]);
 
   // New Rule / FAQ inputs
@@ -184,39 +204,100 @@ export default function AiAssistantPage() {
     const textToSend = customText || sandboxInput;
     if (!textToSend.trim() || sandboxLoading) return;
 
-    const userMsg: Message = { role: 'user', content: textToSend };
+    const userMsg: Message = { role: 'user', content: textToSend.trim() };
     const newHistory = [...sandboxMessages, userMsg];
     setSandboxMessages(newHistory);
     if (!customText) setSandboxInput('');
     setSandboxLoading(true);
+
+    const assistantIndex = newHistory.length;
+    setSandboxMessages(prev => [
+      ...prev,
+      { role: 'assistant', content: '', suggestedProducts: [] }
+    ]);
 
     try {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: newHistory.map(m => ({ role: m.role, content: m.content }))
+          messages: newHistory.map(m => ({ role: m.role, content: m.content })),
+          stream: true
         })
       });
 
-      const data = await res.json();
-      if (data.reply) {
-        setSandboxMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: data.reply, suggestedProducts: data.suggestedProducts }
-        ]);
-      } else {
-        setSandboxMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: 'দুঃখিত, কোনো উত্তর পাওয়া যায়নি।' }
-        ]);
+      if (!res.ok || !res.body) {
+        throw new Error('Chat API network response was not ok');
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let streamText = '';
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith('data:')) continue;
+          const jsonStr = trimmed.replace(/^data:\s*/, '');
+          if (jsonStr === '[DONE]') continue;
+
+          try {
+            const data = JSON.parse(jsonStr);
+            if (data.text) {
+              streamText += data.text;
+              const sanitized = cleanMarkdownArtifacts(streamText);
+              setSandboxMessages(prev => {
+                const next = [...prev];
+                if (next[assistantIndex]) {
+                  next[assistantIndex] = {
+                    ...next[assistantIndex],
+                    content: sanitized
+                  };
+                }
+                return next;
+              });
+              setSandboxLoading(false);
+            }
+
+            if (data.done) {
+              const finalContent = cleanMarkdownArtifacts(data.fullText || streamText);
+              setSandboxMessages(prev => {
+                const next = [...prev];
+                if (next[assistantIndex]) {
+                  next[assistantIndex] = {
+                    role: 'assistant',
+                    content: finalContent || 'আসসালামু আলাইকুম! আপনাকে কীভাবে সাহায্য করতে পারি?',
+                    suggestedProducts: data.suggestedProducts || []
+                  };
+                }
+                return next;
+              });
+            }
+          } catch (err) {
+            // Ignore partial parse
+          }
+        }
       }
     } catch (error) {
       console.error('Sandbox Test Error:', error);
-      setSandboxMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: 'ত্রুটি দেখা দিয়েছে। আবার চেষ্টা করুন।' }
-      ]);
+      setSandboxMessages(prev => {
+        const next = [...prev];
+        if (next[assistantIndex]) {
+          next[assistantIndex] = {
+            role: 'assistant',
+            content: 'ত্রুটি দেখা দিয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
+          };
+        }
+        return next;
+      });
     } finally {
       setSandboxLoading(false);
     }
@@ -524,8 +605,7 @@ export default function AiAssistantPage() {
                     onChange={(e) => setAiModel(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white"
                   >
-                    <option value="gemini-3.5-flash">Gemini 3.5 Flash (Recommended - Super Fast & Smart)</option>
-                    <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+                    <option value="gemini-3.6-flash">Gemini 3.6 Flash (Recommended - Super Fast & Real-time)</option>
                     <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                     <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
                   </select>
@@ -653,7 +733,7 @@ export default function AiAssistantPage() {
                         : 'bg-stone-900 text-stone-200 border border-stone-800 rounded-bl-none shadow-sm'
                     }`}
                   >
-                    {msg.content}
+                    {cleanMarkdownArtifacts(msg.content)}
                   </div>
 
                   {/* Render Suggested Products if any */}

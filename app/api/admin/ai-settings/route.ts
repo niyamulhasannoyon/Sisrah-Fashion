@@ -17,27 +17,27 @@ export async function GET() {
     const aiSettings = {
       aiEnabled: settings.aiEnabled ?? true,
       aiApiKey: settings.aiApiKey || 'v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav',
-      aiModel: settings.aiModel || 'gemini-3.5-flash',
+      aiModel: settings.aiModel || 'gemini-3.6-flash',
       aiAssistantName: settings.aiAssistantName || 'AS SIDRAT AI Assistant',
-      aiTone: settings.aiTone || 'Professional & Polite Bengali',
-      aiSystemPrompt: settings.aiSystemPrompt || 'আপনি AS SIDRAT ব্র্যান্ডের অফিশিয়াল AI কাস্টমার কেয়ার অ্যাসিস্ট্যান্ট। গ্রাহকদের সাথে অত্যন্ত মার্জিত, পেশাদার এবং বন্ধুবৎসল বাংলায় কথা বলুন। ব্র্যান্ডের সুনাম বজায় রাখুন এবং সঠিক তথ্য দিন।',
+      aiTone: settings.aiTone || 'Friendly, warm, polite Bengali',
+      aiSystemPrompt: settings.aiSystemPrompt || 'Role: You are the real-time customer support chat agent for the Bangladeshi clothing brand "AS SIDRAT" (assidrat.vercel.app).',
       aiRules: settings.aiRules && settings.aiRules.length > 0 ? settings.aiRules : [
         'সবসময় গ্রাহককে সালাম জানান এবং অত্যন্ত মার্জিত বাংলায় বিনয়ী হয়ে সাহায্য প্রদান করুন।',
         'ওয়েবসাইতের রিয়েল-টাইম প্রোডাক্ট প্রাইস, স্টক এবং সাইজ অনুযায়ী সঠিক তথ্য সরবরাহ করুন।',
         'সমগ্র বাংলাদেশে ক্যাশ অন ডেলিভারি (Cash on Delivery) সুবিধা উপলব্ধ।',
-        'ঢাকার ভেতরে ডেলিভারি চার্জ ৭০ টাকা (২-৩ দিন) এবং ঢাকার বাইরে ১৩০ টাকা (৩-৫ দিন)।',
+        'ঢাকার ভেতরে ডেলিভারি চার্জ ৮০ টাকা (২-৩ দিন) এবং ঢাকার বাইরে ১২০ টাকা (৩-৫ দিন)।',
         'যেকোনো সাইজ এক্সচেঞ্জ বা রিটার্ন ৭ দিনের মধ্যে অক্ষত অবস্থায় গ্রহণ করা হয়।'
       ],
       aiFaqs: settings.aiFaqs && settings.aiFaqs.length > 0 ? settings.aiFaqs : [
         { question: 'আপনাদের ডেলিভারি সময় কত দিন?', answer: 'ঢাকার ভেতরে সাধারণত ২-৩ কর্মদিবস এবং ঢাকার বাইরে ৩-৫ কর্মদিবসের মধ্যে ডেলিভারি সম্পন্ন হয়।' },
-        { question: 'পেমেন্ট পদ্ধতি কি কি?', answer: 'আমরা ক্যাশ অন ডেলিভারি (COD), বিকাশ, নগদ এবং যেকোনো কার্ডে পেমেন্ট গ্রহণ করি।' },
+        { question: 'পেমেন্ট পদ্ধতি কি কি?', answer: 'আমরা ক্যাশ অন ডেলিভারি (COD), বিকাশ ও নগদ গ্রহণ করি।' },
         { question: 'সাইজ পরিবর্তন করা যাবে কি?', answer: 'হ্যাঁ, প্রোডাক্ট পাওয়ার ৭ দিনের মধ্যে অক্ষত অবস্থায় ফ্রি সাইজ এক্সচেঞ্জ করার সুবিধা রয়েছে।' }
       ],
-      aiWelcomeMessage: settings.aiWelcomeMessage || 'আসসালামু আলাইকুম! AS SIDRAT AI Assistant-এ আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি?',
+      aiWelcomeMessage: settings.aiWelcomeMessage || 'আসসালামু আলাইকুম! আস সিদরাহ্-তে আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি?',
       aiQuickQueries: settings.aiQuickQueries && settings.aiQuickQueries.length > 0 ? settings.aiQuickQueries : [
         'আমি ক্যাশ অন ডেলিভারিতে অর্ডার করতে চাই।',
-        'বর্তমানে কি কি নতুন কালেকশন বা শার্ট আছে?',
-        'ডেলিভারি সময় ও চার্জ সম্পর্কে জানতে চাই।'
+        'আপনাদের ডেলিভারি চার্জ ও সময় কত?',
+        'নতুন প্রিমিয়াম শার্ট কালেকশন দেখতে চাই।'
       ],
       whatsappNumber: settings.whatsappNumber || '+8801975745270'
     };

@@ -49,3 +49,26 @@ export function getDirectImageLink(url: string | undefined | null): string {
 
   return url;
 }
+
+/**
+ * Strips raw markdown artifacts and symbols (*, **, _, #, `, -, etc.) to produce clean plain text.
+ */
+export function cleanMarkdownArtifacts(text: string): string {
+  if (!text) return '';
+  return text
+    // Remove markdown bold/italic (**text**, *text*, __text__, _text_)
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/(\*|_)(.*?)\1/g, '$2')
+    // Remove markdown headers (# Header, ## Header, etc.)
+    .replace(/^#{1,6}\s+/gm, '')
+    // Remove blockquotes (> quote)
+    .replace(/^>\s+/gm, '')
+    // Remove inline code / code blocks (`code` or ```code```)
+    .replace(/`{1,3}(.*?)`{1,3}/g, '$1')
+    // Remove markdown list bullets (* item, - item) at line starts
+    .replace(/^[\*\-]\s+/gm, '')
+    // Clean up any remaining stray markdown characters (*, _, `, #, ~)
+    .replace(/[\*_`#~]/g, '')
+    .trim();
+}
+

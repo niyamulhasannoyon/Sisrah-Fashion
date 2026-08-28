@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bot, Sparkles, X, Send, ShieldCheck, RefreshCw, ExternalLink, PhoneCall } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { cleanMarkdownArtifacts } from '@/lib/utils';
 import Link from 'next/link';
 
 interface FloatingWhatsAppWidgetProps {
@@ -27,7 +28,7 @@ export default function FloatingWhatsAppWidget({
   const activeWhatsappNumber = propWhatsappNumber || settings?.whatsappNumber || '+8801975745270';
   const cleanNumber = activeWhatsappNumber.replace(/[^0-9]/g, '');
 
-  const defaultWelcome = settings?.aiWelcomeMessage || 'আসসালামু আলাইকুম! AS SIDRAT AI Assistant-এ আপনাকে স্বাগতম। কীভাবে সাহায্য করতে পারি?';
+  const defaultWelcome = settings?.aiWelcomeMessage || 'আসসালামু আলাইকুম! আস সিদরাহ্-তে আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি?';
 
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -55,58 +56,110 @@ export default function FloatingWhatsAppWidget({
     ? settings.aiQuickQueries
     : [
         'আমি ক্যাশ অন ডেলিভারিতে অর্ডার করতে চাই।',
-        'বর্তমানে কি কি নতুন শার্ট কালেকশন আছে?',
-        'ঢাকার ভেতরে ডেলিভারি চার্জ কত?'
+        'আপনাদের ডেলিভারি চার্জ ও সময় কত?',
+        'নতুন প্রিমিয়াম শার্ট কালেকশন দেখতে চাই।'
       ];
 
   const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || inputMessage;
     if (!query.trim() || loading) return;
 
-    const userMessage: Message = { role: 'user', content: query };
+    const userMessage: Message = { role: 'user', content: query.trim() };
     const updatedHistory = [...messages, userMessage];
 
     setMessages(updatedHistory);
     if (!textToSend) setInputMessage('');
     setLoading(true);
 
+    // Add empty assistant response to stream into
+    const assistantIndex = updatedHistory.length;
+    setMessages(prev => [
+      ...prev,
+      { role: 'assistant', content: '', suggestedProducts: [] }
+    ]);
+
     try {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: updatedHistory.map(m => ({ role: m.role, content: m.content }))
+          messages: updatedHistory.map(m => ({ role: m.role, content: m.content })),
+          stream: true
         })
       });
 
-      const data = await res.json();
-      if (data.reply) {
-        setMessages(prev => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: data.reply,
-            suggestedProducts: data.suggestedProducts
+      if (!res.ok || !res.body) {
+        throw new Error('Chat API network response was not ok');
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let streamText = '';
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith('data:')) continue;
+          const jsonStr = trimmed.replace(/^data:\s*/, '');
+          if (jsonStr === '[DONE]') continue;
+
+          try {
+            const data = JSON.parse(jsonStr);
+            if (data.text) {
+              streamText += data.text;
+              const sanitizedStream = cleanMarkdownArtifacts(streamText);
+              setMessages(prev => {
+                const next = [...prev];
+                if (next[assistantIndex]) {
+                  next[assistantIndex] = {
+                    ...next[assistantIndex],
+                    content: sanitizedStream
+                  };
+                }
+                return next;
+              });
+              setLoading(false);
+            }
+
+            if (data.done) {
+              const finalContent = cleanMarkdownArtifacts(data.fullText || streamText);
+              setMessages(prev => {
+                const next = [...prev];
+                if (next[assistantIndex]) {
+                  next[assistantIndex] = {
+                    role: 'assistant',
+                    content: finalContent || 'আসসালামু আলাইকুম! আপনাকে কীভাবে সাহায্য করতে পারি?',
+                    suggestedProducts: data.suggestedProducts || []
+                  };
+                }
+                return next;
+              });
+            }
+          } catch (err) {
+            // Ignore parse errors on incomplete stream chunks
           }
-        ]);
-      } else {
-        setMessages(prev => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: 'ধন্যবাদ আপনার বার্তার জন্য। আমরা কীভাবে আপনাকে সাহায্য করতে পারি বলুন?'
-          }
-        ]);
+        }
       }
     } catch (error) {
-      console.error('AI Chat Error:', error);
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: 'দুঃখিত, সংযোগে সমস্যা হয়েছে। সরাসরি অফিশিয়াল হোয়াটসঅ্যাপে সাহায্য নিতে পারেন।'
+      console.error('AI Chat Streaming Error:', error);
+      setMessages(prev => {
+        const next = [...prev];
+        if (next[assistantIndex]) {
+          next[assistantIndex] = {
+            role: 'assistant',
+            content: 'দুঃখিত, সংযোগে সমস্যা হয়েছে। সরাসরি অফিশিয়াল হোয়াটসঅ্যাপে সাহায্য নিতে পারেন।'
+          };
         }
-      ]);
+        return next;
+      });
     } finally {
       setLoading(false);
     }
@@ -139,7 +192,7 @@ export default function FloatingWhatsAppWidget({
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-emerald-200 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>অনলাইনে আছেন • Instant Reply</span>
+                  <span>অনলাইনে আছেন • Real-time Reply</span>
                 </div>
               </div>
             </div>
@@ -175,7 +228,10 @@ export default function FloatingWhatsAppWidget({
                       : 'bg-stone-900 text-stone-200 border border-stone-800 rounded-bl-none shadow-sm'
                   }`}
                 >
-                  {msg.content}
+                  {cleanMarkdownArtifacts(msg.content)}
+                  {msg.role === 'assistant' && !msg.content && loading && (
+                    <span className="inline-block w-1.5 h-3.5 bg-emerald-400 animate-pulse ml-0.5" />
+                  )}
                 </div>
 
                 {/* Render Suggested Products Cards */}
@@ -211,7 +267,7 @@ export default function FloatingWhatsAppWidget({
               </div>
             ))}
 
-            {loading && (
+            {loading && messages[messages.length - 1]?.role !== 'assistant' && (
               <div className="flex items-center gap-2 bg-stone-900 border border-stone-800 p-3 rounded-2xl text-stone-400 w-fit">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                 <span className="text-[11px] font-medium">AS SIDRAT AI লিখছে...</span>
@@ -251,7 +307,7 @@ export default function FloatingWhatsAppWidget({
               />
               <button
                 onClick={() => handleSendMessage()}
-                disabled={loading}
+                disabled={loading || !inputMessage.trim()}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 rounded-xl transition-colors disabled:opacity-50"
               >
                 <Send size={15} />
