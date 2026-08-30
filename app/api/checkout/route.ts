@@ -4,6 +4,7 @@ import Order from '@/models/Order';
 import { sendAdminOrderNotification } from '@/lib/email';
 import { orderLimiter } from '@/lib/rateLimiter';
 import { sanitizeInput } from '@/lib/validation';
+import { runIsolatedTask } from '@/lib/backgroundTasks';
 const SSLCommerzPayment = require('sslcommerz-lts');
 
 export async function POST(req: Request) {
@@ -44,8 +45,11 @@ export async function POST(req: Request) {
       orderStatus: 'Processing',
     });
 
-    // Send admin notification (non-blocking)
-    sendAdminOrderNotification(newOrder.toObject());
+    // Send admin notification in isolated background boundary
+    runIsolatedTask(
+      () => sendAdminOrderNotification(newOrder.toObject()),
+      { taskName: `Checkout Admin Notification for Order #${newOrder._id}`, timeoutMs: 6000 }
+    );
 
     const tran_id = newOrder._id.toString();
 

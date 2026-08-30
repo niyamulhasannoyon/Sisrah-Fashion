@@ -2,20 +2,20 @@ import { NextResponse } from 'next/server';
 import { createHash } from 'crypto';
 import dbConnect from '@/lib/dbConnect';
 import AnalyticsEvent from '@/models/AnalyticsEvent';
+import { analyticsLimiter } from '@/lib/rateLimiter';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * Anonymizes an IP address for privacy compliance (GDPR).
- * In production, IPs should be hashed or truncated before storage.
  */
 function anonymizeIp(ip: string): string {
   if (!ip || ip === '127.0.0.1') return ip;
-  
-  // Hash the IP with a salt for privacy while maintaining uniqueness per visitor
   const salt = process.env.ANALYTICS_IP_SALT || 'default-salt';
   return createHash('sha256').update(ip + salt).digest('hex').substring(0, 16);
 }
 
-// Simple user-agent parser to avoid extra dependency overhead
+// Lightweight UA Parser
 function parseUA(ua: string) {
   let browser = 'Unknown';
   let os = 'Unknown';
@@ -23,7 +23,6 @@ function parseUA(ua: string) {
 
   if (!ua) return { browser, os, device };
 
-  // Browser detection
   if (ua.includes('Firefox')) browser = 'Firefox';
   else if (ua.includes('SamsungBrowser')) browser = 'Samsung Browser';
   else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
@@ -32,7 +31,6 @@ function parseUA(ua: string) {
   else if (ua.includes('Trident') || ua.includes('MSIE')) browser = 'Internet Explorer';
   else if (ua.includes('Edge') || ua.includes('Edg')) browser = 'Edge';
 
-  // OS detection
   if (ua.includes('Windows NT')) os = 'Windows';
   else if (ua.includes('Macintosh') || ua.includes('Mac OS X')) os = 'macOS';
   else if (ua.includes('Android')) {
@@ -43,7 +41,6 @@ function parseUA(ua: string) {
     device = ua.includes('iPad') ? 'Tablet' : 'Mobile';
   } else if (ua.includes('Linux')) os = 'Linux';
 
-  // Device type detection (fallback)
   if (device !== 'Mobile' && device !== 'Tablet') {
     if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|PlayBook|Opera M(obi|ini)/.test(ua)) {
       device = 'Mobile';
@@ -53,11 +50,18 @@ function parseUA(ua: string) {
   return { browser, os, device };
 }
 
-export async function POST(req: Request) {
-  try {
-    await dbConnect();
-    const body = await req.json();
+// Throttled warning log tracker
+let lastDegradedLog = 0;
 
+export async function POST(req: Request) {
+  // 1. Ingress Rate Limiting (Prevents scraping bots from flooding DB writes)
+  const limitCheck = analyticsLimiter.check(req);
+  if (limitCheck.blocked) {
+    return limitCheck.response!;
+  }
+
+  try {
+    const body = await req.json().catch(() => ({}));
     const {
       eventType,
       url,
@@ -68,45 +72,67 @@ export async function POST(req: Request) {
       city,
       clickTarget,
       clickText,
-      userId
+      userId,
     } = body;
 
     if (!eventType || !url || !sessionId) {
-      return NextResponse.json({ success: false, error: 'Missing required parameters' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Missing required parameters' },
+        { status: 400 }
+      );
     }
 
-    // Determine IP address (fallback to server headers if client didn't supply one)
-    const serverIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
-                     req.headers.get('x-real-ip') || 
-                     '';
+    const serverIp =
+      req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+      req.headers.get('x-real-ip') ||
+      '';
     const rawIp = clientIp || serverIp || '127.0.0.1';
-    // Anonymize IP for privacy compliance
     const finalIp = anonymizeIp(rawIp);
 
-    // Parse browser, OS, and device from User-Agent
     const userAgent = req.headers.get('user-agent') || '';
     const parsedUA = parseUA(userAgent);
 
-    // Save analytics event
-    const event = await AnalyticsEvent.create({
-      eventType,
-      url,
-      referrer,
-      ip: finalIp,
-      country: country || 'Local / Dev',
-      city: city || 'Local / Dev',
-      browser: parsedUA.browser,
-      os: parsedUA.os,
-      device: parsedUA.device,
-      clickTarget,
-      clickText,
-      userId: userId || null,
-      sessionId
-    });
+    // 2. Bulkhead Isolation with Strict Fast-Fail Timeout (1,500ms max)
+    // Analytics must NEVER block the system or hold DB connections if under load
+    const savePromise = (async () => {
+      await dbConnect();
+      return AnalyticsEvent.create({
+        eventType,
+        url,
+        referrer,
+        ip: finalIp,
+        country: country || 'Local / Dev',
+        city: city || 'Local / Dev',
+        browser: parsedUA.browser,
+        os: parsedUA.os,
+        device: parsedUA.device,
+        clickTarget,
+        clickText,
+        userId: userId || null,
+        sessionId,
+      });
+    })();
 
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Analytics DB write timeout')), 1500)
+    );
+
+    const event = await Promise.race([savePromise, timeoutPromise]);
     return NextResponse.json({ success: true, eventId: event._id });
-  } catch (error) {
-    console.error('Analytics capture failed:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    // 3. Graceful Degradation / Soft Drop under DB pressure
+    // Log at most once every 10 seconds to prevent log saturation
+    const now = Date.now();
+    if (now - lastDegradedLog > 10_000) {
+      console.warn('[Analytics Soft-Drop] Event dropped due to database load or timeout:', error?.message);
+      lastDegradedLog = now;
+    }
+
+    // Always return HTTP 202 (Accepted) so frontend navigation is NEVER blocked or broken
+    return NextResponse.json(
+      { success: true, degraded: true, note: 'Event accepted with soft-drop under high load' },
+      { status: 202 }
+    );
   }
 }
+

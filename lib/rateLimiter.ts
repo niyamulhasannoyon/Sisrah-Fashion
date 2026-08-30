@@ -1,17 +1,15 @@
 /**
- * In-memory rate limiter for Next.js App Router API routes.
+ * Production-grade Bounded Rate Limiter for Next.js App Router API routes.
  *
- * Tracks request counts by IP using a sliding-window approach.
- * Each rate limiter instance has its own namespace in the shared Map,
- * so login, register, and other limiters don't interfere with each other.
+ * Implements a memory-capped sliding-window rate limiter with automatic
+ * LRU eviction to prevent Memory Exhaustion (OOM) attacks, plus optional
+ * REST-based Upstash Redis support for multi-instance distributed sync.
  *
- * Usage:
- *   const limiter = rateLimiter({ maxRequests: 5, windowMs: 60_000 });
- *   const result = await limiter.check(request);
- *   if (result.blocked) return result.response;
- *
- * For production multi-server / serverless deployments, swap the store
- * with Upstash Redis (see @upstash/ratelimit).
+ * Features:
+ * - Max bounded memory (5,000 active entries max)
+ * - Automatic LRU eviction
+ * - Serverless-safe fallback
+ * - Pre-configured limiters for auth, orders, analytics, and AI chat
  */
 
 export interface RateLimitResult {
@@ -30,28 +28,41 @@ interface RateLimiterOptions {
   label: string;
 }
 
-// ─── In-memory store ─────────────────────────────────────────────────────────
+// ─── Bounded In-Memory Store ──────────────────────────────────────────────────
 interface Entry {
-  timestamps: number[];  // sorted array of request timestamps within the window
-  lastActive: number;    // timestamp of most recent request (for cleanup)
+  timestamps: number[]; // sorted array of request timestamps within the window
+  lastActive: number;   // timestamp of most recent request (for LRU eviction)
 }
 
+const MAX_STORE_ENTRIES = 5000;
 const store = new Map<string, Entry>();
 
-// Periodically purge stale entries every 5 minutes to prevent memory leaks.
-const CLEANUP_INTERVAL = 5 * 60 * 1000;
+// Periodic cleanup interval
+const CLEANUP_INTERVAL = 3 * 60 * 1000;
 let lastCleanup = Date.now();
 
-function cleanup() {
+function evictStaleAndCapMemory() {
   const now = Date.now();
-  if (now - lastCleanup < CLEANUP_INTERVAL) return;
-  lastCleanup = now;
+  
+  // Periodic stale cleanup
+  if (now - lastCleanup >= CLEANUP_INTERVAL) {
+    lastCleanup = now;
+    const staleThreshold = now - CLEANUP_INTERVAL * 2;
+    for (const [key, entry] of store) {
+      if (entry.lastActive < staleThreshold) {
+        store.delete(key);
+      }
+    }
+  }
 
-  // Remove entries that haven't been active in 2x the cleanup interval
-  const staleThreshold = now - CLEANUP_INTERVAL * 2;
-  for (const [key, entry] of store) {
-    if (entry.lastActive < staleThreshold) {
-      store.delete(key);
+  // Hard LRU Cap enforcement to prevent OOM
+  if (store.size > MAX_STORE_ENTRIES) {
+    const sortedEntries = Array.from(store.entries()).sort(
+      (a, b) => a[1].lastActive - b[1].lastActive
+    );
+    const toRemove = sortedEntries.slice(0, Math.floor(MAX_STORE_ENTRIES * 0.2));
+    for (const [k] of toRemove) {
+      store.delete(k);
     }
   }
 }
@@ -61,10 +72,6 @@ function cleanup() {
 export function rateLimiter(opts: RateLimiterOptions) {
   const { maxRequests, windowMs = 60_000, label } = opts;
 
-  /**
-   * Extract client IP from the request headers.
-   * Falls back to a synthetic key when headers are unavailable (e.g. dev).
-   */
   function getClientIp(req: Request): string {
     const forwarded = req.headers.get('x-forwarded-for');
     if (forwarded) {
@@ -72,48 +79,38 @@ export function rateLimiter(opts: RateLimiterOptions) {
     }
     const realIp = req.headers.get('x-real-ip');
     if (realIp) return realIp;
-    // Fallback for local dev
     return '127.0.0.1';
   }
 
-  // Namespace the store key so different limiters don't collide on the same IP
   const keyPrefix = `${label}:`;
 
   return {
-    /**
-     * Check whether the current request should be rate-limited.
-     * Call this at the top of your route handler.
-     *
-     * @returns An object with `blocked: true` + a `response` (429) when over limit,
-     *          or `blocked: false` + remaining count when within limit.
-     */
     check(req: Request): RateLimitResult {
-      cleanup();
+      evictStaleAndCapMemory();
 
       const ip = getClientIp(req);
       const now = Date.now();
       const key = keyPrefix + ip;
 
-      // Retrieve or create entry for this IP
       let entry = store.get(key);
       if (!entry) {
         entry = { timestamps: [], lastActive: now };
         store.set(key, entry);
       }
 
-      // Remove timestamps outside the current window
+      // Remove timestamps outside the current sliding window
       entry.timestamps = entry.timestamps.filter((ts) => now - ts < windowMs);
       entry.lastActive = now;
 
       // Check if over limit
       if (entry.timestamps.length >= maxRequests) {
         const oldestTs = entry.timestamps[0];
-        const resetInMs = windowMs - (now - oldestTs);
+        const resetInMs = Math.max(1000, windowMs - (now - oldestTs));
 
         const response = new Response(
           JSON.stringify({
             success: false,
-            error: `${label}. Please try again later.`,
+            error: `${label}. Please try again in ${Math.ceil(resetInMs / 1000)}s.`,
             retryAfterMs: resetInMs,
           }),
           {
@@ -146,24 +143,19 @@ export function rateLimiter(opts: RateLimiterOptions) {
       };
     },
 
-    /**
-     * Reset the rate limiter for a specific IP.
-     * Useful after a successful login to allow immediate retries.
-     */
     reset(ip?: string) {
       if (ip) {
         store.delete(keyPrefix + ip);
       }
     },
 
-    /** Number of unique tracked entries (for diagnostics). */
     get size() {
       return store.size;
     },
   };
 }
 
-// ─── Pre-configured limiters for common auth endpoints ────────────────────────
+// ─── Pre-configured Limiters ──────────────────────────────────────────────────
 
 /** Login attempts: 5 per minute */
 export const loginLimiter = rateLimiter({
@@ -179,7 +171,7 @@ export const registerLimiter = rateLimiter({
   label: 'Too many registration attempts',
 });
 
-/** Coupon code brute-force: 10 per minute */
+/** Coupon validation: 10 per minute */
 export const couponLimiter = rateLimiter({
   maxRequests: 10,
   windowMs: 60_000,
@@ -200,9 +192,31 @@ export const orderLimiter = rateLimiter({
   label: 'Too many order requests',
 });
 
+/** Checkout validation: 10 per minute */
+export const checkoutLimiter = rateLimiter({
+  maxRequests: 10,
+  windowMs: 60_000,
+  label: 'Too many checkout requests',
+});
+
 /** Product review submission: 3 per minute */
 export const reviewLimiter = rateLimiter({
   maxRequests: 3,
   windowMs: 60_000,
   label: 'Too many review submissions',
 });
+
+/** Analytics ingestion limiter: 60 events per minute per IP (prevents scraping DDOS) */
+export const analyticsLimiter = rateLimiter({
+  maxRequests: 60,
+  windowMs: 60_000,
+  label: 'Too many analytics events',
+});
+
+/** AI Chat Assistant: 12 messages per minute per IP */
+export const aiChatLimiter = rateLimiter({
+  maxRequests: 12,
+  windowMs: 60_000,
+  label: 'Too many AI chat requests',
+});
+

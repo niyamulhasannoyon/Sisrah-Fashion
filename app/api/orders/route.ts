@@ -7,6 +7,7 @@ import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
 import { generateAndEmailInvoice } from '@/lib/invoice';
 import { sendAdminOrderNotification } from '@/lib/email';
 import { orderLimiter } from '@/lib/rateLimiter';
+import { runIsolatedTask } from '@/lib/backgroundTasks';
 
 export const dynamic = 'force-dynamic';
 
@@ -141,11 +142,17 @@ export async function POST(req: Request) {
       console.error('[Order] Failed to create notification:', notifError);
     }
 
-    // Auto-generate invoice (non-blocking)
-    generateAndEmailInvoice(newOrder.toObject(), body.shippingInfo?.email);
+    // Auto-generate invoice in isolated fault-tolerant background boundary
+    runIsolatedTask(
+      () => generateAndEmailInvoice(newOrder.toObject(), body.shippingInfo?.email),
+      { taskName: `Invoice Generation for Order #${nextOrderId}`, timeoutMs: 8000 }
+    );
 
-    // Send admin email notification (non-blocking)
-    sendAdminOrderNotification(newOrder.toObject());
+    // Send admin email notification in isolated fault-tolerant background boundary
+    runIsolatedTask(
+      () => sendAdminOrderNotification(newOrder.toObject()),
+      { taskName: `Admin Notification for Order #${nextOrderId}`, timeoutMs: 6000 }
+    );
 
     return NextResponse.json({ 
       success: true, 

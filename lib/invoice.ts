@@ -80,7 +80,7 @@ export async function generateAndEmailInvoice(
       const { Resend } = await import('resend');
       const resend = new Resend(apiKey);
 
-      const data = await resend.emails.send({
+      const sendPromise = resend.emails.send({
         from: `AS SIDRAT <${fromEmail}>`,
         to: email,
         subject: `Order Confirmation & Invoice #${invoiceData.orderNumber} — AS SIDRAT`,
@@ -167,6 +167,12 @@ export async function generateAndEmailInvoice(
           },
         ],
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Customer invoice email sending timeout (6s)')), 6000)
+      );
+
+      const data: any = await Promise.race([sendPromise, timeoutPromise]);
 
       console.log(`[Customer Email Sent] Successfully sent invoice & order details for order ${invoiceData.orderNumber} to ${email}. Message ID: ${data.data?.id}`);
       return { success: true, messageId: data.data?.id, orderNumber: invoiceData.orderNumber };

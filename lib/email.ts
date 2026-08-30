@@ -148,12 +148,18 @@ export async function sendAdminOrderNotification(order: any) {
       </html>
     `;
 
-    const data = await resend.emails.send({
+    const sendPromise = resend.emails.send({
       from: `AS SIDRAT <${fromEmail}>`,
       to: adminEmail,
       subject: `🛒 New Order ${orderId} - ৳${totalAmount.toLocaleString('en-BD')} (${shipping.name || 'Customer'})`,
       html: htmlContent,
     });
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Resend admin email API timeout (5s)')), 5000)
+    );
+
+    const data: any = await Promise.race([sendPromise, timeoutPromise]);
 
     console.log(`[Email] Admin notification sent for order ${orderId} to ${adminEmail}. Message ID: ${data.data?.id}`);
     return { success: true, messageId: data.data?.id };
