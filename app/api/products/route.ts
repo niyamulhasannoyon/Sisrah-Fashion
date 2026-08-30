@@ -69,6 +69,8 @@ export async function GET(request: Request) {
     } else {
       // Dynamic edge caching header with stale-while-revalidate strategy for public storefront
       response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
+      response.headers.set('CDN-Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
+      response.headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
     }
     return response;
   } catch (error) {
