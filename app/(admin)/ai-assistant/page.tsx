@@ -5,7 +5,7 @@ import {
   Bot, Sparkles, Save, Plus, Trash2, RefreshCw, Send, CheckCircle2,
   AlertCircle, HelpCircle, Shield, Sliders, MessageSquare, Key, Play, CornerDownLeft
 } from 'lucide-react';
-import { cleanMarkdownArtifacts } from '@/lib/utils';
+import { cleanMarkdownArtifacts, getDirectImageLink } from '@/lib/utils';
 
 interface FAQ {
   question: string;
@@ -30,7 +30,7 @@ export default function AiAssistantPage() {
   // Form State
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiApiKey, setAiApiKey] = useState('v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav');
-  const [aiModel, setAiModel] = useState('gemini-3.6-flash');
+  const [aiModel, setAiModel] = useState('gemini-2.0-flash');
   const [aiAssistantName, setAiAssistantName] = useState('AS SIDRAT AI Assistant');
   const [aiTone, setAiTone] = useState('Friendly, warm, polite Bengali');
   const [aiSystemPrompt, setAiSystemPrompt] = useState(
@@ -605,9 +605,9 @@ Boundary:
                     onChange={(e) => setAiModel(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white"
                   >
-                    <option value="gemini-3.6-flash">Gemini 3.6 Flash (Recommended - Super Fast & Real-time)</option>
-                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Recommended - Ultra Fast & Real-time)</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Lightweight & Quick)</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning)</option>
                   </select>
                 </div>
 
@@ -742,7 +742,7 @@ Boundary:
                       {msg.suggestedProducts.map((prod: any, pIdx: number) => (
                         <div key={pIdx} className="bg-stone-900 border border-stone-800 p-2 rounded-xl flex items-center gap-2">
                           {prod.image && (
-                            <img src={prod.image} alt={prod.title} className="w-10 h-10 object-cover rounded-lg shrink-0" />
+                            <img src={getDirectImageLink(prod.image)} alt={prod.title} className="w-10 h-10 object-cover rounded-lg shrink-0" />
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-white text-[11px] truncate">{prod.title}</p>

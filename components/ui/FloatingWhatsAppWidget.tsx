@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bot, Sparkles, X, Send, ShieldCheck, RefreshCw, ExternalLink, PhoneCall } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
-import { cleanMarkdownArtifacts } from '@/lib/utils';
+import { cleanMarkdownArtifacts, getDirectImageLink } from '@/lib/utils';
 import Link from 'next/link';
 
 interface FloatingWhatsAppWidgetProps {
@@ -246,7 +246,7 @@ export default function FloatingWhatsAppWidget({
                         className="bg-stone-900 hover:bg-stone-850 border border-stone-800 hover:border-emerald-600/60 p-2 rounded-xl flex items-center gap-2.5 transition-all group"
                       >
                         {p.image && (
-                          <img src={p.image} alt={p.title} className="w-10 h-10 object-cover rounded-lg shrink-0" />
+                          <img src={getDirectImageLink(p.image)} alt={p.title} className="w-10 h-10 object-cover rounded-lg shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-white text-[11px] truncate group-hover:text-emerald-400 transition-colors">

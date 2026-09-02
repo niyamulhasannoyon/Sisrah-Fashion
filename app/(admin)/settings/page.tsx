@@ -1251,12 +1251,12 @@ export default function AdminSettings() {
                       <div className="flex gap-2">
                         <input 
                           type="text" 
-                          placeholder="https://..." 
+                          placeholder="https://drive.google.com/file/d/... or image URL" 
                           value={settings.communityImages?.[idx]?.url || ''}
                           onChange={e => {
                             const newImages = [...(settings.communityImages || [])];
                             if (newImages[idx]) {
-                              newImages[idx].url = e.target.value;
+                              newImages[idx] = { ...newImages[idx], url: e.target.value };
                             } else {
                               newImages[idx] = { url: e.target.value, public_id: 'external' };
                             }
@@ -1273,6 +1273,7 @@ export default function AdminSettings() {
                               setSettings({...settings, communityImages: newImages});
                             }}
                             className="p-3 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                            title="Remove Image"
                           >
                             <X size={16} />
                           </button>
@@ -1283,20 +1284,38 @@ export default function AdminSettings() {
                 </div>
 
                 <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
-                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Upload via Computer</label>
+                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Upload via Computer / Image Previews</label>
                   <div className="flex flex-wrap gap-4 mt-2">
-                    {settings.communityImages?.map((img: any, idx: number) => (
-                      <div key={idx} className="relative w-32 h-40 border border-slate-100 rounded-xl overflow-hidden group shadow-sm">
-                        <Image src={img.url} fill sizes="128px" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="community" />
-                        <button 
-                          type="button" 
-                          onClick={() => removeCommunityImage(idx)} 
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
+                    {settings.communityImages?.map((img: any, idx: number) => {
+                      const directSrc = getDirectImageLink(img?.url);
+                      return (
+                        <div key={idx} className="relative w-32 h-40 border border-slate-200 rounded-xl overflow-hidden group shadow-sm bg-slate-50 flex items-center justify-center">
+                          {directSrc ? (
+                            <Image 
+                              src={directSrc} 
+                              fill 
+                              sizes="128px" 
+                              unoptimized
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                              alt={`Community style ${idx + 1}`} 
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-1">
+                              <ImageIcon size={24} />
+                              <span className="text-[9px] uppercase font-bold tracking-wider text-slate-400">No Image</span>
+                            </div>
+                          )}
+                          <button 
+                            type="button" 
+                            onClick={() => removeCommunityImage(idx)} 
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600 z-10"
+                            title="Remove Image"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      );
+                    })}
                     
                     <label className="w-32 h-40 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-black transition-all group">
                       {uploadingImg ? (

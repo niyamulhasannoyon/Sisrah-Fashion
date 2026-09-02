@@ -266,15 +266,19 @@ export default function AddProductPage() {
             </h3>
             
             <div className="flex flex-wrap gap-4 mb-4">
-              {mainImages.map((img, idx) => (
-                <div key={idx} className="relative w-24 h-32 rounded-lg overflow-hidden border border-slate-200 group">
-                  <Image src={img.url} alt="upload" fill sizes="96px" className="w-full h-full object-cover" />
-                  <button type="button" onClick={() => setMainImages(mainImages.filter((_, i) => i !== idx))} 
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
+              {mainImages.map((img, idx) => {
+                const src = typeof img === 'string' ? getDirectImageLink(img) : getDirectImageLink(img?.url);
+                if (!src) return null;
+                return (
+                  <div key={idx} className="relative w-24 h-32 rounded-lg overflow-hidden border border-slate-200 group bg-slate-50">
+                    <Image src={src} alt={`upload ${idx + 1}`} fill sizes="96px" unoptimized className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => setMainImages(mainImages.filter((_, i) => i !== idx))} 
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
               
               <label className="w-24 h-32 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-all group">
                 {uploadingImage ? <Loader2 size={24} className="animate-spin text-slate-400" /> : <UploadCloud size={24} className="text-slate-400 group-hover:text-black" />}

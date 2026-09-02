@@ -23,31 +23,46 @@ export function estimateShippingCharge(location: 'dhaka' | 'outside'): number {
 }
 
 /**
- * Normalizes image URLs for direct CDN display (Google Drive & Cloudinary).
+ * Normalizes image URLs for direct CDN display (Google Drive, Dropbox, Imgur, Cloudinary, etc.).
  */
 export function getDirectImageLink(url: string | undefined | null): string {
   if (!url) return '';
-  
-  let fileId = '';
-  const fileDMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (fileDMatch) {
-    fileId = fileDMatch[1];
-  } else {
-    const idParamMatch = url.match(/drive\.google\.com\/.*[?&]id=([a-zA-Z0-9_-]+)/);
-    if (idParamMatch) {
-      fileId = idParamMatch[1];
-    }
-  }
-  
-  if (fileId) {
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+
+  // 1. Google Drive URLs (file/d/, open?id=, uc?id=, docs.google.com, lh3.googleusercontent.com/d/)
+  const gDriveMatch = trimmed.match(
+    /(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:export=view&)?id=|.*[?&]id=)|docs\.google\.com\/file\/d\/|lh[0-9]\.googleusercontent\.com\/(?:u\/[0-9]+\/)?d\/)([a-zA-Z0-9_-]{15,})/
+  );
+  if (gDriveMatch && gDriveMatch[1]) {
+    const fileId = gDriveMatch[1];
     return `https://lh3.googleusercontent.com/d/${fileId}`;
   }
 
-  if (url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('f_auto') && !url.includes('q_auto')) {
-    return url.replace('/upload/', '/upload/f_auto,q_auto/');
+  // 2. Dropbox share URLs -> Direct download/stream URLs
+  if (trimmed.includes('dropbox.com')) {
+    if (trimmed.includes('dl.dropboxusercontent.com')) {
+      return trimmed;
+    }
+    return trimmed
+      .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+      .replace('dropbox.com', 'dl.dropboxusercontent.com')
+      .replace(/[?&]dl=[01]/g, '')
+      .replace(/[?&]raw=1/g, '');
   }
 
-  return url;
+  // 3. Imgur page links -> Direct image link
+  const imgurMatch = trimmed.match(/^https?:\/\/(?:www\.)?imgur\.com\/([a-zA-Z0-9]{5,8})(?:\.[a-zA-Z]{3,4})?$/);
+  if (imgurMatch && imgurMatch[1] && !trimmed.includes('i.imgur.com')) {
+    return `https://i.imgur.com/${imgurMatch[1]}.jpg`;
+  }
+
+  // 4. Cloudinary auto-optimization
+  if (trimmed.includes('res.cloudinary.com') && trimmed.includes('/upload/') && !trimmed.includes('f_auto') && !trimmed.includes('q_auto')) {
+    return trimmed.replace('/upload/', '/upload/f_auto,q_auto/');
+  }
+
+  return trimmed;
 }
 
 /**

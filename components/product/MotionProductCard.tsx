@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useCartStore } from '@/store/useCartStore';
+import { getDirectImageLink } from '@/lib/utils';
 
 interface MotionProductCardProps {
   product: {
@@ -22,8 +23,10 @@ interface MotionProductCardProps {
 export default function MotionProductCard({ product, aspectRatio = 'portrait' }: MotionProductCardProps) {
   const addToCart = useCartStore((state) => state.addToCart);
 
-  const primaryImage = product.images?.[0]?.url ?? '/images/linen-shirt.jpg';
-  const hoverImage = product.images?.[1]?.url ?? primaryImage;
+  const rawPrimary = product.images?.[0]?.url;
+  const rawHover = product.images?.[1]?.url;
+  const primaryImage = rawPrimary ? getDirectImageLink(rawPrimary) : '/images/linen-shirt.jpg';
+  const hoverImage = rawHover ? getDirectImageLink(rawHover) : primaryImage;
   const displayPrice = product.offerPrice && product.offerPrice > 0 && product.offerPrice < (product.basePrice ?? 0)
     ? product.offerPrice
     : (product.price ?? product.basePrice ?? 0);

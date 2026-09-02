@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Settings from '@/models/Settings';
 import Product from '@/models/Product';
-import { cleanMarkdownArtifacts } from '@/lib/utils';
+import { cleanMarkdownArtifacts, getDirectImageLink } from '@/lib/utils';
 import { aiChatLimiter } from '@/lib/rateLimiter';
 
 export const dynamic = 'force-dynamic';
@@ -28,9 +28,9 @@ async function getCachedProductContext(): Promise<{ context: string; products: a
   let products: any[] = [];
   try {
     await dbConnect();
-    products = await Product.find({ isPublished: { $ne: false } })
-      .limit(30)
-      .select('title name slug price salePrice category stock stockCount sizes colors description images')
+    products = await Product.find({})
+      .limit(50)
+      .select('title slug description category subCategory tags images variants lowStockThreshold rating numReviews basePrice offerPrice')
       .lean();
   } catch (e) {
     console.error('Failed to fetch products for AI context:', e);
@@ -45,21 +45,30 @@ async function getCachedProductContext(): Promise<{ context: string; products: a
 
   const context = products
     .map((p, idx) => {
-      const pName = p.title || p.name || 'Product';
-      const price = p.salePrice || p.price;
-      const originalPrice = p.price;
-      const availableSizes = p.sizes
-        ? Array.isArray(p.sizes)
-          ? p.sizes.join(', ')
-          : p.sizes
-        : 'S, M, L, XL, XXL';
-      const stockStatus =
-        (p.stockCount !== undefined ? p.stockCount > 0 : p.stock !== false)
-          ? 'In Stock'
-          : 'Out of Stock';
-      return `${idx + 1}. ${pName} | Category: ${p.category || 'Fashion'} | Price: ৳${price} ${
-        originalPrice > price ? `(Original: ৳${originalPrice})` : ''
-      } | Sizes: [${availableSizes}] | Stock: ${stockStatus} | Link: /product/${p.slug || ''}`;
+      const pName = p.title || 'Product';
+      const regularPrice = p.basePrice || 0;
+      const offerPrice = p.offerPrice && p.offerPrice > 0 && p.offerPrice < regularPrice ? p.offerPrice : null;
+      const effectivePrice = offerPrice || regularPrice;
+      
+      const variantList = Array.isArray(p.variants) ? p.variants : [];
+      const availableSizes = Array.from(new Set(variantList.map((v: any) => v.size).filter(Boolean)));
+      const availableColors = Array.from(new Set(variantList.map((v: any) => v.color).filter(Boolean)));
+      const totalStock = variantList.reduce((sum: number, v: any) => sum + (Number(v.stock) || 0), 0);
+
+      let stockStatus = 'In Stock';
+      if (variantList.length > 0 && totalStock <= 0) {
+        stockStatus = 'Out of Stock';
+      } else if (totalStock > 0 && totalStock <= (p.lowStockThreshold || 5)) {
+        stockStatus = 'Low Stock (Few items left)';
+      }
+
+      const sizesStr = availableSizes.length > 0 ? availableSizes.join(', ') : 'Standard Sizes';
+      const colorsStr = availableColors.length > 0 ? ` | Colors: [${availableColors.join(', ')}]` : '';
+      const priceStr = offerPrice
+        ? `৳${offerPrice} (Special Offer, Regular: ৳${regularPrice})`
+        : `৳${regularPrice}`;
+
+      return `${idx + 1}. ${pName} | Category: ${p.category || 'Fashion'}${p.subCategory ? ` (${p.subCategory})` : ''} | Price: ${priceStr} | Sizes: [${sizesStr}]${colorsStr} | Stock: ${stockStatus} | URL: /product/${p.slug || ''}`;
     })
     .join('\n');
 
@@ -73,7 +82,7 @@ async function getCachedProductContext(): Promise<{ context: string; products: a
 }
 
 export async function POST(req: Request) {
-  // 1. Ingress Rate Limiting (Prevents AI quota and thread exhaustion)
+  // 1. Ingress Rate Limiting (Prevents AI quota exhaustion)
   const limitCheck = aiChatLimiter.check(req);
   if (limitCheck.blocked) {
     return limitCheck.response!;
@@ -90,6 +99,13 @@ export async function POST(req: Request) {
 
     const aiEnabled = settings.aiEnabled ?? true;
     const whatsappNum = settings.whatsappNumber || '+8801975745270';
+    const email = settings.contactEmail || 'support@assidrat.com';
+    const address = settings.contactAddress || 'Dhaka, Bangladesh';
+    const shippingInside = settings.shippingInsideDhaka ?? 60;
+    const shippingOutside = settings.shippingOutsideDhaka ?? 120;
+    const freeShippingTrigger = settings.freeShippingTrigger || 'none';
+    const freeShippingMinAmount = settings.freeShippingMinAmount || 3000;
+    const freeShippingMinQty = settings.freeShippingMinQuantity || 2;
 
     if (!aiEnabled) {
       const disabledMsg =
@@ -130,39 +146,87 @@ export async function POST(req: Request) {
         ? process.env.GEMINI_API_KEY
         : apiKey;
 
-    let modelName = settings.aiModel || 'gemini-3.6-flash';
-    if (modelName === 'gemini-3.5-flash' || modelName === 'gemini-2.5-flash') {
-      modelName = 'gemini-3.6-flash';
+    // Normalize model name to valid Gemini models
+    let rawModel = (settings.aiModel || 'gemini-2.0-flash').trim();
+    if (
+      rawModel === 'gemini-3.6-flash' ||
+      rawModel === 'gemini-3.5-flash' ||
+      rawModel === 'gemini-2.5-flash' ||
+      !rawModel
+    ) {
+      rawModel = 'gemini-2.0-flash';
     }
+    const modelName = rawModel;
 
     // 3. Cached Product Context (Zero DB load on repeated chats)
     const { context: productContext, products } = await getCachedProductContext();
 
-    // 4. System Instruction Prompt
-    const baseSystemPrompt = `Role: You are the real-time customer support chat agent for the Bangladeshi clothing brand "AS SIDRAT" (assidrat.vercel.app).
+    // 4. Build Dynamic Knowledge & System Instruction
+    const assistantName = settings.aiAssistantName || 'AS SIDRAT AI Assistant';
+    const tone = settings.aiTone || 'Friendly, warm, polite, and helpful Bengali';
+    const customPrompt = settings.aiSystemPrompt?.trim() || '';
 
-Tone and Personality:
-- Friendly, warm, polite, and natural—like talking to a helpful Bangladeshi store representative.
-- Reply in Bengali by default, or match the user's language (Banglish/English).
-- Keep replies brief and conversational (1-2 sentences maximum).
+    let freeShippingText = 'কোনো নির্দিষ্ট ফ্রি ডেলিভারি অফার বর্তমানে সক্রিয় নেই।';
+    if (freeShippingTrigger === 'amount') {
+      freeShippingText = `৳${freeShippingMinAmount} বা তার বেশি অর্ডারে সারা দেশে ডেলিভারি সম্পূর্ণ ফ্রি!`;
+    } else if (freeShippingTrigger === 'quantity') {
+      freeShippingText = `${freeShippingMinQty} বা তার বেশি প্রোডাক্ট অর্ডারে ডেলিভারি ফ্রি!`;
+    } else if (freeShippingTrigger === 'both') {
+      freeShippingText = `কমপক্ষে ${freeShippingMinQty}টি প্রোডাক্ট অথবা ৳${freeShippingMinAmount} এর অর্ডারে ডেলিভারি ফ্রি!`;
+    }
 
-Strict Formatting Rules:
-- NEVER use markdown symbols (*, **, _, #, -, etc.).
-- Output ONLY plain text with normal spacing and line breaks.
+    const rulesList = Array.isArray(settings.aiRules) && settings.aiRules.length > 0
+      ? settings.aiRules.map((r: string, i: number) => `${i + 1}. ${r}`).join('\n')
+      : `1. সর্বদা গ্রাহককে সালাম জানান এবং অত্যন্ত মার্জিত বাংলায় বিনয়ী হয়ে সাহায্য প্রদান করুন।
+2. ওয়েবসাইটের রিয়েল-টাইম প্রোডাক্ট প্রাইস, স্টক এবং সাইজ অনুযায়ী সঠিক তথ্য সরবরাহ করুন।
+3. সমগ্র বাংলাদেশে ক্যাশ অন ডেলিভারি (Cash on Delivery) সুবিধা উপলব্ধ।
+4. ঢাকার ভেতরে ডেলিভারি চার্জ ৳${shippingInside} (২-৩ কার্যদিবস) এবং ঢাকার বাইরে ৳${shippingOutside} (৩-৫ কার্যদিবস)।
+5. যেকোনো সাইজ এক্সচেঞ্জ বা রিটার্ন ৭ দিনের মধ্যে অক্ষত অবস্থায় গ্রহণ করা হয়।`;
 
-Knowledge Base:
-- Products: Premium linen shirts, pure combed cotton t-shirts.
-- Delivery Charge and Time: Inside Dhaka 80 TK (2-3 business days), Outside Dhaka 120 TK (3-5 business days).
-- Return and Exchange: 7-day hassle-free exchange for unused items with tags.
-- Payment Methods: Cash on Delivery (COD), bKash, Nagad.
-- WhatsApp Support: +880 1975745270.
+    const faqsList = Array.isArray(settings.aiFaqs) && settings.aiFaqs.length > 0
+      ? settings.aiFaqs.map((f: any) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')
+      : `Q: আপনাদের ডেলিভারি চার্জ ও সময় কত?
+A: ঢাকার ভেতরে ডেলিভারি চার্জ ৳${shippingInside} (২-৩ কার্যদিবস) এবং ঢাকার বাইরে ৳${shippingOutside} (৩-৫ কার্যদিবস)।
 
-Boundary:
-- If asked about unrelated topics, politely guide them back to AS SIDRAT shopping.`;
+Q: পেমেন্ট পদ্ধতি কি কি?
+A: আমরা ক্যাশ অন ডেলিভারি (Cash on Delivery), বিকাশ, নগদ ও অনলাইন কার্ড পেমেন্ট গ্রহণ করি।
 
-    const fullSystemInstruction = `${baseSystemPrompt}
+Q: সাইজ পরিবর্তন বা এক্সচেঞ্জ করা যাবে কি?
+A: হ্যাঁ, প্রোডাক্ট ডেলিভারি পাওয়ার ৭ দিনের মধ্যে অক্ষত অবস্থায় ও ট্যাগসহ সহজে সাইজ এক্সচেঞ্জ করার সুবিধা রয়েছে।`;
 
-${productContext.length > 0 ? `Real-time Live Store Product Catalog Snapshot:\n${productContext}` : ''}`;
+    const fullSystemInstruction = `You are "${assistantName}", the official AI Customer Support Specialist for the premium Bangladeshi fashion brand "AS SIDRAT" (Website: assidrat.vercel.app).
+
+Role & Conversational Tone:
+- Tone: ${tone}.
+- Language: Reply in natural, conversational Bengali (বাংলা) by default. If the customer messages in English or Banglish (Bengali written in Latin letters), reply naturally in that matching language.
+- Brevity: Keep responses concise, warm, and clear (1-3 sentences maximum).
+- Formatting: Output ONLY clean plain text. NEVER use raw markdown symbols (*, **, _, #, \`, -, etc.).
+
+Store Policies & Delivery Facts:
+- Cash on Delivery (COD) is available all over Bangladesh.
+- Delivery Charges & Timelines:
+  * Inside Dhaka: ৳${shippingInside} (2-3 business days)
+  * Outside Dhaka: ৳${shippingOutside} (3-5 business days)
+  * Free Shipping: ${freeShippingText}
+- Returns & Exchanges: 7-day hassle-free size exchange for unworn items with original tags intact.
+- Payment Methods: Cash on Delivery (COD), bKash, Nagad, SSLCommerz card payments.
+- Support WhatsApp: ${whatsappNum}
+- Support Email: ${email}
+- Store Address: ${address}
+
+${customPrompt ? `Store Manager Custom Guidelines:\n${customPrompt}\n` : ''}
+Mandatory Business Rules (Strictly Enforced):
+${rulesList}
+
+Store FAQ Knowledgebase:
+${faqsList}
+
+${productContext.length > 0 ? `Live Real-Time Product Catalog Snapshot:\n${productContext}\n` : ''}
+Catalog & Inquiry Instructions:
+- Always use the exact prices in Bangladeshi Taka (৳) and available sizes from the Live Product Catalog Snapshot above.
+- When recommending a product, mention its exact title, price in ৳, available sizes, and link (/product/slug).
+- If an item is out of stock, politely inform the customer and suggest an in-stock alternative from the catalog.
+- If asked about human support, direct them politely to official WhatsApp at ${whatsappNum}.`;
 
     // 5. Build Gemini API Payload
     const formattedContents = messages
@@ -185,39 +249,50 @@ ${productContext.length > 0 ? `Real-time Live Store Product Catalog Snapshot:\n$
       },
       contents: formattedContents,
       generationConfig: {
-        temperature: 0.7,
+        temperature: 0.6,
         maxOutputTokens: 600,
       },
     };
 
     const getMatchedProducts = (responseText: string) => {
       const matched: any[] = [];
-      if (products.length > 0) {
-        products.forEach((p) => {
-          const pTitle = (p.title || p.name || '').toLowerCase();
-          const pSlug = (p.slug || '').toLowerCase();
-          if (
-            pSlug &&
-            (responseText.toLowerCase().includes(pSlug) ||
-              (pTitle.length >= 4 && responseText.toLowerCase().includes(pTitle.substring(0, 8))))
-          ) {
-            if (matched.length < 2) {
-              matched.push({
-                _id: p._id,
-                title: p.title || p.name,
-                slug: p.slug,
-                price: p.salePrice || p.price,
-                originalPrice: p.price,
-                image: p.images && p.images[0] ? p.images[0].url || p.images[0] : null,
-              });
-            }
-          }
-        });
+      if (!products || products.length === 0) return matched;
+
+      const lowerText = responseText.toLowerCase();
+
+      for (const p of products) {
+        if (matched.length >= 2) break;
+        const pTitle = (p.title || '').toLowerCase();
+        const pSlug = (p.slug || '').toLowerCase();
+
+        const titleWords = pTitle.split(/\s+/).filter((w: string) => w.length > 3);
+        const hasWordMatch = titleWords.some((w: string) => lowerText.includes(w));
+
+        if (
+          (pSlug && lowerText.includes(pSlug)) ||
+          (pTitle && lowerText.includes(pTitle)) ||
+          hasWordMatch
+        ) {
+          const regPrice = p.basePrice || 0;
+          const offer = p.offerPrice && p.offerPrice > 0 && p.offerPrice < regPrice ? p.offerPrice : null;
+          const effective = offer || regPrice;
+          const rawImg = p.images && p.images[0] ? (p.images[0].url || p.images[0]) : null;
+
+          matched.push({
+            _id: p._id,
+            title: p.title,
+            slug: p.slug,
+            price: effective,
+            originalPrice: regPrice,
+            image: rawImg ? getDirectImageLink(rawImg) : null,
+          });
+        }
       }
+
       return matched;
     };
 
-    // 6. Handle Non-Streaming Request with Strict Timeout (8s)
+    // 6. Handle Non-Streaming Request with Fallback Model
     if (!stream) {
       let aiReplyText = '';
       const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${primaryApiKey}`;
@@ -232,9 +307,9 @@ ${productContext.length > 0 ? `Real-time Live Store Product Catalog Snapshot:\n$
         if (resData.candidates && resData.candidates[0]?.content?.parts[0]?.text) {
           aiReplyText = resData.candidates[0].content.parts[0].text;
         } else {
-          // Fallback to gemini-2.0-flash
+          // Fallback to gemini-1.5-flash
           const fallbackRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${primaryApiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${primaryApiKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -262,7 +337,7 @@ ${productContext.length > 0 ? `Real-time Live Store Product Catalog Snapshot:\n$
       });
     }
 
-    // 7. Handle Real-Time Streaming Request via SSE with Timeout & Circuit Breaker
+    // 7. Handle Real-Time Streaming Request via SSE
     const streamEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${primaryApiKey}`;
 
     let geminiStreamRes: Response | null = null;
@@ -275,9 +350,9 @@ ${productContext.length > 0 ? `Real-time Live Store Product Catalog Snapshot:\n$
       });
 
       if (!geminiStreamRes.ok) {
-        console.warn(`Primary model ${modelName} streaming failed, falling back to gemini-2.0-flash`);
+        console.warn(`Primary model ${modelName} streaming failed (${geminiStreamRes.status}), falling back to gemini-1.5-flash`);
         geminiStreamRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${primaryApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${primaryApiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -292,7 +367,7 @@ ${productContext.length > 0 ? `Real-time Live Store Product Catalog Snapshot:\n$
 
     if (!geminiStreamRes || !geminiStreamRes.ok || !geminiStreamRes.body) {
       const fallbackText =
-        'আসসালামু আলাইকুম! আস সিদরাহ্-তে আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি? যেকোনো তথ্যের জন্য আমাদের হোয়াটসঅ্যাপে যোগাযোগ করতে পারেন।';
+        'আসসালামু আলাইকুম! আস সিদরাহ্-তে আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি? যেকোনো তথ্যের জন্য আমাদের হোয়াটসঅ্যাপে যোগাযোগ করুন।';
       const streamEncoder = new TextEncoder();
       const fallbackStream = new ReadableStream({
         start(controller) {
@@ -346,6 +421,7 @@ ${productContext.length > 0 ? `Real-time Live Store Product Catalog Snapshot:\n$
                 const parsed = JSON.parse(jsonStr);
                 const chunkText = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (chunkText) {
+                  // Basic regex to filter out typical markdown chars in-stream
                   const cleanChunk = chunkText.replace(/[\*_`#~]/g, '');
                   fullAccumulatedText += cleanChunk;
                   const sseData = `data: ${JSON.stringify({ text: cleanChunk })}\n\n`;
@@ -410,4 +486,3 @@ ${productContext.length > 0 ? `Real-time Live Store Product Catalog Snapshot:\n$
     );
   }
 }
-

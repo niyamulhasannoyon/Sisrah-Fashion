@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { getDirectImageLink } from '@/lib/utils';
 
 interface ProductImageProps {
   src: string;
@@ -23,11 +24,14 @@ export default function ProductImage({
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
+  const resolvedSrc = getDirectImageLink(src);
+  const resolvedHoverSrc = hoverSrc ? getDirectImageLink(hoverSrc) : undefined;
+
   const aspectClass =
     aspectRatio === 'portrait' ? 'aspect-[4/5]' : 'aspect-square';
 
   // ── Elegant text fallback when the image URL fails ──
-  if (error || !src) {
+  if (error || !resolvedSrc) {
     return (
       <div
         className={`relative w-full ${aspectClass} bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg overflow-hidden flex items-center justify-center ${className}`}
@@ -60,12 +64,13 @@ export default function ProductImage({
     >
       {/* Primary Image */}
       <Image
-        src={src}
+        src={resolvedSrc}
         alt={alt}
         fill
         sizes={sizes}
+        unoptimized
         className={`object-cover object-center transition-all duration-300 ${
-          hoverSrc ? 'group-hover:opacity-0' : 'group-hover:scale-105'
+          resolvedHoverSrc ? 'group-hover:opacity-0' : 'group-hover:scale-105'
         }`}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
@@ -73,12 +78,13 @@ export default function ProductImage({
       />
 
       {/* Hover Image (if provided) */}
-      {hoverSrc && (
+      {resolvedHoverSrc && (
         <Image
-          src={hoverSrc}
+          src={resolvedHoverSrc}
           alt={`${alt} — alternate view`}
           fill
           sizes={sizes}
+          unoptimized
           className="absolute inset-0 object-cover object-center opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100"
           loading="lazy"
         />

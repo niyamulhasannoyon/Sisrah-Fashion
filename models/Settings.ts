@@ -73,7 +73,7 @@ const SettingsSchema = new Schema({
   // AS SIDRAT AI Assistant Settings
   aiEnabled: { type: Boolean, default: true },
   aiApiKey: { type: String, default: 'v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav' },
-  aiModel: { type: String, default: 'gemini-3.6-flash' },
+  aiModel: { type: String, default: 'gemini-2.0-flash' },
   aiAssistantName: { type: String, default: 'AS SIDRAT AI Assistant' },
   aiTone: { type: String, default: 'Friendly, warm, polite Bengali' },
   aiSystemPrompt: {

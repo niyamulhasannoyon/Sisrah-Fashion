@@ -17,7 +17,7 @@ export async function GET() {
     const aiSettings = {
       aiEnabled: settings.aiEnabled ?? true,
       aiApiKey: settings.aiApiKey || 'v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav',
-      aiModel: settings.aiModel || 'gemini-3.6-flash',
+      aiModel: (settings.aiModel === 'gemini-3.6-flash' || settings.aiModel === 'gemini-3.5-flash' || !settings.aiModel) ? 'gemini-2.0-flash' : settings.aiModel,
       aiAssistantName: settings.aiAssistantName || 'AS SIDRAT AI Assistant',
       aiTone: settings.aiTone || 'Friendly, warm, polite Bengali',
       aiSystemPrompt: settings.aiSystemPrompt || 'Role: You are the real-time customer support chat agent for the Bangladeshi clothing brand "AS SIDRAT" (assidrat.vercel.app).',

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { Image as ImageIcon } from 'lucide-react';
+import { getDirectImageLink } from '@/lib/utils';
 
 export function SocialGallery() {
   const { settings } = useSettingsStore();
@@ -42,28 +43,36 @@ export function SocialGallery() {
           </p>
         </div>
         
-        {/* Horizontal Scroll Layout */}
-        <div className="flex overflow-x-auto gap-4 pb-6 px-4 -mx-4 custom-scrollbar snap-x">
-          {images.map((img: any, idx: number) => (
-            <div key={idx} className="relative w-60 sm:w-72 md:w-80 aspect-[4/5] shrink-0 snap-center rounded-2xl overflow-hidden group cursor-pointer shadow-xs border border-slate-100">
-              <Image 
-                src={img.url} 
-                alt={`AS SIDRAT Community Style ${idx + 1}`} 
-                fill
-                sizes="(max-width: 768px) 240px, 320px"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-              />
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
-                <ImageIcon className="text-white" size={28} />
-                <span className="text-white text-[10px] font-bold uppercase tracking-widest border-b border-white pb-0.5">
-                  SHOP THE LOOK ({instaHandle})
-                </span>
+          {images.map((img: any, idx: number) => {
+            const resolvedSrc = getDirectImageLink(img?.url);
+            return (
+              <div key={idx} className="relative w-60 sm:w-72 md:w-80 aspect-[4/5] shrink-0 snap-center rounded-2xl overflow-hidden group cursor-pointer shadow-xs border border-slate-100 bg-slate-50">
+                {resolvedSrc ? (
+                  <Image 
+                    src={resolvedSrc} 
+                    alt={`AS SIDRAT Community Style ${idx + 1}`} 
+                    fill
+                    sizes="(max-width: 768px) 240px, 320px"
+                    unoptimized
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
+                    <ImageIcon size={32} />
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Community Style</span>
+                  </div>
+                )}
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 z-10">
+                  <ImageIcon className="text-white" size={28} />
+                  <span className="text-white text-[10px] font-bold uppercase tracking-widest border-b border-white pb-0.5">
+                    SHOP THE LOOK ({instaHandle})
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            );
+          })}
 
         {/* View Full Gallery Link */}
         <div className="mt-6 text-center">
