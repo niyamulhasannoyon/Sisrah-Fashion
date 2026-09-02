@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Save, Loader2, UploadCloud, X, Users, Image as ImageIcon, Sliders, Layers, Truck, Settings, Trash2 } from 'lucide-react';
+import { Save, Loader2, UploadCloud, X, Users, Image as ImageIcon, Sliders, Layers, Truck, Settings, Trash2, Plus, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { getDirectImageLink } from '@/lib/utils';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
@@ -125,30 +125,54 @@ export default function AdminSettings() {
     if (!e.target.files?.length) return;
     setUploadingImg(true);
     try {
-      const data = await uploadToCloudinary(e.target.files[0]);
-      setSettings({
-        ...settings, 
-        communityImages: [...(settings.communityImages || []), { url: data.secure_url, public_id: data.public_id }]
-      });
+      const files = Array.from(e.target.files);
+      const uploaded: { url: string; public_id: string }[] = [];
+      for (const file of files) {
+        const data = await uploadToCloudinary(file);
+        if (data.secure_url) {
+          uploaded.push({ url: data.secure_url, public_id: data.public_id || 'cloudinary' });
+        }
+      }
+      setSettings((prev: any) => ({
+        ...prev, 
+        communityImages: [...(prev.communityImages || []), ...uploaded]
+      }));
     } catch (error) { 
-      alert("Upload failed!"); 
+      alert("Upload failed! Please check your network or try a smaller image."); 
     } finally { 
       setUploadingImg(false); 
+      e.target.value = '';
     }
   };
 
   const handleAddCommunityByUrl = () => {
-    if (!communityUrl) return;
-    setSettings({
-      ...settings,
-      communityImages: [...(settings.communityImages || []), { url: communityUrl, public_id: 'external' }]
-    });
+    if (!communityUrl.trim()) return;
+    setSettings((prev: any) => ({
+      ...prev,
+      communityImages: [...(prev.communityImages || []), { url: communityUrl.trim(), public_id: 'external' }]
+    }));
     setCommunityUrl('');
   };
 
   const removeCommunityImage = (indexToRemove: number) => {
     const newImages = settings.communityImages.filter((_: any, index: number) => index !== indexToRemove);
     setSettings({ ...settings, communityImages: newImages });
+  };
+
+  const moveCommunityImage = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= (settings.communityImages?.length || 0)) return;
+    const newImages = [...(settings.communityImages || [])];
+    const [movedItem] = newImages.splice(fromIndex, 1);
+    newImages.splice(toIndex, 0, movedItem);
+    setSettings({ ...settings, communityImages: newImages });
+  };
+
+  const updateCommunityImageUrl = (idx: number, newUrl: string) => {
+    const newImages = [...(settings.communityImages || [])];
+    if (newImages[idx]) {
+      newImages[idx] = { ...newImages[idx], url: newUrl };
+      setSettings({ ...settings, communityImages: newImages });
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -1237,99 +1261,289 @@ export default function AdminSettings() {
 
             {/* Tab 6: Community Gallery */}
             {activeTab === 'community' && (
-              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex justify-between items-center border-b pb-4">
-                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                    <Users size={18} className="text-slate-400" /> "From The Community" Gallery
-                  </h3>
-                </div>
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[0, 1, 2, 3].map((idx) => (
-                    <div key={idx} className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Gallery Image URL {idx + 1}</label>
-                      <div className="flex gap-2">
-                        <input 
-                          type="text" 
-                          placeholder="https://drive.google.com/file/d/... or image URL" 
-                          value={settings.communityImages?.[idx]?.url || ''}
-                          onChange={e => {
-                            const newImages = [...(settings.communityImages || [])];
-                            if (newImages[idx]) {
-                              newImages[idx] = { ...newImages[idx], url: e.target.value };
-                            } else {
-                              newImages[idx] = { url: e.target.value, public_id: 'external' };
-                            }
-                            setSettings({...settings, communityImages: newImages});
-                          }}
-                          className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black text-xs"
-                        />
-                        {settings.communityImages?.[idx] && (
-                          <button 
-                            type="button"
-                            onClick={() => {
-                              const newImages = [...settings.communityImages];
-                              newImages.splice(idx, 1);
-                              setSettings({...settings, communityImages: newImages});
-                            }}
-                            className="p-3 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"
-                            title="Remove Image"
-                          >
-                            <X size={16} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                {/* Header & Description */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 pb-4">
+                  <div>
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2 text-base">
+                      <Users size={20} className="text-[#A31F24]" /> Community Gallery (একক রো-তে অটোমেটিক মুভিং গ্যালারি)
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      হোমপেজের Community Gallery সেকশনে প্রদর্শিত ছবিগুলো এখানে ইচ্ছেমতো যোগ, সাজানো বা রিমুভ করুন।
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 bg-red-50 text-[#A31F24] border border-red-200 rounded-full text-xs font-bold shrink-0">
+                    {settings.communityImages?.length || 0} Images Added
+                  </span>
                 </div>
 
-                <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
-                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Upload via Computer / Image Previews</label>
-                  <div className="flex flex-wrap gap-4 mt-2">
-                    {settings.communityImages?.map((img: any, idx: number) => {
-                      const directSrc = getDirectImageLink(img?.url);
-                      return (
-                        <div key={idx} className="relative w-32 h-40 border border-slate-200 rounded-xl overflow-hidden group shadow-sm bg-slate-50 flex items-center justify-center">
-                          {directSrc ? (
-                            <Image 
-                              src={directSrc} 
-                              fill 
-                              sizes="128px" 
-                              unoptimized
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                              alt={`Community style ${idx + 1}`} 
-                            />
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-1">
-                              <ImageIcon size={24} />
-                              <span className="text-[9px] uppercase font-bold tracking-wider text-slate-400">No Image</span>
-                            </div>
-                          )}
-                          <button 
-                            type="button" 
-                            onClick={() => removeCommunityImage(idx)} 
-                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600 z-10"
-                            title="Remove Image"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      );
-                    })}
-                    
-                    <label className="w-32 h-40 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-black transition-all group">
-                      {uploadingImg ? (
-                        <Loader2 size={24} className="animate-spin text-slate-400" />
-                      ) : (
-                        <div className="flex flex-col items-center">
-                          <UploadCloud size={20} className="text-slate-500 mb-2" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-black">Upload</span>
-                        </div>
-                      )}
-                      <input type="file" className="hidden" accept="image/*" onChange={handleCommunityImageUpload} />
-                    </label>
+                {/* Section Content / Copy Settings */}
+                <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
+                  <h4 className="text-xs font-black uppercase text-slate-700 tracking-wider flex items-center gap-2">
+                    <Sparkles size={14} className="text-[#A31F24]" /> Section Titles & Instagram Handle
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Sub-Title (English)</label>
+                      <input 
+                        type="text" 
+                        value={settings.communityTitle || ''}
+                        onChange={e => setSettings({...settings, communityTitle: e.target.value})}
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:border-black text-xs font-medium"
+                        placeholder="COMMUNITY GALLERY"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Main Headline (Bengali)</label>
+                      <input 
+                        type="text" 
+                        value={settings.communityHeadline || ''}
+                        onChange={e => setSettings({...settings, communityHeadline: e.target.value})}
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:border-black text-xs font-medium font-bengali"
+                        placeholder="আমাদের হ্যাপি কাস্টমারদের স্টাইল ."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 fill-pink-600" viewBox="0 0 24 24">
+                          <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.01 3.71.054.937.04 1.612.189 2.185.411a4.896 4.896 0 011.626 1.057 4.896 4.896 0 011.057 1.625c.222.573.371 1.248.411 2.185.044.926.054 1.281.054 3.71s-.01 2.784-.054 3.71c-.04.937-.189 1.612-.411 2.185a4.896 4.896 0 01-1.057 1.626 4.896 4.896 0 01-1.625 1.057c-.573.222-1.248.371-2.185.411-.926.044-1.281.054-3.71.054s-2.784-.01-3.71-.054c-.937-.04-1.612-.189-2.185-.411a4.896 4.896 0 01-1.626-1.057 4.896 4.896 0 01-1.057-1.625c-.222-.573-.371-1.248-.411-2.185C2.01 16.1 2 15.745 2 13.315s.01-2.784.054-3.71c.04-.937.189-1.612.411-2.185a4.896 4.896 0 011.057-1.626 4.896 4.896 0 011.625-1.057c.573-.222 1.248-.371 2.185-.411.926-.044 1.281-.054 3.71-.054zM12 5.802a7.513 7.513 0 100 15.026 7.513 7.513 0 000-15.026zm0 1.802a5.711 5.711 0 110 11.422 5.711 5.711 0 010-11.422zm4.74-2.484a1.34 1.34 0 110 2.68 1.34 1.34 0 010-2.68z" clipRule="evenodd" />
+                        </svg>
+                        <span>Instagram Handle</span>
+                      </label>
+                      <input 
+                        type="text" 
+                        value={settings.instagramHandle || ''}
+                        onChange={e => setSettings({...settings, instagramHandle: e.target.value})}
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:border-black text-xs font-mono"
+                        placeholder="@as_sidrat_official"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Sub-Headline Text (Bengali)</label>
+                      <input 
+                        type="text" 
+                        value={settings.communitySubheadline || ''}
+                        onChange={e => setSettings({...settings, communitySubheadline: e.target.value})}
+                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:border-black text-xs font-medium font-bengali"
+                        placeholder="ইনস্টাগ্রামে আমাদের ফলো করুন @as_sidrat_official..."
+                      />
+                    </div>
                   </div>
                 </div>
+
+                {/* Add New Images Bar */}
+                <div className="p-5 bg-white border-2 border-dashed border-slate-300 rounded-xl space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800">Add Images to Gallery</h4>
+                      <p className="text-[11px] text-slate-400">Add directly via URL / Google Drive, or upload multiple photos from your computer.</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <label className="flex items-center gap-1.5 px-4 py-2.5 bg-black text-white hover:bg-slate-800 rounded-lg cursor-pointer text-xs font-bold uppercase tracking-wider transition-all shadow-sm">
+                        {uploadingImg ? (
+                          <Loader2 size={14} className="animate-spin text-white" />
+                        ) : (
+                          <UploadCloud size={14} />
+                        )}
+                        <span>{uploadingImg ? 'Uploading...' : 'Upload Photos'}</span>
+                        <input 
+                          type="file" 
+                          multiple 
+                          className="hidden" 
+                          accept="image/*" 
+                          onChange={handleCommunityImageUpload} 
+                          disabled={uploadingImg}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSettings((prev: any) => ({
+                            ...prev,
+                            communityImages: [...(prev.communityImages || []), { url: '', public_id: 'external' }]
+                          }));
+                        }}
+                        className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all"
+                      >
+                        + Add Card
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Add by URL input */}
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Paste Image URL or Google Drive Link (https://...)" 
+                      value={communityUrl}
+                      onChange={e => setCommunityUrl(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddCommunityByUrl();
+                        }
+                      }}
+                      className="flex-1 p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black text-xs font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCommunityByUrl}
+                      disabled={!communityUrl.trim()}
+                      className="px-4 py-2.5 bg-[#A31F24] disabled:opacity-50 text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-800 transition-all shrink-0 flex items-center gap-1.5"
+                    >
+                      <Plus size={14} />
+                      <span>Add URL</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Images List Grid */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Current Gallery Cards ({settings.communityImages?.length || 0})
+                    </span>
+                    {settings.communityImages?.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm("Are you sure you want to clear all community gallery images?")) {
+                            setSettings({ ...settings, communityImages: [] });
+                          }
+                        }}
+                        className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                      >
+                        Clear All
+                      </button>
+                    )}
+                  </div>
+
+                  {(!settings.communityImages || settings.communityImages.length === 0) ? (
+                    <div className="p-10 border border-slate-200 rounded-xl bg-slate-50 text-center space-y-3">
+                      <ImageIcon size={36} className="mx-auto text-slate-300" />
+                      <p className="text-sm font-medium text-slate-600">No custom images added yet.</p>
+                      <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                        Currently using default curated lookbook images on the homepage. Upload your customer style photos or paste image links above to personalize!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {settings.communityImages.map((img: any, idx: number) => {
+                        const directSrc = getDirectImageLink(img?.url);
+                        return (
+                          <div 
+                            key={idx} 
+                            className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3 group relative hover:border-slate-400 transition-all"
+                          >
+                            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                              <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                                Image #{idx + 1}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  disabled={idx === 0}
+                                  onClick={() => moveCommunityImage(idx, idx - 1)}
+                                  className="p-1 hover:bg-slate-200 rounded text-slate-600 disabled:opacity-30 transition-all"
+                                  title="Move Left / Earlier"
+                                >
+                                  <ArrowLeft size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={idx === (settings.communityImages.length - 1)}
+                                  onClick={() => moveCommunityImage(idx, idx + 1)}
+                                  className="p-1 hover:bg-slate-200 rounded text-slate-600 disabled:opacity-30 transition-all"
+                                  title="Move Right / Later"
+                                >
+                                  <ArrowRight size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => removeCommunityImage(idx)}
+                                  className="p-1 hover:bg-red-50 text-red-500 rounded transition-all ml-1"
+                                  title="Delete Image"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-3 items-center">
+                              {/* Thumbnail preview */}
+                              <div className="relative w-20 h-24 rounded-lg overflow-hidden bg-white border border-slate-200 shrink-0 flex items-center justify-center">
+                                {directSrc ? (
+                                  <Image 
+                                    src={directSrc} 
+                                    fill 
+                                    sizes="80px" 
+                                    unoptimized
+                                    className="object-cover" 
+                                    alt={`Gallery style ${idx + 1}`} 
+                                  />
+                                ) : (
+                                  <ImageIcon size={20} className="text-slate-300" />
+                                )}
+                              </div>
+
+                              {/* URL Editor & Upload button */}
+                              <div className="flex-1 space-y-2 min-w-0">
+                                <input 
+                                  type="text"
+                                  placeholder="Image URL or Drive link"
+                                  value={img?.url || ''}
+                                  onChange={e => updateCommunityImageUrl(idx, e.target.value)}
+                                  className="w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-black text-xs font-mono"
+                                />
+                                <div className="flex items-center justify-between">
+                                  <label className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-slate-200 rounded-md text-[10px] font-bold text-slate-600 hover:bg-slate-100 cursor-pointer transition-all">
+                                    <UploadCloud size={11} />
+                                    <span>Replace File</span>
+                                    <input 
+                                      type="file" 
+                                      className="hidden" 
+                                      accept="image/*" 
+                                      onChange={async (e) => {
+                                        if (!e.target.files?.[0]) return;
+                                        setSaving(true);
+                                        try {
+                                          const data = await uploadToCloudinary(e.target.files[0]);
+                                          if (data.secure_url) {
+                                            updateCommunityImageUrl(idx, data.secure_url);
+                                          }
+                                        } catch {
+                                          alert("Upload failed!");
+                                        } finally {
+                                          setSaving(false);
+                                        }
+                                      }} 
+                                    />
+                                  </label>
+                                  {directSrc && (
+                                    <a 
+                                      href={directSrc} 
+                                      target="_blank" 
+                                      rel="noreferrer" 
+                                      className="text-[10px] text-blue-600 hover:underline"
+                                    >
+                                      Preview ↗
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
               </div>
             )}
 

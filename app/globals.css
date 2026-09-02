@@ -31,7 +31,26 @@ body {
   animation: marquee 24s linear infinite;
 }
 
+.marquee-gallery {
+  display: flex;
+  width: max-content;
+  animation: marqueeGallery 35s linear infinite;
+}
+
+.marquee-gallery:hover {
+  animation-play-state: paused;
+}
+
 @keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marqueeGallery {
   0% {
     transform: translateX(0);
   }

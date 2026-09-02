@@ -29,8 +29,8 @@ export default function AiAssistantPage() {
 
   // Form State
   const [aiEnabled, setAiEnabled] = useState(true);
-  const [aiApiKey, setAiApiKey] = useState('v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav');
-  const [aiModel, setAiModel] = useState('gemini-2.0-flash');
+  const [aiApiKey, setAiApiKey] = useState('');
+  const [aiModel, setAiModel] = useState('gemini-3.5-flash-lite');
   const [aiAssistantName, setAiAssistantName] = useState('AS SIDRAT AI Assistant');
   const [aiTone, setAiTone] = useState('Friendly, warm, polite Bengali');
   const [aiSystemPrompt, setAiSystemPrompt] = useState(
@@ -592,7 +592,7 @@ Boundary:
                       {showKey ? 'Hide' : 'Show'}
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1">Configured Default: v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Leave empty to use server default (.env.local)</p>
                 </div>
 
                 {/* Model Selection */}
@@ -605,9 +605,12 @@ Boundary:
                     onChange={(e) => setAiModel(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white"
                   >
-                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Recommended - Ultra Fast & Real-time)</option>
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Lightweight & Quick)</option>
-                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning)</option>
+                    <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (Recommended - Ultra Fast & Instant Response)</option>
+                    <option value="gemini-flash-lite-latest">Gemini Flash Lite Latest (Real-time & High Efficiency)</option>
+                    <option value="gemini-3.6-flash">Gemini 3.6 Flash (High Intelligence & Versatile)</option>
+                    <option value="gemini-flash-latest">Gemini Flash Latest (Standard Gemini Flash)</option>
+                    <option value="gemini-3.7-flash">Gemini 3.7 Flash (Next-Gen Flash)</option>
+                    <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview (Deep Reasoning)</option>
                   </select>
                 </div>
 

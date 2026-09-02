@@ -140,23 +140,30 @@ export async function POST(req: Request) {
       });
     }
 
-    const apiKey = settings.aiApiKey || process.env.GEMINI_API_KEY || '';
+    const dbApiKey = (settings.aiApiKey || '').trim();
+    const envApiKey = (process.env.GEMINI_API_KEY || '').trim();
     const primaryApiKey =
-      apiKey === 'v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav' && process.env.GEMINI_API_KEY
-        ? process.env.GEMINI_API_KEY
-        : apiKey;
+      dbApiKey && dbApiKey !== 'v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav' ? dbApiKey : envApiKey;
 
-    // Normalize model name to valid Gemini models
-    let rawModel = (settings.aiModel || 'gemini-2.0-flash').trim();
-    if (
-      rawModel === 'gemini-3.6-flash' ||
-      rawModel === 'gemini-3.5-flash' ||
-      rawModel === 'gemini-2.5-flash' ||
-      !rawModel
-    ) {
-      rawModel = 'gemini-2.0-flash';
+    // Validate and prioritize Gemini models
+    const validGeminiModels = [
+      'gemini-3.5-flash-lite',
+      'gemini-flash-lite-latest',
+      'gemini-3.6-flash',
+      'gemini-flash-latest',
+      'gemini-3.7-flash',
+      'gemini-3.5-flash',
+      'gemini-3.1-pro-preview',
+    ];
+
+    let chosenModel = (settings.aiModel || '').trim();
+    if (!validGeminiModels.includes(chosenModel)) {
+      chosenModel = 'gemini-3.5-flash-lite';
     }
-    const modelName = rawModel;
+
+    const candidateModels = Array.from(
+      new Set([chosenModel, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.6-flash', 'gemini-3.5-flash'])
+    );
 
     // 3. Cached Product Context (Zero DB load on repeated chats)
     const { context: productContext, products } = await getCachedProductContext();
@@ -250,7 +257,7 @@ Catalog & Inquiry Instructions:
       contents: formattedContents,
       generationConfig: {
         temperature: 0.6,
-        maxOutputTokens: 600,
+        maxOutputTokens: 700,
       },
     };
 
@@ -292,42 +299,40 @@ Catalog & Inquiry Instructions:
       return matched;
     };
 
-    // 6. Handle Non-Streaming Request with Fallback Model
+    // 6. Handle Non-Streaming Request with Resilient Multi-Model Fallback
     if (!stream) {
       let aiReplyText = '';
-      const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${primaryApiKey}`;
-      try {
-        const response = await fetch(apiEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(8000),
-        });
-        const resData = await response.json();
-        if (resData.candidates && resData.candidates[0]?.content?.parts[0]?.text) {
-          aiReplyText = resData.candidates[0].content.parts[0].text;
-        } else {
-          // Fallback to gemini-1.5-flash
-          const fallbackRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${primaryApiKey}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload),
-              signal: AbortSignal.timeout(6000),
+      for (const candidateModel of candidateModels) {
+        const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${candidateModel}:generateContent?key=${primaryApiKey}`;
+        try {
+          const response = await fetch(apiEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(8000),
+          });
+          if (response.ok) {
+            const resData = await response.json();
+            const parts = resData.candidates?.[0]?.content?.parts || [];
+            const nonThoughtText = parts
+              .filter((p: any) => !p.thought && p.text)
+              .map((p: any) => p.text)
+              .join('');
+            if (nonThoughtText && nonThoughtText.trim()) {
+              aiReplyText = nonThoughtText.trim();
+              break;
             }
-          );
-          const fallbackData = await fallbackRes.json();
-          if (fallbackData.candidates && fallbackData.candidates[0]?.content?.parts[0]?.text) {
-            aiReplyText = fallbackData.candidates[0].content.parts[0].text;
+          } else {
+            console.warn(`Non-streaming model ${candidateModel} failed with status: ${response.status}`);
           }
+        } catch (err: any) {
+          console.warn(`Non-streaming model ${candidateModel} error:`, err?.message);
         }
-      } catch (err) {
-        console.error('Non-streaming Gemini API error/timeout:', err);
       }
 
       const cleanText = cleanMarkdownArtifacts(
-        aiReplyText || 'আসসালামু আলাইকুম! আস সিদরাহ্-তে আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি?'
+        aiReplyText ||
+          'দুঃখিত, সংযোগে সাময়িক সমস্যা হচ্ছে। সরাসরি তথ্যের জন্য আমাদের অফিশিয়াল হোয়াটসঅ্যাপে যোগাযোগ করতে পারেন।'
       );
       return NextResponse.json({
         success: true,
@@ -337,37 +342,35 @@ Catalog & Inquiry Instructions:
       });
     }
 
-    // 7. Handle Real-Time Streaming Request via SSE
-    const streamEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${primaryApiKey}`;
-
+    // 7. Handle Real-Time Streaming Request via SSE with Multi-Model Fallback
     let geminiStreamRes: Response | null = null;
-    try {
-      geminiStreamRes = await fetch(streamEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(8000),
-      });
+    let connectedModel = '';
 
-      if (!geminiStreamRes.ok) {
-        console.warn(`Primary model ${modelName} streaming failed (${geminiStreamRes.status}), falling back to gemini-1.5-flash`);
-        geminiStreamRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${primaryApiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            signal: AbortSignal.timeout(6000),
-          }
-        );
+    for (const candidateModel of candidateModels) {
+      const streamEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${candidateModel}:streamGenerateContent?alt=sse&key=${primaryApiKey}`;
+      try {
+        const res = await fetch(streamEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(7000),
+        });
+
+        if (res.ok && res.body) {
+          geminiStreamRes = res;
+          connectedModel = candidateModel;
+          break;
+        } else {
+          console.warn(`Streaming model ${candidateModel} failed with status: ${res.status}`);
+        }
+      } catch (fetchErr: any) {
+        console.warn(`Streaming model ${candidateModel} connection timeout or failure:`, fetchErr?.message);
       }
-    } catch (fetchErr: any) {
-      console.warn('Gemini stream connection timeout or failure:', fetchErr?.message);
     }
 
     if (!geminiStreamRes || !geminiStreamRes.ok || !geminiStreamRes.body) {
       const fallbackText =
-        'আসসালামু আলাইকুম! আস সিদরাহ্-তে আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি? যেকোনো তথ্যের জন্য আমাদের হোয়াটসঅ্যাপে যোগাযোগ করুন।';
+        'দুঃখিত, সংযোগে সাময়িক সমস্যা হচ্ছে। সরাসরি তথ্যের জন্য আমাদের অফিশিয়াল হোয়াটসঅ্যাপে যোগাযোগ করতে পারেন।';
       const streamEncoder = new TextEncoder();
       const fallbackStream = new ReadableStream({
         start(controller) {
@@ -417,15 +420,20 @@ Catalog & Inquiry Instructions:
               const trimmed = line.trim();
               if (!trimmed || !trimmed.startsWith('data:')) continue;
               const jsonStr = trimmed.replace(/^data:\s*/, '');
+              if (jsonStr === '[DONE]') continue;
               try {
                 const parsed = JSON.parse(jsonStr);
-                const chunkText = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (chunkText) {
-                  // Basic regex to filter out typical markdown chars in-stream
-                  const cleanChunk = chunkText.replace(/[\*_`#~]/g, '');
-                  fullAccumulatedText += cleanChunk;
-                  const sseData = `data: ${JSON.stringify({ text: cleanChunk })}\n\n`;
-                  controller.enqueue(textEncoder.encode(sseData));
+                const parts = parsed.candidates?.[0]?.content?.parts || [];
+                for (const part of parts) {
+                  // Skip internal reasoning thoughts
+                  if (part.thought) continue;
+                  const chunkText = part.text;
+                  if (chunkText) {
+                    const cleanChunk = chunkText.replace(/[\*_`#~]/g, '');
+                    fullAccumulatedText += cleanChunk;
+                    const sseData = `data: ${JSON.stringify({ text: cleanChunk })}\n\n`;
+                    controller.enqueue(textEncoder.encode(sseData));
+                  }
                 }
               } catch (e) {
                 // Ignore partial JSON parse errors in stream
@@ -433,7 +441,9 @@ Catalog & Inquiry Instructions:
             }
           }
 
-          const sanitizedFinal = cleanMarkdownArtifacts(fullAccumulatedText);
+          const sanitizedFinal =
+            cleanMarkdownArtifacts(fullAccumulatedText) ||
+            'আসসালামু আলাইকুম! আপনাকে কীভাবে সাহায্য করতে পারি?';
           const suggested = getMatchedProducts(sanitizedFinal);
 
           const endData = `data: ${JSON.stringify({
@@ -448,8 +458,8 @@ Catalog & Inquiry Instructions:
         } catch (streamErr) {
           console.error('Stream processing error:', streamErr);
           const fallbackText =
-            'আসসালামু আলাইকুম! আস সিদরাহ্-তে আপনাকে স্বাগতম। আজ আপনাকে কীভাবে সাহায্য করতে পারি?';
-          controller.enqueue(textEncoder.encode(`data: ${JSON.stringify({ text: fallbackText })}\n\n`));
+            cleanMarkdownArtifacts(fullAccumulatedText) ||
+            'দুঃখিত, সংযোগে সাময়িক সমস্যা হয়েছে। সরাসরি হোয়াটসঅ্যাপে যোগাযোগ করতে পারেন।';
           controller.enqueue(
             textEncoder.encode(
               `data: ${JSON.stringify({

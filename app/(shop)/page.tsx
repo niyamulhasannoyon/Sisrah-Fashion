@@ -90,7 +90,7 @@ export default async function HomePage() {
         <TrendingSlider initialProducts={trendingProducts} />
         <LifestyleBanner />
         <WhyChooseUs />
-        <SocialGallery />
+        <SocialGallery initialSettings={settings} />
         <ReviewMarquee />
       </main>
     </div>

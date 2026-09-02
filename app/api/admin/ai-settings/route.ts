@@ -14,10 +14,23 @@ export async function GET() {
       settings = await Settings.create({});
     }
 
+    const validModels = [
+      'gemini-3.5-flash-lite',
+      'gemini-flash-lite-latest',
+      'gemini-3.6-flash',
+      'gemini-flash-latest',
+      'gemini-3.7-flash',
+      'gemini-3.1-pro-preview',
+    ];
+    let model = (settings.aiModel || 'gemini-3.5-flash-lite').trim();
+    if (!validModels.includes(model)) {
+      model = 'gemini-3.5-flash-lite';
+    }
+
     const aiSettings = {
       aiEnabled: settings.aiEnabled ?? true,
-      aiApiKey: settings.aiApiKey || 'v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav',
-      aiModel: (settings.aiModel === 'gemini-3.6-flash' || settings.aiModel === 'gemini-3.5-flash' || !settings.aiModel) ? 'gemini-2.0-flash' : settings.aiModel,
+      aiApiKey: (settings.aiApiKey && settings.aiApiKey !== 'v84Ftx7BcJBugkq0Cig51Kwcl2lYjWav') ? settings.aiApiKey : '',
+      aiModel: model,
       aiAssistantName: settings.aiAssistantName || 'AS SIDRAT AI Assistant',
       aiTone: settings.aiTone || 'Friendly, warm, polite Bengali',
       aiSystemPrompt: settings.aiSystemPrompt || 'Role: You are the real-time customer support chat agent for the Bangladeshi clothing brand "AS SIDRAT" (assidrat.vercel.app).',
