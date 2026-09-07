@@ -48,6 +48,7 @@ const SettingsSchema = new Schema({
   contactEmail: String,
   contactAddress: String,
   facebookUrl: String,
+  messengerUrl: String,
   instagramUrl: String,
   youtubeUrl: String,
   

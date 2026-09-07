@@ -45,6 +45,7 @@ interface Settings {
   contactEmail?: string;
   contactAddress?: string;
   facebookUrl?: string;
+  messengerUrl?: string;
   instagramUrl?: string;
   youtubeUrl?: string;
   

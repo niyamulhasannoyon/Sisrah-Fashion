@@ -30,10 +30,16 @@ import {
   Ruler,
   Banknote,
   Zap,
+  ZoomIn,
+  Eye,
 } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
+import LandingContactWidget from '@/components/landing/LandingContactWidget';
+import LandingDirectMessageCard from '@/components/landing/LandingDirectMessageCard';
+import { WhatsAppIcon, MessengerIcon, getWhatsAppUrl, getMessengerUrl } from '@/components/landing/MessagingIcons';
+import ProductDetailLightbox from '@/components/ui/ProductDetailLightbox';
 
 // ── Types ──
 interface ProductData {
@@ -302,18 +308,22 @@ function StickyCtaBar({
   disabled,
   totalPrice,
   shippingCost,
+  waLink,
+  messengerLink,
 }: {
   onCtaClick: () => void;
   disabled: boolean;
   totalPrice: number;
   shippingCost: number;
+  waLink?: string;
+  messengerLink?: string;
 }) {
   return (
     <motion.div
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
     >
       <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 text-center sm:text-left">
         <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-1 sm:flex-col">
@@ -325,19 +335,51 @@ function StickyCtaBar({
             Cash on Delivery (হাতে পেয়ে মূল্য দিন)
           </p>
         </div>
-        <button
-          onClick={onCtaClick}
-          disabled={disabled}
-          className="bg-[#A31F24] hover:bg-[#8D181D] hover:scale-[1.02] active:scale-[0.97] text-white py-3 px-8 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5 shadow-[0_6px_20px_rgba(163,31,36,0.3)] hover:shadow-[0_8px_25px_rgba(163,31,36,0.45)] w-full sm:w-auto font-sans cursor-pointer"
-        >
-          <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.05em] leading-none">
-            <ShoppingBag size={14} className="shrink-0" />
-            ORDER NOW — ৳{(totalPrice + shippingCost).toLocaleString()}
-          </span>
-          <span className="text-[8px] font-bold text-white/80 lowercase tracking-wide font-bengali leading-none mt-0.5">
-            অর্ডার করতে এখানে ক্লিক করুন
-          </span>
-        </button>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Quick WhatsApp Button */}
+          {waLink && (
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center text-white shrink-0 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Chat on WhatsApp"
+              aria-label="Chat on WhatsApp"
+            >
+              <WhatsAppIcon className="w-5 h-5 fill-white" />
+            </a>
+          )}
+
+          {/* Quick Messenger Button */}
+          {messengerLink && (
+            <a
+              href={messengerLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#00C6FF] via-[#0078FF] to-[#0055FF] flex items-center justify-center text-white shrink-0 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Chat on Messenger"
+              aria-label="Chat on Messenger"
+            >
+              <MessengerIcon className="w-5 h-5" />
+            </a>
+          )}
+
+          {/* Primary Order Now Button */}
+          <button
+            onClick={onCtaClick}
+            disabled={disabled}
+            className="flex-1 sm:flex-initial bg-[#A31F24] hover:bg-[#8D181D] hover:scale-[1.02] active:scale-[0.97] text-white py-3 px-5 sm:px-8 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5 shadow-[0_6px_20px_rgba(163,31,36,0.3)] hover:shadow-[0_8px_25px_rgba(163,31,36,0.45)] font-sans cursor-pointer min-w-0"
+          >
+            <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.05em] leading-none whitespace-nowrap">
+              <ShoppingBag size={14} className="shrink-0" />
+              ORDER NOW — ৳{(totalPrice + shippingCost).toLocaleString()}
+            </span>
+            <span className="text-[8px] font-bold text-white/80 lowercase tracking-wide font-bengali leading-none mt-0.5">
+              অর্ডার করতে এখানে ক্লিক করুন
+            </span>
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -430,6 +472,23 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
   const [modalColor, setModalColor] = useState<string>('');
   const [modalQuantity, setModalQuantity] = useState<number>(1);
   const [modalImageIdx, setModalImageIdx] = useState<number>(0);
+
+  // Lightbox State (Full-screen detail pictures viewer)
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxTitle, setLightboxTitle] = useState('');
+  const [lightboxCategory, setLightboxCategory] = useState('');
+
+  const openProductLightbox = useCallback((product: ProductData | null, initialIdx: number = 0) => {
+    if (!product) return;
+    const imgs = getProductImages(product, page.customHero?.customBannerImage);
+    setLightboxImages(imgs);
+    setLightboxIndex(initialIdx);
+    setLightboxTitle(product.title);
+    setLightboxCategory(product.category);
+    setLightboxOpen(true);
+  }, [page.customHero?.customBannerImage]);
 
   const products = useMemo(() => {
     return (page.productIds || []).filter((p): p is ProductData =>
@@ -728,6 +787,19 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
     }
   }, [page.slug]);
 
+  // Direct links for Sticky Bar & Contact Widget
+  const waStickyLink = useMemo(() => {
+    const prodName = primaryProduct?.title || page.pageTitle;
+    const msg = `আসসালামু আলাইকুম AS SIDRAT! আমি ল্যান্ডিং পেজ থেকে "${prodName}" (৳${totalPrice.toLocaleString()}) সম্পর্কে জানতে / অর্ডার করতে চাই।`;
+    return getWhatsAppUrl(settings?.whatsappNumber, msg);
+  }, [primaryProduct?.title, page.pageTitle, totalPrice, settings?.whatsappNumber]);
+
+  const messengerStickyLink = useMemo(() => {
+    const prodName = primaryProduct?.title || page.pageTitle;
+    const msg = `আসসালামু আলাইকুম AS SIDRAT! আমি "${prodName}" সম্পর্কে জানতে / অর্ডার করতে চাই।`;
+    return getMessengerUrl((settings as any)?.messengerUrl, settings?.facebookUrl, msg);
+  }, [primaryProduct?.title, page.pageTitle, (settings as any)?.messengerUrl, settings?.facebookUrl]);
+
   // Order Placement Handler
   const handlePlaceDirectOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -925,22 +997,33 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
               অর্ডার ট্র্যাক করুন (Track Now)
             </Link>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <a
-                href={`https://wa.me/${settings?.whatsappNumber || '8801700000000'}?text=Hello,%20I%20have%20placed%20order%20%23${orderSuccess.orderId}%20on%20AS%20SIDRAT.`}
+                href={getWhatsAppUrl(settings?.whatsappNumber, `আসসালামু আলাইকুম AS SIDRAT! আমি ল্যান্ডিং পেজ থেকে অর্ডার #${orderSuccess.orderId} প্লেস করেছি। অনুগ্রহ করে কনফার্ম করবেন?`)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-1.5 shadow-md"
+                className="w-full bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#20bd5a] hover:to-[#0f7a6e] text-white py-3 px-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-md hover:shadow-emerald-500/25 cursor-pointer"
               >
-                WhatsApp Support
+                <WhatsAppIcon className="w-4 h-4 fill-white shrink-0" />
+                <span>WhatsApp চ্যাট</span>
               </a>
-              <Link
-                href="/shop"
-                className="w-full bg-[#1A1A1A] hover:bg-gray-800 text-white py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all block text-center shadow-md"
+              <a
+                href={getMessengerUrl((settings as any)?.messengerUrl, settings?.facebookUrl, `আসসালামু আলাইকুম AS SIDRAT! আমি অর্ডার #${orderSuccess.orderId} প্লেস করেছি।`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-gradient-to-r from-[#00C6FF] via-[#0078FF] to-[#0055FF] hover:from-[#00b2ff] hover:to-[#0047e0] text-white py-3 px-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-md hover:shadow-blue-500/25 cursor-pointer"
               >
-                Shop More
-              </Link>
+                <MessengerIcon className="w-4 h-4 shrink-0" />
+                <span>Messenger চ্যাট</span>
+              </a>
             </div>
+
+            <Link
+              href="/shop"
+              className="w-full bg-[#1A1A1A] hover:bg-gray-800 text-white py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all block text-center shadow-md cursor-pointer"
+            >
+              Shop More Products →
+            </Link>
           </div>
         </motion.div>
       </div>
@@ -1097,17 +1180,36 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
         {/* ── Single Product Layout ── */}
         {isSingle && primaryProduct && (
           <div className="space-y-6">
-            {/* Image Gallery with thumbnails and hotspots */}
+            {/* Image Gallery with thumbnails, hotspots and detail lightbox */}
             <div className="space-y-3">
-              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group shadow-sm">
+              <div 
+                onClick={() => openProductLightbox(primaryProduct, activeImage)}
+                className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group shadow-sm cursor-zoom-in"
+                title="বিস্তারিত ও ক্লোজ-আপ ছবি দেখতে ক্লিক করুন"
+              >
                 <Image
                   src={primaryProductImages[activeImage] || heroImage}
                   alt={primaryProduct.title}
                   fill
                   sizes="(max-width: 640px) 100vw, 600px"
-                  className="object-cover object-top transition-all duration-300"
+                  className="object-cover object-top transition-all duration-300 group-hover:scale-105"
                   priority
                 />
+
+                {/* View Detail Photos Floating Button */}
+                <div className="absolute bottom-3 right-3 z-20">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openProductLightbox(primaryProduct, activeImage);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/80 hover:bg-black active:scale-95 text-white text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-lg border border-white/20 transition-all hover:scale-105 cursor-pointer"
+                  >
+                    <ZoomIn size={13} className="text-amber-400" />
+                    <span>বিস্তারিত ছবি ({primaryProductImages.length})</span>
+                  </button>
+                </div>
 
                 {/* Hotspots overlay */}
                 {HOTSPOTS.map((hotspot) => (
@@ -1402,6 +1504,76 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
           </div>
         )}
 
+        {/* ── Dedicated Product Close-Up & Detail Gallery Section ── */}
+        {isSingle && primaryProduct && primaryProductImages.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-200/80 p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles size={18} className="text-[#A31F24]" />
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-gray-900 uppercase tracking-wider">
+                    পণ্যের ক্লোজ-আপ ও বিস্তারিত ছবি
+                  </h3>
+                  <p className="text-[10px] sm:text-xs text-gray-500 font-medium">
+                    ফেব্রিক, সেলাই ও ফিনিশিং স্পষ্ট দেখতে যেকোনো ছবিতে ট্যাপ করুন
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => openProductLightbox(primaryProduct, 0)}
+                className="text-[10px] sm:text-xs font-bold text-[#A31F24] hover:underline flex items-center gap-1 shrink-0 bg-[#A31F24]/5 px-2.5 py-1 rounded-full border border-[#A31F24]/10 cursor-pointer"
+              >
+                <ZoomIn size={13} />
+                <span>সব ছবি ({primaryProductImages.length})</span>
+              </button>
+            </div>
+
+            {/* Responsive Image Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+              {primaryProductImages.map((imgUrl, idx) => {
+                const badges = [
+                  'মূল লুক / Front View',
+                  'ক্লোজ-আপ ফেব্রিক / Fabric',
+                  'কলার ও বোতাম / Collar',
+                  'পেছনের অংশ / Back View',
+                  'সেলাই ফিনিশিং / Stitch',
+                  'সাইড ভিউ / Side Profile',
+                ];
+                const badgeLabel = badges[idx] || `ডিটেইল ছবি #${idx + 1}`;
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => openProductLightbox(primaryProduct, idx)}
+                    className="group relative aspect-[4/5] rounded-xl overflow-hidden bg-gray-50 border border-gray-200/70 hover:border-gray-900 transition-all cursor-zoom-in shadow-2xs hover:shadow-md"
+                  >
+                    <Image
+                      src={imgUrl}
+                      alt={`${primaryProduct.title} detail view ${idx + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 50vw, 33vw"
+                      className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {/* Dark overlay on hover with zoom icon */}
+                    <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-white/95 text-gray-900 flex items-center justify-center shadow-lg">
+                        <ZoomIn size={16} />
+                      </div>
+                    </div>
+                    {/* Label badge */}
+                    <div className="absolute bottom-1.5 left-1.5 right-1.5 pointer-events-none">
+                      <span className="block text-[9px] font-bold text-white bg-black/75 backdrop-blur-xs px-2 py-0.5 rounded-md truncate text-center shadow-xs">
+                        {badgeLabel}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* ── Multi-Product Bundle Layout ── */}
         {!isSingle && products.length > 0 && (
           <div className="space-y-6">
@@ -1419,6 +1591,7 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
                 const isSelected = multiProductActive[product._id] ?? true;
                 const sel = multiProductSelections[product._id] || { size: 'M', color: 'Black', quantity: 1 };
                 const productImage = getVariantImageForColor(product, sel.color) || product.images?.[0]?.url || '/images/placeholder.jpg';
+                const pImages = getProductImages(product);
 
                 return (
                   <div
@@ -1447,18 +1620,36 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
                         )}
                       </button>
 
-                      <div className="relative w-16 h-20 sm:w-20 sm:h-24 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
+                      {/* Clickable thumbnail to open lightbox */}
+                      <div 
+                        onClick={() => openProductLightbox(product, 0)}
+                        className="relative w-16 h-20 sm:w-20 sm:h-24 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0 cursor-zoom-in group"
+                        title="ক্লোজ-আপ ও বিস্তারিত ছবি দেখতে ক্লিক করুন"
+                      >
                         <Image
                           src={getDirectImageLink(productImage)}
                           alt={product.title}
                           fill
                           sizes="80px"
-                          className="object-cover object-top"
+                          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
                         />
+                        <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <ZoomIn size={14} className="text-white drop-shadow" />
+                        </div>
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold text-gray-900 truncate">{product.title}</h3>
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-sm font-bold text-gray-900 truncate">{product.title}</h3>
+                          <button
+                            type="button"
+                            onClick={() => openProductLightbox(product, 0)}
+                            className="text-[10px] font-bold text-[#A31F24] hover:underline flex items-center gap-1 shrink-0 bg-[#A31F24]/5 px-2 py-0.5 rounded-full cursor-pointer"
+                            title="পণ্যের সব বিস্তারিত ছবি দেখুন"
+                          >
+                            <ZoomIn size={11} /> ছবি ({pImages.length})
+                          </button>
+                        </div>
                         <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">{product.category}</p>
 
                         {product.variants && product.variants.length > 0 && isSelected && (
@@ -1952,6 +2143,15 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
           </form>
         </div>
 
+        {/* ── Direct WhatsApp & Messenger Ordering / Query Section ── */}
+        <LandingDirectMessageCard
+          productTitle={primaryProduct?.title || page.pageTitle}
+          price={totalPrice}
+          selectedSize={mainItems[0]?.size}
+          selectedColor={mainItems[0]?.color}
+          pageSlug={page.slug}
+        />
+
         {/* ── Collapsible FAQ Accordion ── */}
         <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-4">
           <h3 className="text-base font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
@@ -2024,6 +2224,18 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
         disabled={disabled}
         totalPrice={totalPrice}
         shippingCost={getShippingCost()}
+        waLink={waStickyLink}
+        messengerLink={messengerStickyLink}
+      />
+
+      {/* ── Floating WhatsApp & Messenger Support Widget ── */}
+      <LandingContactWidget
+        productTitle={primaryProduct?.title || page.pageTitle}
+        price={totalPrice}
+        pageSlug={page.slug}
+        whatsappNumber={settings?.whatsappNumber}
+        facebookUrl={settings?.facebookUrl}
+        messengerUrl={(settings as any)?.messengerUrl}
       />
 
       {/* ── Interactive Product Detail Modal ── */}
@@ -2288,6 +2500,16 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
           );
         })()}
       </AnimatePresence>
+
+      {/* Fullscreen Product Detail Photos Lightbox */}
+      <ProductDetailLightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        productTitle={lightboxTitle}
+        category={lightboxCategory}
+      />
     </div>
   );
 }

@@ -2,12 +2,13 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2, Ruler, Truck, RefreshCw, FileText } from 'lucide-react';
+import { Heart, Share2, Star, ShieldCheck, UploadCloud, X, Loader2, Ruler, Truck, RefreshCw, FileText, ZoomIn } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import MobileStickyCart from '@/components/product/MobileStickyCart';
 import SizeGuideModal from '@/components/product/SizeGuideModal';
 import WhatsAppButton from '@/components/product/WhatsAppButton';
 import StockScarcityBadge from '@/components/product/StockScarcityBadge';
+import ProductDetailLightbox from '@/components/ui/ProductDetailLightbox';
 import { formatCurrency, getDirectImageLink } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackViewContent, trackAddToCart } from '@/lib/analytics/trackEvents';
@@ -314,9 +315,25 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
               sizes="(max-width: 768px) 100vw, 60vw"
               className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110 pointer-events-none"
             />
+
+            {/* View Detail Photos Floating Button */}
+            <div className="absolute bottom-4 right-4 z-10">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsZoomOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/80 hover:bg-black active:scale-95 text-white text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-lg border border-white/20 transition-all hover:scale-105 cursor-pointer"
+              >
+                <ZoomIn size={13} className="text-amber-400" />
+                <span>বিস্তারিত ছবি ({allProductImages.length})</span>
+              </button>
+            </div>
+
             {/* Slide indicators for mobile */}
             {allProductImages.length > 1 && (
-              <div className="absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-1.5 md:hidden">
+              <div className="absolute bottom-4 left-4 z-10 flex justify-center gap-1.5 md:hidden">
                 {allProductImages.map((_, idx) => (
                   <div 
                     key={idx}
@@ -594,51 +611,15 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
         )}
       </AnimatePresence>
 
-      {/* Tap-to-Zoom Fullscreen Dialog */}
-      <AnimatePresence>
-        {isZoomOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[250] bg-black flex flex-col justify-center items-center p-4 select-none"
-          >
-            {/* Close Button */}
-            <button 
-              onClick={() => { setIsZoomOpen(false); setZoomScale(1); }}
-              className="absolute top-6 right-6 z-[260] w-12 h-12 bg-white/10 hover:bg-white/20 active:scale-95 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all cursor-pointer"
-            >
-              <X size={24} />
-            </button>
-
-            {/* Zoomable Image Area */}
-            <div 
-              className="relative w-full h-full max-w-4xl max-h-[80vh] flex items-center justify-center overflow-hidden cursor-zoom-in"
-              onClick={() => setZoomScale(prev => prev === 1 ? 2 : 1)}
-            >
-              <motion.div
-                animate={{ scale: zoomScale }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="relative w-full h-full aspect-[4/5]"
-              >
-                <Image
-                  src={allProductImages[activeImage]?.url || imageUrl}
-                  alt={product.title}
-                  fill
-                  sizes="100vw"
-                  className="object-contain"
-                  quality={90}
-                />
-              </motion.div>
-            </div>
-
-            {/* Zoom helper label */}
-            <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mt-4">
-              {zoomScale === 1 ? 'Tap Image to Zoom 2x' : 'Tap Image to Zoom Out'}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Tap-to-Zoom Fullscreen Lightbox with Thumbnails, Swipe & Controls */}
+      <ProductDetailLightbox
+        isOpen={isZoomOpen}
+        onClose={() => setIsZoomOpen(false)}
+        images={allProductImages}
+        initialIndex={activeImage}
+        productTitle={product.title}
+        category={product.category}
+      />
 
       <SizeGuideModal 
         isOpen={isSizeGuideOpen} 

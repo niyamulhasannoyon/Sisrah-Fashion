@@ -88,6 +88,7 @@ export interface SiteSettings {
   contactEmail?: string;
   contactAddress?: string;
   facebookUrl?: string;
+  messengerUrl?: string;
   instagramUrl?: string;
   youtubeUrl?: string;
   shippingInsideDhaka?: number;

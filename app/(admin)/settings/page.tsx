@@ -21,6 +21,7 @@ export default function AdminSettings() {
     contactEmail: '',
     contactAddress: '',
     facebookUrl: '',
+    messengerUrl: '',
     instagramUrl: '',
     youtubeUrl: '',
     shippingInsideDhaka: 60,
@@ -86,6 +87,7 @@ export default function AdminSettings() {
             contactEmail: '',
             contactAddress: '',
             facebookUrl: '',
+            messengerUrl: '',
             instagramUrl: '',
             youtubeUrl: '',
             shippingInsideDhaka: 60,
@@ -355,16 +357,29 @@ export default function AdminSettings() {
                   <h3 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
                     Social Media Accounts
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Facebook Link</label>
+                      <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Facebook Page Link</label>
                       <input 
                         type="text" 
                         value={settings.facebookUrl || ''}
                         onChange={e => setSettings({...settings, facebookUrl: e.target.value})}
                         className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-xs"
-                        placeholder="https://facebook.com/..."
+                        placeholder="https://facebook.com/assidrat"
                       />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                        Messenger Link or Username
+                      </label>
+                      <input 
+                        type="text" 
+                        value={settings.messengerUrl || ''}
+                        onChange={e => setSettings({...settings, messengerUrl: e.target.value})}
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-xs"
+                        placeholder="assidrat or https://m.me/assidrat"
+                      />
+                      <span className="text-[9px] text-slate-400">খালি রাখলে ফেসবুক লিংক থেকে অটো তৈরি হবে</span>
                     </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Instagram Link</label>

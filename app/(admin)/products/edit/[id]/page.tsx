@@ -132,13 +132,30 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     if (!e.target.files?.length) return;
     setUploadingImage(true);
     try {
-      const data = await uploadToCloudinary(e.target.files[0]);
-      if (data && (data.secure_url || data.url)) {
-        setMainImages(prev => [...prev, { url: data.secure_url || data.url, public_id: data.public_id || `img-${Date.now()}` }]);
+      const files = Array.from(e.target.files);
+      const uploadedImages: any[] = [];
+
+      for (const file of files) {
+        const data = await uploadToCloudinary(file);
+        if (data && (data.secure_url || data.url)) {
+          uploadedImages.push({
+            url: data.secure_url || data.url,
+            public_id: data.public_id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          });
+        }
+      }
+
+      if (uploadedImages.length > 0) {
+        setMainImages(prev => [...prev, ...uploadedImages]);
       } else {
         alert("Upload failed! Please check your network or try pasting an image link.");
       }
-    } catch (error) { alert("Upload failed!"); } finally { setUploadingImage(false); }
+    } catch (error) { 
+      alert("Upload failed!"); 
+    } finally { 
+      setUploadingImage(false); 
+      e.target.value = '';
+    }
   };
 
   const handleVariantImageUpload = async (index: number, file: File) => {
@@ -280,24 +297,41 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           
           {/* Images */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="font-bold text-slate-800 border-b pb-2 mb-4 flex items-center gap-2">
-               <ImageIcon size={18} className="text-slate-400" /> Main Product Gallery
-            </h3>
+            <div className="border-b pb-2 mb-4 flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <ImageIcon size={18} className="text-slate-400" /> Main & Detail Photos Gallery ({mainImages.length})
+              </h3>
+              <span className="text-[10px] text-slate-500 font-medium">
+                প্রথমটি কভার ছবি, বাকিগুলো ডিটেইল ছবি
+              </span>
+            </div>
+
             <div className="flex flex-wrap gap-4 mb-4">
               {mainImages.map((img, idx) => {
                 const src = typeof img === 'string' ? getDirectImageLink(img) : getDirectImageLink(img?.url);
                 if (!src) return null;
                 return (
-                  <div key={idx} className="relative w-24 h-32 border border-slate-200 rounded-lg overflow-hidden group shadow-sm bg-slate-50">
+                  <div key={idx} className="relative w-24 h-32 border border-slate-200 rounded-lg overflow-hidden group shadow-xs bg-slate-50">
                     <Image src={src} fill sizes="96px" unoptimized className="w-full h-full object-cover" alt={`gallery image ${idx + 1}`} />
-                    <button type="button" onClick={() => setMainImages(mainImages.filter((_, i) => i !== idx))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"><X size={12} /></button>
+                    
+                    {/* Badge: Main Cover vs Detail */}
+                    <div className="absolute top-1 left-1">
+                      <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-xs ${
+                        idx === 0 ? 'bg-amber-500 text-white' : 'bg-black/70 text-white'
+                      }`}>
+                        {idx === 0 ? 'Cover' : `Detail #${idx}`}
+                      </span>
+                    </div>
+
+                    <button type="button" onClick={() => setMainImages(mainImages.filter((_, i) => i !== idx))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer"><X size={12} /></button>
                   </div>
                 );
               })}
-              <label className="w-24 h-32 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-all">
-                {uploadingImage ? <Loader2 size={24} className="animate-spin text-slate-400" /> : <UploadCloud size={24} className="text-slate-400" />}
-                <span className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Add Gallery</span>
-                <input type="file" className="hidden" accept="image/*" onChange={handleMainImageUpload} />
+              <label className="w-24 h-32 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 hover:border-black transition-all group">
+                {uploadingImage ? <Loader2 size={24} className="animate-spin text-slate-400" /> : <UploadCloud size={24} className="text-slate-400 group-hover:text-black" />}
+                <span className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-widest text-center px-1">Upload Photos</span>
+                <span className="text-[8px] text-slate-400">(Multiple)</span>
+                <input type="file" multiple className="hidden" accept="image/*" onChange={handleMainImageUpload} />
               </label>
             </div>
             
@@ -318,11 +352,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <button 
                 type="button" 
                 onClick={addImageViaUrl}
-                className="px-4 py-2 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase rounded hover:bg-slate-200 transition-all shrink-0"
+                className="px-4 py-2 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase rounded hover:bg-slate-200 transition-all shrink-0 cursor-pointer"
               >
                 Add Link
               </button>
             </div>
+            <p className="text-[10px] text-gray-400 font-medium italic mt-2">
+              💡 টিপস: একসাথে একাধিক ছবি সিলেক্ট করতে পারেন। প্রথম ছবি ওয়েবসাইট ও ল্যান্ডিং পেইজে মেইন কভার হিসেবে দেখাবে, বাকি ছবিগুলো ডিটেইল/ক্লোজ-আপ গ্যালারিতে দেখাবে।
+            </p>
           </div>
 
           {/* Info */}

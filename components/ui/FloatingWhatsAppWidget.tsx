@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bot, Sparkles, X, Send, ShieldCheck, RefreshCw, ExternalLink, PhoneCall } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { cleanMarkdownArtifacts, getDirectImageLink } from '@/lib/utils';
+import { getMessengerUrl } from '@/components/landing/MessagingIcons';
 import Link from 'next/link';
 
 interface FloatingWhatsAppWidgetProps {
@@ -170,6 +171,11 @@ export default function FloatingWhatsAppWidget({
     window.open(`https://wa.me/${cleanNumber}?text=${finalMsg}`, '_blank');
   };
 
+  const handleMessengerRedirect = () => {
+    const link = getMessengerUrl((settings as any)?.messengerUrl, settings?.facebookUrl, 'Hello AS SIDRAT, I need help with an order.');
+    window.open(link, '_blank');
+  };
+
   return (
     <div className="flex fixed bottom-20 right-4 md:bottom-5 md:right-5 z-40 md:z-50 flex-col items-end font-sans">
       {/* Expanded AI Chat Widget */}
@@ -316,16 +322,25 @@ export default function FloatingWhatsAppWidget({
 
             {/* Human Handover Button */}
             <div className="flex items-center justify-between pt-1 border-t border-stone-900 text-[10px]">
-              <button
-                onClick={() => handleWhatsAppRedirect()}
-                className="text-emerald-400 hover:underline font-bold flex items-center gap-1"
-              >
-                <PhoneCall size={11} />
-                <span>মানবের সাথে কথা বলবেন? WhatsApp</span>
-              </button>
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={() => handleWhatsAppRedirect()}
+                  className="text-emerald-400 hover:text-emerald-300 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <PhoneCall size={11} />
+                  <span>WhatsApp</span>
+                </button>
+                <span className="text-stone-750">|</span>
+                <button
+                  onClick={() => handleMessengerRedirect()}
+                  className="text-sky-400 hover:text-sky-300 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Messenger</span>
+                </button>
+              </div>
               <div className="flex items-center gap-1 text-stone-500 font-sans">
                 <ShieldCheck size={11} className="text-emerald-500" />
-                <span>100% AS SIDRAT AI Care</span>
+                <span>AS SIDRAT Care</span>
               </div>
             </div>
           </div>
