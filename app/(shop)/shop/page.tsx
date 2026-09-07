@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import ShopClient from '@/components/product/ShopClient';
 import { Loader2 } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
 

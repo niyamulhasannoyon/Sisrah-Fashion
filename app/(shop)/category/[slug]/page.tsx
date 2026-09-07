@@ -5,16 +5,27 @@ import Product from '@/models/Product';
 import ProductListing from '@/components/product/ProductListing';
 import { Loader2 } from 'lucide-react';
 
+import { getCachedCategoryProducts } from '@/lib/dataCache';
+
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  return [
+    { slug: 'men' },
+    { slug: 'women' },
+    { slug: 'fusion' },
+    { slug: 'accessories' },
+  ];
 }
 
 function normalizeCategory(slug: string) {
   const value = slug.replace('-', ' ').toLowerCase();
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
-
-export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -54,14 +65,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  await dbConnect();
-
   const { slug } = await params;
   const category = normalizeCategory(slug);
-  const products = await Product.find({
-    category: { $regex: new RegExp(`^${slug.replace('-', ' ')}$`, 'i') }
-  }).lean();
-  const safeProducts = JSON.parse(JSON.stringify(products));
+  const safeProducts = await getCachedCategoryProducts(slug);
 
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
   const categoryUrl = `${baseUrl}/category/${slug}`;

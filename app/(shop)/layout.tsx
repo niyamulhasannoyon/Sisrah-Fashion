@@ -1,10 +1,8 @@
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import BottomNav from '@/components/layout/BottomNav';
-import CartDrawer from '@/components/cart/CartDrawer';
 import { AnalyticsTracker } from '@/components/layout/AnalyticsTracker';
-import LiveSalesProof from '@/components/ui/LiveSalesProof';
-import FloatingWhatsAppWidget from '@/components/ui/FloatingWhatsAppWidget';
+import ShopClientWidgets from '@/components/layout/ShopClientWidgets';
 import { Suspense } from 'react';
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
@@ -17,9 +15,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       <main className="flex-1 pb-28 md:pb-0">{children}</main>
       <Footer />
       <BottomNav />
-      <CartDrawer />
-      <LiveSalesProof />
-      <FloatingWhatsAppWidget />
+      <ShopClientWidgets />
     </div>
   );
 }

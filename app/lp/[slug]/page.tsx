@@ -5,12 +5,24 @@ import LandingPage from '@/models/LandingPage';
 import Product from '@/models/Product';
 import LandingPageClient from '@/components/landing/LandingPageClient';
 import { getDirectImageLink } from '@/lib/utils';
+import { getCachedLandingPage } from '@/lib/dataCache';
 
 interface LpPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export const revalidate = 60;
+
+export async function generateStaticParams() {
+  try {
+    await dbConnect();
+    const pages = await LandingPage.find({ isActive: true }).select('slug').lean();
+    return pages.map((p: any) => ({ slug: p.slug }));
+  } catch (err) {
+    console.error('[LP Page] Failed to generateStaticParams:', err);
+    return [];
+  }
+}
 
 // ── Helper: filter out null products from populated array ──
 function safeProducts(products: any[]): any[] {
@@ -24,16 +36,10 @@ function safePrice(p: any): number {
 }
 
 export async function generateMetadata({ params }: LpPageProps): Promise<Metadata> {
-  await dbConnect();
   const { slug } = await params;
 
-  // Prevent compiler tree-shaking of Product model
-  const _forceRegister = Product.modelName;
-
   try {
-    const raw = await LandingPage.findOne({ slug, isActive: true })
-      .populate('productIds', 'title description basePrice offerPrice images')
-      .lean() as any;
+    const raw = await getCachedLandingPage(slug);
 
     if (!raw) {
       return { title: 'Page Not Found - AS SIDRAT' };
@@ -97,21 +103,9 @@ export async function generateMetadata({ params }: LpPageProps): Promise<Metadat
 }
 
 export default async function LpPage({ params }: LpPageProps) {
-  await dbConnect();
   const { slug } = await params;
 
-  // Prevent compiler tree-shaking of Product model
-  const _forceRegister = Product.modelName;
-
-  let raw;
-  try {
-    raw = await LandingPage.findOne({ slug, isActive: true })
-      .populate('productIds')
-      .lean() as any;
-  } catch (err) {
-    console.error('[LP Page] Database query failed:', err);
-    throw err;
-  }
+  const raw = await getCachedLandingPage(slug);
 
   if (!raw) {
     notFound();
@@ -128,6 +122,7 @@ export default async function LpPage({ params }: LpPageProps) {
   const lpProductIds = products.map((p: any) => p._id);
   let initialSuggestedProducts: any[] = [];
   try {
+    await dbConnect();
     const rawSuggestions = await Product.find({ _id: { $nin: lpProductIds } })
       .select('title basePrice offerPrice images category variants rating numReviews sizeGuide')
       .limit(4)

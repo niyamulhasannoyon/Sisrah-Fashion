@@ -33,6 +33,16 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      'recharts',
+      'clsx',
+      'tailwind-merge',
+      'zustand',
+    ],
+  },
   async redirects() {
     return [
       {
@@ -61,6 +71,24 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path*(svg|png|jpg|jpeg|webp|ico|woff|woff2)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/((?!sitemap.xml|robots.txt).*)',
         headers: [

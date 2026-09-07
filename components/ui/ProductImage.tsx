@@ -68,7 +68,6 @@ export default function ProductImage({
         alt={alt}
         fill
         sizes={sizes}
-        unoptimized
         className={`object-cover object-center transition-all duration-300 ${
           resolvedHoverSrc ? 'group-hover:opacity-0' : 'group-hover:scale-105'
         }`}
@@ -84,7 +83,6 @@ export default function ProductImage({
           alt={`${alt} — alternate view`}
           fill
           sizes={sizes}
-          unoptimized
           className="absolute inset-0 object-cover object-center opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100"
           loading="lazy"
         />

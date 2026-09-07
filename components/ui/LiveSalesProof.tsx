@@ -38,10 +38,10 @@ export default function LiveSalesProof() {
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Fetch real active products to build live sales notifications dynamically
+  // Defer fetching active products so it never contends with critical initial page load
   useEffect(() => {
     let isMounted = true;
-    async function loadRealProducts() {
+    const timer = setTimeout(async () => {
       try {
         const res = await fetch('/api/products?limit=10');
         const data = await res.json();
@@ -65,9 +65,12 @@ export default function LiveSalesProof() {
       } catch (err) {
         console.error('Error fetching products for sales proof:', err);
       }
-    }
-    loadRealProducts();
-    return () => { isMounted = false; };
+    }, 3000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {

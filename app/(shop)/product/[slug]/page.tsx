@@ -2,22 +2,31 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
-import Review from '@/models/Review';
 import ProductDetailsClient from '@/components/product/ProductDetailsClient';
 import ProductSchemaMarkup from '@/components/seo/ProductSchemaMarkup';
 import { generateProductMetadata } from '@/lib/metadata/productMetadata';
+import { getCachedProduct, getCachedProductReviews } from '@/lib/dataCache';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  try {
+    await dbConnect();
+    const products = await Product.find({}).select('slug').sort({ createdAt: -1 }).limit(30).lean();
+    return products.map((p: any) => ({ slug: p.slug }));
+  } catch (err) {
+    console.error('[Product Page] Failed to generateStaticParams:', err);
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  await dbConnect();
-
   const { slug } = await params;
-  const product = (await Product.findOne({ slug }).lean()) as any;
+  const product = (await getCachedProduct(slug)) as any;
 
   if (!product) {
     return {
@@ -46,27 +55,19 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  await dbConnect();
-
   const { slug } = await params;
-  const product = (await Product.findOne({ slug }).lean()) as any;
+  const product = (await getCachedProduct(slug)) as any;
 
   if (!product) {
     notFound();
   }
 
-  const reviews = await Review.find({ product: product._id, status: 'approved' })
-    .sort({ createdAt: -1 })
-    .limit(10)
-    .lean();
-
-  const productData = JSON.parse(JSON.stringify(product));
-  const reviewsData = JSON.parse(JSON.stringify(reviews));
+  const reviewsData = await getCachedProductReviews(product._id);
 
   return (
     <>
-      <ProductSchemaMarkup product={productData} reviews={reviewsData} />
-      <ProductDetailsClient product={productData} reviews={reviewsData} />
+      <ProductSchemaMarkup product={product} reviews={reviewsData} />
+      <ProductDetailsClient product={product} reviews={reviewsData} />
     </>
   );
 }

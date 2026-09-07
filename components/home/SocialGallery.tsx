@@ -114,7 +114,6 @@ export function SocialGallery({ initialSettings }: SocialGalleryProps) {
                   alt={`AS SIDRAT Community Style ${idx + 1}`} 
                   fill
                   sizes="(max-width: 640px) 208px, (max-width: 768px) 256px, 288px"
-                  unoptimized
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="lazy"
                 />

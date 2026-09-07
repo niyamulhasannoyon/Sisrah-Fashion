@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/dbConnect';
 import LandingPage from '@/models/LandingPage';
 import { isAdmin, hasAccessTo } from '@/lib/adminAuth';
@@ -100,6 +101,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Landing page not found' }, { status: 404 });
     }
 
+    try {
+      if (page.slug) revalidatePath(`/lp/${page.slug}`);
+      revalidatePath('/landing-pages');
+      revalidatePath('/');
+    } catch (e) {
+      console.error('[LandingPages] revalidatePath error:', e);
+    }
+
     return NextResponse.json({ success: true, page });
   } catch (error: any) {
     console.error('[LandingPages] PUT error:', error);
@@ -123,6 +132,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const page = await LandingPage.findByIdAndDelete(id);
     if (!page) {
       return NextResponse.json({ error: 'Landing page not found' }, { status: 404 });
+    }
+
+    try {
+      if (page.slug) revalidatePath(`/lp/${page.slug}`);
+      revalidatePath('/landing-pages');
+      revalidatePath('/');
+    } catch (e) {
+      console.error('[LandingPages] revalidatePath error:', e);
     }
 
     return NextResponse.json({ success: true, message: 'Landing page deleted successfully' });

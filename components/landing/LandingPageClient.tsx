@@ -33,13 +33,15 @@ import {
   ZoomIn,
   Eye,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
-import LandingContactWidget from '@/components/landing/LandingContactWidget';
-import LandingDirectMessageCard from '@/components/landing/LandingDirectMessageCard';
 import { WhatsAppIcon, MessengerIcon, getWhatsAppUrl, getMessengerUrl } from '@/components/landing/MessagingIcons';
-import ProductDetailLightbox from '@/components/ui/ProductDetailLightbox';
+
+const LandingContactWidget = dynamic(() => import('@/components/landing/LandingContactWidget'), { ssr: false });
+const LandingDirectMessageCard = dynamic(() => import('@/components/landing/LandingDirectMessageCard'), { ssr: false });
+const ProductDetailLightbox = dynamic(() => import('@/components/ui/ProductDetailLightbox'), { ssr: false });
 
 // ── Types ──
 interface ProductData {
@@ -1080,30 +1082,19 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
       <div className="relative bg-slate-950 overflow-hidden">
         <div className="aspect-[4/3] sm:aspect-[4/2] md:aspect-[21/9] relative">
           {mobileHeroImage !== desktopHeroImage ? (
-            <>
-              <div className="sm:hidden w-full h-full absolute inset-0">
-                <Image
-                  src={mobileHeroImage}
-                  alt={heading}
-                  fill
-                  priority
-                  fetchPriority="high"
-                  sizes="100vw"
-                  className="object-cover object-top"
-                />
-              </div>
-              <div className="hidden sm:block w-full h-full absolute inset-0">
-                <Image
-                  src={desktopHeroImage}
-                  alt={heading}
-                  fill
-                  priority
-                  fetchPriority="high"
-                  sizes="100vw"
-                  className="object-cover object-top"
-                />
-              </div>
-            </>
+            <picture className="w-full h-full absolute inset-0">
+              <source media="(max-width: 639px)" srcSet={mobileHeroImage} />
+              <source media="(min-width: 640px)" srcSet={desktopHeroImage} />
+              <img
+                src={desktopHeroImage}
+                alt={heading}
+                // @ts-ignore
+                fetchPriority="high"
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-cover object-top"
+              />
+            </picture>
           ) : (
             <div className="w-full h-full absolute inset-0">
               <Image

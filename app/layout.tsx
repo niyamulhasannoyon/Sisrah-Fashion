@@ -5,9 +5,8 @@ import StoreInitializer from '@/components/layout/StoreInitializer';
 import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
 import OrganizationSchema from '@/components/seo/OrganizationSchema';
 import WebSiteSchema from '@/components/seo/WebSiteSchema';
-import dbConnect from '@/lib/dbConnect';
-import Settings from '@/models/Settings';
 import { getDirectImageLink } from '@/lib/utils';
+import { getCachedSettings } from '@/lib/dataCache';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -24,6 +23,35 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://assidrat.vercel.app').replace(/\/+$/, '');
+
+const speculationRules = {
+  prefetch: [
+    {
+      source: 'document',
+      where: {
+        and: [
+          { href_matches: '/*' },
+          { not: { href_matches: '/api/*' } },
+          { not: { href_matches: '/manager/*' } },
+          { not: { href_matches: '/dashboard*' } },
+          { not: { href_matches: '/orders*' } },
+          { not: { href_matches: '/products*' } },
+          { not: { href_matches: '/settings*' } },
+          { not: { href_matches: '/coupons*' } },
+          { not: { href_matches: '/inventory*' } },
+          { not: { href_matches: '/landing-pages*' } },
+          { not: { href_matches: '/staff*' } },
+          { not: { href_matches: '/users*' } },
+          { not: { href_matches: '/reviews*' } },
+          { not: { href_matches: '/checkout*' } },
+          { not: { selector_matches: '.no-prefetch' } },
+          { not: { selector_matches: '[rel~=nofollow]' } },
+        ],
+      },
+      eagerness: 'moderate',
+    },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -123,24 +151,8 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-async function getSettings() {
-  try {
-    await dbConnect();
-    let settings = await Settings.findOne().lean();
-    if (!settings) {
-      const doc = new Settings({});
-      await doc.save();
-      settings = doc.toObject();
-    }
-    return JSON.parse(JSON.stringify(settings));
-  } catch (error) {
-    console.error('Error fetching settings in layout:', error);
-    return null;
-  }
-}
-
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSettings();
+  const settings = await getCachedSettings();
   const faviconUrl = settings?.favicon ? getDirectImageLink(settings.favicon) : null;
 
   return (
@@ -157,13 +169,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         ) : (
           <>
             <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-            <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
+            <link rel="icon" href="/favicon.png" type="image/png" sizes="192x192" />
             <link rel="icon" href="/icon.png" type="image/png" sizes="32x32" />
             <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" />
           </>
         )}
         <OrganizationSchema settings={settings} baseUrl={BASE_URL} />
         <WebSiteSchema baseUrl={BASE_URL} />
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(speculationRules) }}
+        />
       </head>
       <body className="min-h-screen bg-loomra-white text-loomra-black antialiased font-sans" suppressHydrationWarning>
         <AnalyticsScripts
