@@ -55,13 +55,6 @@ export default function MobileStickyCart({
       availableSizes,
       availableColors
     });
-    trackAddToCart({
-      id: product._id,
-      title: product.title,
-      price: displayPrice,
-      size: selectedSize || 'M',
-      color: selectedColor || 'Standard'
-    }, 1);
   };
 
   return (

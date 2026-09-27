@@ -491,14 +491,6 @@ export default function ProductDetailsClient({ product, reviews }: ProductDetail
                   availableSizes,
                   availableColors
                 });
-                trackAddToCart({
-                  id: product._id,
-                  title: product.title,
-                  price: finalPrice,
-                  category: product.category,
-                  size: selectedSize,
-                  color: selectedColor
-                }, 1);
               }}
               disabled={!hasSelectedOptions || currentVariant?.stock === 0}
               className="flex-1 bg-loomra-red text-loomra-white py-4 text-small font-bold uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"

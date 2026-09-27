@@ -873,6 +873,15 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
 
     const finalTotal = totalPrice + getShippingCost();
 
+    // Trigger Meta Pixel InitiateCheckout
+    trackFbEvent('InitiateCheckout', {
+      content_ids: orderItems.map((item) => item.title),
+      content_type: 'product',
+      num_items: selectedCount,
+      value: finalTotal,
+      currency: 'BDT',
+    });
+
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -898,7 +907,9 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
           value: finalTotal,
           currency: 'BDT',
           content_type: 'product',
+          content_ids: orderItems.map((item) => item.title),
           num_items: selectedCount,
+          order_id: data.orderId,
         });
         try {
           localStorage.setItem('loomra_latest_order_id', data.orderId.toString());

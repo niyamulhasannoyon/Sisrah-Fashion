@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { trackAddToCart } from '@/lib/analytics/trackEvents';
 
 export interface CartItem {
   _id: string;
@@ -49,6 +50,19 @@ export const useCartStore = create<CartState>()(
           set({ cart: [...cart, { ...item, quantity: 1 }] });
         }
         set({ isCartOpen: true });
+
+        // Trigger Meta Pixel & GA4 AddToCart event
+        try {
+          trackAddToCart({
+            id: item._id,
+            title: item.title,
+            price: item.price,
+            size: item.selectedSize,
+            color: item.selectedColor,
+          }, 1);
+        } catch (err) {
+          console.warn('[CartStore] Failed to track AddToCart:', err);
+        }
       },
 
       removeFromCart: (id, size, color) => {

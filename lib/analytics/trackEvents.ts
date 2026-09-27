@@ -23,6 +23,19 @@ export interface AnalyticsItem {
 }
 
 /**
+ * Safe helper to trigger FB Pixel events
+ */
+function safeFbq(...args: any[]) {
+  if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+    try {
+      window.fbq(...args);
+    } catch (err) {
+      console.warn('[Meta Pixel] Event tracking failed:', err);
+    }
+  }
+}
+
+/**
  * Track PageView event
  */
 export function trackPageView(url?: string) {
@@ -31,9 +44,7 @@ export function trackPageView(url?: string) {
   const currentUrl = url || window.location.pathname;
 
   // Meta Pixel
-  if (typeof window.fbq === 'function') {
-    window.fbq('track', 'PageView');
-  }
+  safeFbq('track', 'PageView');
 
   // Google Analytics 4
   if (typeof window.gtag === 'function') {
@@ -54,15 +65,13 @@ export function trackViewContent(product: AnalyticsItem) {
   const productId = product.id || product.title;
 
   // Meta Pixel
-  if (typeof window.fbq === 'function') {
-    window.fbq('track', 'ViewContent', {
-      content_name: product.title,
-      content_ids: [productId],
-      content_type: 'product',
-      value: price,
-      currency: 'BDT',
-    });
-  }
+  safeFbq('track', 'ViewContent', {
+    content_name: product.title,
+    content_ids: [productId],
+    content_type: 'product',
+    value: price,
+    currency: 'BDT',
+  });
 
   // Google Analytics 4
   if (typeof window.gtag === 'function') {
@@ -93,15 +102,13 @@ export function trackAddToCart(product: AnalyticsItem, quantity: number = 1) {
   const totalValue = price * quantity;
 
   // Meta Pixel
-  if (typeof window.fbq === 'function') {
-    window.fbq('track', 'AddToCart', {
-      content_name: product.title,
-      content_ids: [productId],
-      content_type: 'product',
-      value: totalValue,
-      currency: 'BDT',
-    });
-  }
+  safeFbq('track', 'AddToCart', {
+    content_name: product.title,
+    content_ids: [productId],
+    content_type: 'product',
+    value: totalValue,
+    currency: 'BDT',
+  });
 
   // Google Analytics 4
   if (typeof window.gtag === 'function') {
@@ -129,17 +136,16 @@ export function trackInitiateCheckout(items: AnalyticsItem[], totalValue: number
   if (typeof window === 'undefined' || !items || items.length === 0) return;
 
   const contentIds = items.map(item => item.id || item.title);
+  const totalItemsCount = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   // Meta Pixel
-  if (typeof window.fbq === 'function') {
-    window.fbq('track', 'InitiateCheckout', {
-      content_ids: contentIds,
-      content_type: 'product',
-      num_items: items.reduce((acc, item) => acc + (item.quantity || 1), 0),
-      value: totalValue,
-      currency: 'BDT',
-    });
-  }
+  safeFbq('track', 'InitiateCheckout', {
+    content_ids: contentIds,
+    content_type: 'product',
+    num_items: totalItemsCount,
+    value: totalValue,
+    currency: 'BDT',
+  });
 
   // Google Analytics 4
   if (typeof window.gtag === 'function') {
@@ -164,17 +170,17 @@ export function trackPurchase(orderId: string, items: AnalyticsItem[], totalValu
   if (typeof window === 'undefined' || !items) return;
 
   const contentIds = items.map(item => item.id || item.title);
+  const totalItemsCount = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   // Meta Pixel
-  if (typeof window.fbq === 'function') {
-    window.fbq('track', 'Purchase', {
-      content_ids: contentIds,
-      content_type: 'product',
-      value: totalValue,
-      currency: 'BDT',
-      order_id: orderId,
-    });
-  }
+  safeFbq('track', 'Purchase', {
+    content_ids: contentIds,
+    content_type: 'product',
+    num_items: totalItemsCount,
+    value: totalValue,
+    currency: 'BDT',
+    order_id: orderId,
+  });
 
   // Google Analytics 4
   if (typeof window.gtag === 'function') {
@@ -192,3 +198,4 @@ export function trackPurchase(orderId: string, items: AnalyticsItem[], totalValu
     });
   }
 }
+

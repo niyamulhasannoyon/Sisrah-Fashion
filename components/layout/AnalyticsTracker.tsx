@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { trackPageView } from '@/lib/analytics/trackEvents';
 
 export function AnalyticsTracker() {
   const pathname = usePathname();
@@ -121,6 +122,9 @@ export function AnalyticsTracker() {
     // Guard against duplicate page views in Dev / Strict Mode
     if (lastPathname.current === fullPath) return;
     lastPathname.current = fullPath;
+
+    // Trigger Meta Pixel & GA4 PageView event on client navigation
+    trackPageView(fullPath);
 
     const sessionId = sessionStorage.getItem('loomra_session_id') || '';
     const visitorId = localStorage.getItem('loomra_visitor_id') || '';
