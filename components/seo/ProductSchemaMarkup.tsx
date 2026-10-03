@@ -110,7 +110,7 @@ export default function ProductSchemaMarkup({
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: '60.00',
+          value: '0.00',
           currency: 'BDT',
         },
         shippingDestination: {

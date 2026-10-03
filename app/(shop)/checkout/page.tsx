@@ -100,6 +100,8 @@ export default function CheckoutPage() {
   const isShippingFree = () => {
     if (!settings) return false;
     const trigger = settings.freeShippingTrigger;
+    if (trigger === 'always' || trigger === 'all') return true;
+    if (settings.shippingInsideDhaka === 0 && settings.shippingOutsideDhaka === 0) return true;
     if (trigger === 'quantity') {
       const minQty = settings.freeShippingMinQuantity ?? 2;
       return getCartItemsCount() >= minQty;
@@ -116,9 +118,9 @@ export default function CheckoutPage() {
     if (!shippingInfo.city) return 0;
     const isDhaka = shippingInfo.city.toLowerCase().includes('dhaka');
     if (isDhaka) {
-      return settings?.shippingInsideDhaka ?? 60;
+      return settings?.shippingInsideDhaka ?? 0;
     }
-    return settings?.shippingOutsideDhaka ?? 120;
+    return settings?.shippingOutsideDhaka ?? 0;
   };
 
   const finalTotal = getCartTotal() - calculateDiscount() + getShippingCost();

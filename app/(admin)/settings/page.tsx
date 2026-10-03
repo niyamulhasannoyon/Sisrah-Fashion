@@ -1149,7 +1149,7 @@ export default function AdminSettings() {
                     <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Inside Dhaka (৳)</label>
                     <input 
                       type="number" 
-                      value={settings.shippingInsideDhaka ?? 80}
+                      value={settings.shippingInsideDhaka ?? 0}
                       onChange={e => setSettings({...settings, shippingInsideDhaka: parseInt(e.target.value) || 0})}
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
                     />
@@ -1158,7 +1158,7 @@ export default function AdminSettings() {
                     <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Outside Dhaka (৳)</label>
                     <input 
                       type="number" 
-                      value={settings.shippingOutsideDhaka ?? 150}
+                      value={settings.shippingOutsideDhaka ?? 0}
                       onChange={e => setSettings({...settings, shippingOutsideDhaka: parseInt(e.target.value) || 0})}
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-black focus:bg-white transition-all text-sm"
                     />
@@ -1173,9 +1173,10 @@ export default function AdminSettings() {
                   
                   <div className="flex flex-col gap-2">
                     <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Trigger Type</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
                         { id: 'none', label: 'Disabled' },
+                        { id: 'always', label: 'Always Free' },
                         { id: 'quantity', label: 'By Quantity' },
                         { id: 'amount', label: 'By Amount' }
                       ].map((option) => (
@@ -1194,6 +1195,13 @@ export default function AdminSettings() {
                       ))}
                     </div>
                   </div>
+
+                  {settings.freeShippingTrigger === 'always' && (
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <span>✓</span>
+                      <span>ডেলিভারি চার্জ সম্পূর্ণ ফ্রি! সারা দেশে যেকোনো অর্ডারে ডেলিভারি ফ্রি থাকবে।</span>
+                    </div>
+                  )}
 
                   {settings.freeShippingTrigger === 'quantity' && (
                     <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-300">

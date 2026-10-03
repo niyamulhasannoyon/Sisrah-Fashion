@@ -173,8 +173,15 @@ export async function POST(req: Request) {
     const tone = settings.aiTone || 'Friendly, warm, polite, and helpful Bengali';
     const customPrompt = settings.aiSystemPrompt?.trim() || '';
 
+    const isFreeShippingEverywhere = 
+      freeShippingTrigger === 'always' || 
+      freeShippingTrigger === 'all' || 
+      (shippingInside === 0 && shippingOutside === 0);
+
     let freeShippingText = 'কোনো নির্দিষ্ট ফ্রি ডেলিভারি অফার বর্তমানে সক্রিয় নেই।';
-    if (freeShippingTrigger === 'amount') {
+    if (isFreeShippingEverywhere) {
+      freeShippingText = 'বর্তমানে সারা বাংলাদেশে যেকোনো অর্ডারে ডেলিভারি চার্জ সম্পূর্ণ ফ্রি (০ টাকা)!';
+    } else if (freeShippingTrigger === 'amount') {
       freeShippingText = `৳${freeShippingMinAmount} বা তার বেশি অর্ডারে সারা দেশে ডেলিভারি সম্পূর্ণ ফ্রি!`;
     } else if (freeShippingTrigger === 'quantity') {
       freeShippingText = `${freeShippingMinQty} বা তার বেশি প্রোডাক্ট অর্ডারে ডেলিভারি ফ্রি!`;
@@ -187,13 +194,13 @@ export async function POST(req: Request) {
       : `1. সর্বদা গ্রাহককে সালাম জানান এবং অত্যন্ত মার্জিত বাংলায় বিনয়ী হয়ে সাহায্য প্রদান করুন।
 2. ওয়েবসাইটের রিয়েল-টাইম প্রোডাক্ট প্রাইস, স্টক এবং সাইজ অনুযায়ী সঠিক তথ্য সরবরাহ করুন।
 3. সমগ্র বাংলাদেশে ক্যাশ অন ডেলিভারি (Cash on Delivery) সুবিধা উপলব্ধ।
-4. ঢাকার ভেতরে ডেলিভারি চার্জ ৳${shippingInside} (২-৩ কার্যদিবস) এবং ঢাকার বাইরে ৳${shippingOutside} (৩-৫ কার্যদিবস)।
+4. ${isFreeShippingEverywhere ? 'বর্তমানে সারা বাংলাদেশে ডেলিভারি সম্পূর্ণ ফ্রি (০ টাকা)। ডেলিভারি সময়: ঢাকার ভেতরে ২-৩ কার্যদিবস এবং ঢাকার বাইরে ৩-৫ কার্যদিবস।' : `ঢাকার ভেতরে ডেলিভারি চার্জ ৳${shippingInside} (২-৩ কার্যদিবস) এবং ঢাকার বাইরে ৳${shippingOutside} (৩-৫ কার্যদিবস)।`}
 5. যেকোনো সাইজ এক্সচেঞ্জ বা রিটার্ন ৭ দিনের মধ্যে অক্ষত অবস্থায় গ্রহণ করা হয়।`;
 
     const faqsList = Array.isArray(settings.aiFaqs) && settings.aiFaqs.length > 0
       ? settings.aiFaqs.map((f: any) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')
       : `Q: আপনাদের ডেলিভারি চার্জ ও সময় কত?
-A: ঢাকার ভেতরে ডেলিভারি চার্জ ৳${shippingInside} (২-৩ কার্যদিবস) এবং ঢাকার বাইরে ৳${shippingOutside} (৩-৫ কার্যদিবস)।
+A: ${isFreeShippingEverywhere ? 'বর্তমানে সারা বাংলাদেশে ডেলিভারি সম্পূর্ণ ফ্রি (০ টাকা)। ডেলিভারি সময়: ঢাকার ভেতরে ২-৩ কার্যদিবস এবং ঢাকার বাইরে ৩-৫ কার্যদিবস।' : `ঢাকার ভেতরে ডেলিভারি চার্জ ৳${shippingInside} (২-৩ কার্যদিবস) এবং ঢাকার বাইরে ৳${shippingOutside} (৩-৫ কার্যদিবস)।`}
 
 Q: পেমেন্ট পদ্ধতি কি কি?
 A: আমরা ক্যাশ অন ডেলিভারি (Cash on Delivery), বিকাশ, নগদ ও অনলাইন কার্ড পেমেন্ট গ্রহণ করি।
@@ -212,8 +219,8 @@ Role & Conversational Tone:
 Store Policies & Delivery Facts:
 - Cash on Delivery (COD) is available all over Bangladesh.
 - Delivery Charges & Timelines:
-  * Inside Dhaka: ৳${shippingInside} (2-3 business days)
-  * Outside Dhaka: ৳${shippingOutside} (3-5 business days)
+  * Inside Dhaka: ${isFreeShippingEverywhere ? 'Free / সম্পূর্ণ ফ্রি (0 Taka)' : `৳${shippingInside}`} (2-3 business days)
+  * Outside Dhaka: ${isFreeShippingEverywhere ? 'Free / সম্পূর্ণ ফ্রি (0 Taka)' : `৳${shippingOutside}`} (3-5 business days)
   * Free Shipping: ${freeShippingText}
 - Returns & Exchanges: 7-day hassle-free size exchange for unworn items with original tags intact.
 - Payment Methods: Cash on Delivery (COD), bKash, Nagad, SSLCommerz card payments.

@@ -760,6 +760,8 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
 
     if (!settings) return false;
     const trigger = settings.freeShippingTrigger;
+    if (trigger === 'always' || trigger === 'all') return true;
+    if (settings.shippingInsideDhaka === 0 && settings.shippingOutsideDhaka === 0) return true;
     if (trigger === 'quantity') {
       const minQty = settings.freeShippingMinQuantity ?? 2;
       return selectedCount >= minQty;
@@ -776,9 +778,9 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
     if (!shippingInfo.city) return 0;
     const isDhaka = shippingInfo.city.toLowerCase().includes('dhaka');
     if (isDhaka) {
-      return settings?.shippingInsideDhaka ?? 60;
+      return settings?.shippingInsideDhaka ?? 0;
     }
-    return settings?.shippingOutsideDhaka ?? 120;
+    return settings?.shippingOutsideDhaka ?? 0;
   }, [isShippingFree, shippingInfo.city, settings]);
 
   const handleScrollToForm = useCallback(() => {
@@ -2036,8 +2038,8 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
                   </div>
                 )}
                 <div className="flex justify-between items-center text-[11px] text-gray-500 font-bold uppercase">
-                  <span>Delivery Cost ({shippingInfo.city})</span>
-                  <span>{getShippingCost() === 0 ? 'FREE' : `৳${getShippingCost()}`}</span>
+                  <span>Delivery Cost {shippingInfo.city ? `(${shippingInfo.city})` : ''}</span>
+                  <span className={getShippingCost() === 0 ? 'text-emerald-600 font-black' : ''}>{getShippingCost() === 0 ? 'FREE' : `৳${getShippingCost()}`}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs text-gray-900 font-black uppercase pt-2 border-t border-gray-200">
                   <span>Total Payable</span>

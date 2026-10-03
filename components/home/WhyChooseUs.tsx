@@ -21,8 +21,8 @@ export function WhyChooseUs() {
       id: 'feature-[#2]',
       icon: Truck,
       title: settings?.whyShopFeature2Title || 'Free Delivery',
-      bnTitle: settings?.whyShopFeature2BnTitle || 'ফ্রি ডেলিভারি ৳২০০০+',
-      description: settings?.whyShopFeature2Desc || '৳২০০০ বা তার বেশি অর্ডারে সারা দেশে ডেলিভারি সম্পূর্ণ ফ্রি।',
+      bnTitle: settings?.whyShopFeature2BnTitle || ((settings?.shippingInsideDhaka === 0 && settings?.shippingOutsideDhaka === 0) || settings?.freeShippingTrigger === 'always' ? 'ফ্রি ডেলিভারি' : 'ফ্রি ডেলিভারি ৳২০০০+'),
+      description: settings?.whyShopFeature2Desc || ((settings?.shippingInsideDhaka === 0 && settings?.shippingOutsideDhaka === 0) || settings?.freeShippingTrigger === 'always' ? 'সারাদেশে সকল অর্ডারে ডেলিভারি সম্পূর্ণ ফ্রি।' : '৳২০০০ বা তার বেশি অর্ডারে সারা দেশে ডেলিভারি সম্পূর্ণ ফ্রি।'),
     },
     {
       id: 'feature-[#3]',

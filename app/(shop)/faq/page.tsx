@@ -33,7 +33,7 @@ const faqSchema = {
       name: 'What are your delivery charges in Bangladesh?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Our standard shipping charges are ৳80 inside Dhaka city and ৳150 outside Dhaka city. We offer free shipping triggers depending on promotions.',
+        text: 'Currently, we are offering 100% FREE nationwide delivery on all orders across Bangladesh! Delivery takes 2 to 3 business days inside Dhaka and 3 to 5 business days outside Dhaka.',
       },
     },
     {

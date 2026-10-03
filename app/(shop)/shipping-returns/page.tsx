@@ -54,13 +54,16 @@ export default function ShippingReturnsPage() {
               </p>
               
               <div className="border-t border-b border-gray-50 py-4 my-2 space-y-3">
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center mb-1">
+                  <span className="text-emerald-700 font-bold text-xs uppercase tracking-wide">🎉 Special Offer: Free Nationwide Delivery!</span>
+                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-900 font-bold">Inside Dhaka:</span>
-                  <span className="text-[#A31F24] font-black">৳80 (2-3 Business Days)</span>
+                  <span className="text-emerald-600 font-black">FREE (2-3 Business Days)</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-900 font-bold">Outside Dhaka:</span>
-                  <span className="text-[#A31F24] font-black">৳150 (3-5 Business Days)</span>
+                  <span className="text-emerald-600 font-black">FREE (3-5 Business Days)</span>
                 </div>
               </div>
 
