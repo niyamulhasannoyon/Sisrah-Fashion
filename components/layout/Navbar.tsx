@@ -87,29 +87,23 @@ export function Navbar() {
       <header className="sticky top-0 z-[100] w-full border-b border-neutral-200/70 bg-white/90 backdrop-blur-md shadow-subtle transition-all duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-2 md:py-2.5">
           <div className="flex items-center gap-8 lg:gap-12">
-            <Link href="/" className="flex items-center gap-3 shrink-0 group">
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 shrink-0 flex items-center justify-center overflow-hidden">
-                {!mounted ? (
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-neutral-100 animate-pulse" />
-                ) : settings?.logo ? (
-                  <Image 
-                    src={getDirectImageLink(settings.logo)} 
-                    alt="AS SIDRAT" 
-                    fill
-                    sizes="(max-width: 768px) 48px, 56px"
-                    priority
-                    className="object-contain transition-all duration-300 group-hover:scale-105" 
-                  />
-                ) : (
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center text-sm font-bold text-neutral-700 select-none">
-                    S
-                  </div>
-                )}
-              </div>
-              
-              <span className="text-base md:text-lg font-bold tracking-[0.2em] text-neutral-900 uppercase select-none transition-all duration-300 group-hover:text-brand">
-                AS SIDRAT
-              </span>
+            <Link href="/" className="flex items-center shrink-0 group py-1" aria-label="AS SIDRAT Home">
+              {!mounted ? (
+                <div className="h-9 sm:h-11 md:h-12 w-28 sm:w-36 bg-neutral-100 rounded animate-pulse" />
+              ) : settings?.logo ? (
+                <Image 
+                  src={getDirectImageLink(settings.logo)} 
+                  alt="AS SIDRAT" 
+                  width={160}
+                  height={52}
+                  priority
+                  className="h-9 sm:h-11 md:h-12 w-auto object-contain transition-all duration-300 group-hover:scale-105" 
+                />
+              ) : (
+                <span className="text-base md:text-lg font-bold tracking-[0.2em] text-neutral-900 uppercase select-none transition-all duration-300 group-hover:text-brand">
+                  AS SIDRAT
+                </span>
+              )}
             </Link>
 
             <nav className="hidden md:flex items-center gap-6 lg:gap-8">
