@@ -1,6 +1,5 @@
 import dynamic from 'next/dynamic';
 import { HeroSection } from '@/components/home/HeroSection';
-import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { WhyChooseUs } from '@/components/home/WhyChooseUs';
 import { NewDrop } from '@/components/home/NewDrop';
 import { TrendingSlider } from '@/components/home/TrendingSlider';
@@ -27,7 +26,6 @@ export default async function HomePage() {
     <div className="bg-surface-paper text-neutral-900 font-sans scroll-smooth">
       <main>
         <HeroSection initialSettings={settings} />
-        <CategoryGrid />
         <NewDrop initialProducts={newDropProducts} />
         <TrendingSlider initialProducts={trendingProducts} />
         <LifestyleBanner />
