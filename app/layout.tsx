@@ -101,11 +101,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.png', type: 'image/png', sizes: '512x512' },
+      { url: '/favicon.png', type: 'image/png', sizes: '192x192' },
       { url: '/icon.png', type: 'image/png', sizes: '32x32' },
     ],
-    shortcut: '/favicon.png',
+    shortcut: '/favicon.ico',
     apple: [
       { url: '/apple-icon.png', sizes: '180x180' },
     ],
@@ -164,10 +165,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
-        {faviconUrl ? (
+        {faviconUrl && faviconUrl !== '/favicon.png' ? (
           <link rel="icon" href={faviconUrl} />
         ) : (
           <>
+            <link rel="icon" href="/favicon.ico" sizes="any" />
             <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
             <link rel="icon" href="/favicon.png" type="image/png" sizes="192x192" />
             <link rel="icon" href="/icon.png" type="image/png" sizes="32x32" />
