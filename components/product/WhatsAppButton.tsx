@@ -3,6 +3,7 @@
 import { MessageCircle, ArrowRight } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useEffect } from 'react';
+import { trackContact } from '@/lib/analytics/trackEvents';
 
 interface WhatsAppButtonProps {
   productName: string;
@@ -33,6 +34,13 @@ export default function WhatsAppButton({
   const brandPhone = rawPhone.replace(/\+/g, '').replace(/\s+/g, '');
 
   const handleWhatsAppOrder = () => {
+    // Fire Meta Pixel & GA4 Contact / Lead event
+    trackContact({
+      productName,
+      price,
+      channel: 'WhatsApp',
+    });
+
     let details = `*Product:* ${productName}\n*Price:* ৳ ${price}`;
     if (selectedSize) {
       details += `\n*Size:* ${selectedSize}`;

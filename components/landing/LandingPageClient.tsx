@@ -38,6 +38,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
 import { WhatsAppIcon, MessengerIcon, getWhatsAppUrl, getMessengerUrl } from '@/components/landing/MessagingIcons';
+import { trackViewContent, trackAddToCart, trackInitiateCheckout, trackPurchase, trackContact } from '@/lib/analytics/trackEvents';
 
 const LandingContactWidget = dynamic(() => import('@/components/landing/LandingContactWidget'), { ssr: false });
 const LandingDirectMessageCard = dynamic(() => import('@/components/landing/LandingDirectMessageCard'), { ssr: false });
@@ -585,15 +586,25 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
     setMounted(true);
     fetchSettings();
     trackLpEvent(page.slug, 'pageview');
-    trackFbEvent('ViewContent', {
-      content_name: page.pageTitle,
-      content_category: 'LandingPage',
-      currency: 'BDT',
-    });
+    if (primaryProduct) {
+      trackViewContent({
+        id: primaryProduct._id,
+        title: primaryProduct.title,
+        price: primaryProduct.offerPrice && primaryProduct.offerPrice > 0 ? primaryProduct.offerPrice : primaryProduct.basePrice,
+        category: primaryProduct.category || 'Landing Page',
+      });
+    } else {
+      trackViewContent({
+        id: page._id,
+        title: page.pageTitle,
+        price: 0,
+        category: 'Landing Page',
+      });
+    }
     try {
       sessionStorage.setItem('loomra_campaign_slug', page.slug);
     } catch {}
-  }, [page.slug, page.pageTitle, fetchSettings]);
+  }, [page.slug, page.pageTitle, fetchSettings, primaryProduct]);
 
   // Initialize/reset modal state when detailProduct changes
   useEffect(() => {
@@ -837,8 +848,9 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
       mainItems.forEach((item) => {
         const varImg = getVariantImageForColor(primaryProduct, item.color) || defaultImg;
         orderItems.push({
+          _id: primaryProduct._id,
           title: primaryProduct.title,
-          price: primaryProduct.offerPrice || primaryProduct.basePrice,
+          price: primaryProduct.offerPrice && primaryProduct.offerPrice > 0 ? primaryProduct.offerPrice : primaryProduct.basePrice,
           image: varImg,
           selectedSize: item.size,
           selectedColor: item.color,
@@ -851,8 +863,9 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
           const sel = multiProductSelections[p._id] || { size: 'M', color: 'Black', quantity: 1 };
           const imgUrl = getVariantImageForColor(p, sel.color) || p.images?.[0]?.url || '/images/placeholder.jpg';
           orderItems.push({
+            _id: p._id,
             title: p.title,
-            price: p.offerPrice || p.basePrice,
+            price: p.offerPrice && p.offerPrice > 0 ? p.offerPrice : p.basePrice,
             image: getDirectImageLink(imgUrl),
             selectedSize: sel.size,
             selectedColor: sel.color,
@@ -875,14 +888,18 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
 
     const finalTotal = totalPrice + getShippingCost();
 
-    // Trigger Meta Pixel InitiateCheckout
-    trackFbEvent('InitiateCheckout', {
-      content_ids: orderItems.map((item) => item.title),
-      content_type: 'product',
-      num_items: selectedCount,
-      value: finalTotal,
-      currency: 'BDT',
-    });
+    // Trigger Meta Pixel & GA4 InitiateCheckout
+    trackInitiateCheckout(
+      orderItems.map((item) => ({
+        id: item._id || item.productId || item.title,
+        title: item.title,
+        price: item.price,
+        quantity: item.quantity || 1,
+        size: item.selectedSize,
+        color: item.selectedColor,
+      })),
+      finalTotal
+    );
 
     try {
       const res = await fetch('/api/orders', {
@@ -905,14 +922,18 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
       const data = await res.json();
       if (data.success) {
         trackLpEvent(page.slug, 'click', 'lp_direct_order_success');
-        trackFbEvent('Purchase', {
-          value: finalTotal,
-          currency: 'BDT',
-          content_type: 'product',
-          content_ids: orderItems.map((item) => item.title),
-          num_items: selectedCount,
-          order_id: data.orderId,
-        });
+        trackPurchase(
+          data.orderId.toString(),
+          orderItems.map((item) => ({
+            id: item._id || item.productId || item.title,
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity || 1,
+            size: item.selectedSize,
+            color: item.selectedColor,
+          })),
+          finalTotal
+        );
         try {
           localStorage.setItem('loomra_latest_order_id', data.orderId.toString());
           localStorage.setItem('loomra_latest_order_phone', data.phone);

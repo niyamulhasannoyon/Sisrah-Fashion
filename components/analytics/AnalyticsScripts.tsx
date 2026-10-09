@@ -8,8 +8,8 @@ interface AnalyticsScriptsProps {
 }
 
 export default function AnalyticsScripts({ facebookPixelId, googleAnalyticsId }: AnalyticsScriptsProps) {
-  const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || facebookPixelId;
-  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || googleAnalyticsId;
+  const pixelId = (process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || facebookPixelId || '').trim();
+  const gaId = (process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || googleAnalyticsId || '').trim();
 
   return (
     <>
@@ -39,7 +39,7 @@ export default function AnalyticsScripts({ facebookPixelId, googleAnalyticsId }:
               height="1"
               width="1"
               style={{ display: 'none' }}
-              src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
+              src={`https://www.facebook.com/tr?id=${encodeURIComponent(pixelId)}&ev=PageView&noscript=1`}
               alt="FB Pixel"
             />
           </noscript>
@@ -51,7 +51,7 @@ export default function AnalyticsScripts({ facebookPixelId, googleAnalyticsId }:
         <>
           <Script
             strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`}
           />
           <Script
             id="google-analytics"

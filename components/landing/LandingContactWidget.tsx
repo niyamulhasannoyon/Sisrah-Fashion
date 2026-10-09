@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PhoneCall, X, Sparkles, ShieldCheck, ChevronRight, MessageSquare } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { WhatsAppIcon, MessengerIcon, getWhatsAppUrl, getMessengerUrl } from './MessagingIcons';
+import { trackContact } from '@/lib/analytics/trackEvents';
 
 interface LandingContactWidgetProps {
   productTitle?: string;
@@ -78,6 +79,18 @@ export default function LandingContactWidget({
   const messengerLink = getMessengerUrl(activeMessengerUrl, activeFacebookUrl, messengerMessage);
   const cleanPhoneForCall = activeWhatsappNumber.replace(/[^0-9]/g, '');
 
+  const handleWaClick = () => {
+    trackContact({ productName: productTitle, price, channel: 'WhatsApp' });
+  };
+
+  const handleMessengerClick = () => {
+    trackContact({ productName: productTitle, price, channel: 'Messenger' });
+  };
+
+  const handleCallClick = () => {
+    trackContact({ productName: productTitle, price, channel: 'Phone Call' });
+  };
+
   return (
     <div
       ref={popoverRef}
@@ -134,6 +147,7 @@ export default function LandingContactWidget({
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={handleWaClick}
                 className="group relative flex items-center gap-3.5 p-3.5 rounded-2xl bg-gradient-to-r from-[#25D366]/15 via-stone-900 to-stone-900 hover:from-[#25D366]/25 border border-[#25D366]/40 hover:border-[#25D366] transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-emerald-950/50 cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-105 transition-transform">
@@ -158,6 +172,7 @@ export default function LandingContactWidget({
                 href={messengerLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={handleMessengerClick}
                 className="group relative flex items-center gap-3.5 p-3.5 rounded-2xl bg-gradient-to-r from-[#0084FF]/15 via-stone-900 to-stone-900 hover:from-[#0084FF]/25 border border-[#0084FF]/40 hover:border-[#0084FF] transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-blue-950/50 cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#00C6FF] via-[#0078FF] to-[#A800FF] flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-105 transition-transform">
@@ -181,6 +196,7 @@ export default function LandingContactWidget({
               {cleanPhoneForCall && (
                 <a
                   href={`tel:+${cleanPhoneForCall}`}
+                  onClick={handleCallClick}
                   className="flex items-center justify-between p-2.5 rounded-xl bg-stone-900 hover:bg-stone-850 border border-stone-800 text-stone-300 hover:text-white transition-all text-xs cursor-pointer group"
                 >
                   <div className="flex items-center gap-2">

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ArrowRight } from 'lucide-react';
+import { trackSearch } from '@/lib/analytics/trackEvents';
 
 export default function NotFoundSearch() {
   const [query, setQuery] = useState('');
@@ -12,6 +13,7 @@ export default function NotFoundSearch() {
     e.preventDefault();
     const trimmed = query.trim();
     if (trimmed) {
+      trackSearch(trimmed);
       router.push(`/shop?search=${encodeURIComponent(trimmed)}`);
     } else {
       router.push('/shop');
