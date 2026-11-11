@@ -30,6 +30,13 @@ export interface IOrder extends Document {
   trackingNumber?: string;
   internalNotes?: string;
   campaignSlug?: string;
+  attribution?: {
+    source?: string; medium?: string; campaign?: string; content?: string; term?: string;
+    campaignId?: string; adsetId?: string; adId?: string; placement?: string; fbclid?: string;
+    landingPage?: string; isMetaAd?: boolean;
+    firstSource?: string; firstMedium?: string; firstCampaign?: string; firstAdId?: string; firstTouchAt?: Date;
+    inAppBrowser?: string; visitorId?: string; fbp?: string; fbc?: string; eventSourceUrl?: string; userAgent?: string;
+  };
 }
 
 const OrderSchema: Schema = new Schema(
@@ -65,8 +72,36 @@ const OrderSchema: Schema = new Schema(
     trackingNumber: { type: String, default: '' },
     internalNotes: { type: String, default: '' },
     campaignSlug: { type: String, index: true },
+    // Ad attribution captured in the browser (last touch 7d, first touch 90d) + Meta identifiers
+    attribution: {
+      source: String,
+      medium: String,
+      campaign: String,
+      content: String,
+      term: String,
+      campaignId: String,
+      adsetId: String,
+      adId: String,
+      placement: String,
+      fbclid: String,
+      landingPage: String,
+      isMetaAd: { type: Boolean, default: false },
+      firstSource: String,
+      firstMedium: String,
+      firstCampaign: String,
+      firstAdId: String,
+      firstTouchAt: Date,
+      inAppBrowser: String,
+      visitorId: String,
+      fbp: String,
+      fbc: String,
+      eventSourceUrl: String,
+      userAgent: String,
+    },
   },
   { timestamps: true }
 );
+
+OrderSchema.index({ 'attribution.isMetaAd': 1, createdAt: -1 });
 
 export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);

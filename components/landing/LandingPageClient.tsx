@@ -38,7 +38,9 @@ import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { getDirectImageLink } from '@/lib/utils';
 import { WhatsAppIcon, MessengerIcon, getWhatsAppUrl, getMessengerUrl } from '@/components/landing/MessagingIcons';
-import { trackViewContent, trackAddToCart, trackInitiateCheckout, trackPurchase, trackContact } from '@/lib/analytics/trackEvents';
+import { trackViewContent, trackAddToCart, trackInitiateCheckout, trackPurchase, trackContact, trackPageView } from '@/lib/analytics/trackEvents';
+import { captureAttribution, getOrderAttributionPayload } from '@/lib/analytics/attribution';
+import { sendAnalyticsEvent } from '@/lib/analytics/client';
 
 const LandingContactWidget = dynamic(() => import('@/components/landing/LandingContactWidget'), { ssr: false });
 const LandingDirectMessageCard = dynamic(() => import('@/components/landing/LandingDirectMessageCard'), { ssr: false });
@@ -420,38 +422,17 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   );
 }
 
-// ── FB Pixel tracking helper ──
-function trackFbEvent(eventName: string, params?: Record<string, any>) {
-  if (typeof window !== 'undefined' && (window as any).fbq) {
-    try {
-      (window as any).fbq('track', eventName, params);
-    } catch (e) {
-      console.warn('[FB Pixel] Tracking warning:', e);
-    }
-  }
-}
-
 // ── LP Analytics helper ──
+// Landing pages live outside the shop layout (no AnalyticsTracker), so they report through the same
+// shared helper: consistent visitor/session ids + UTM / fbclid / ad attribution on every event.
 function trackLpEvent(slug: string, eventType: 'pageview' | 'click', clickText?: string) {
   if (typeof window === 'undefined') return;
-  const sessionId = sessionStorage.getItem('loomra_session_id');
-  const visitorId = localStorage.getItem('loomra_visitor_id');
-  const payload: Record<string, any> = {
+  sendAnalyticsEvent({
     eventType,
     url: `/lp/${slug}`,
-    sessionId: sessionId || 'lp_' + Math.random().toString(36).substring(2, 10),
-    visitorId: visitorId || 'lp_vis_' + Math.random().toString(36).substring(2, 10),
-    referrer: document.referrer || '',
     clickTarget: `lp_campaign:${slug}`,
-  };
-  if (clickText) payload.clickText = clickText;
-
-  fetch('/api/analytics/track', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-    keepalive: true,
-  }).catch(() => {});
+    clickText,
+  });
 }
 
 // ── Main Component ──
@@ -582,10 +563,19 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
   }, [page.productIds, initialSuggestedProducts]);
 
   // Fetch settings & track view
+  const lpPageViewSlug = useRef<string | null>(null);
   useEffect(() => {
     setMounted(true);
     fetchSettings();
-    trackLpEvent(page.slug, 'pageview');
+    // Capture UTM / fbclid / ad ids BEFORE the first event so they are attached to it
+    captureAttribution();
+    // This effect re-runs when primaryProduct changes identity; the page view must fire once per slug.
+    if (lpPageViewSlug.current !== page.slug) {
+      lpPageViewSlug.current = page.slug;
+      // Base Pixel snippet already fired the Pixel PageView -> only GA4 + server-side twin here
+      trackPageView(`/lp/${page.slug}`, { initial: true });
+      trackLpEvent(page.slug, 'pageview');
+    }
     if (primaryProduct) {
       trackViewContent({
         id: primaryProduct._id,
@@ -912,6 +902,7 @@ export default function LandingPageClient({ page, initialSuggestedProducts = [] 
           paymentMethod: paymentMethod,
           paymentStatus: 'Pending',
           campaignSlug: page.slug,
+          attribution: getOrderAttributionPayload(),
           ...(comboDiscount > 0 && {
             couponCode: 'COMBO_DISCOUNT',
             couponDiscount: comboDiscount,

@@ -95,7 +95,7 @@ export default function AdminAnalytics() {
   const [sessionSearchQuery, setSessionSearchQuery] = useState('');
 
   // UI Selection States
-  const [activeSection, setActiveSection] = useState<'sales' | 'devices' | 'geo' | 'profit'>('sales');
+  const [activeSection, setActiveSection] = useState<'sales' | 'devices' | 'geo' | 'profit' | 'meta'>('sales');
   const [chartType, setChartType] = useState<'traffic' | 'sales'>('sales');
   const [topProductsMetric, setTopProductsMetric] = useState<'quantity' | 'revenue'>('quantity');
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
@@ -480,6 +480,17 @@ export default function AdminAnalytics() {
           }`}
         >
           <DollarSign size={16} /> Profit & Cost Margin
+        </button>
+
+        <button
+          onClick={() => setActiveSection('meta')}
+          className={`pb-3 px-5 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+            activeSection === 'meta'
+              ? 'border-[#A31F24] text-[#A31F24] font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <TrendingUp size={16} /> Meta Ads Traffic
         </button>
       </div>
 
@@ -935,6 +946,104 @@ export default function AdminAnalytics() {
 
         </div>
       )}
+
+      {/* ──────────────── TAB 5: META ADS TRAFFIC ──────────────── */}
+      {activeSection === 'meta' && (() => {
+        const meta = data?.metaAds;
+        const sm = meta?.summary;
+        const cards = [
+          { label: 'Ad Sessions', value: sm?.sessions ?? 0 },
+          { label: 'Page Views', value: sm?.pageviews ?? 0 },
+          { label: 'Clicks', value: sm?.clicks ?? 0 },
+          { label: 'Orders', value: sm?.orders ?? 0 },
+          { label: 'Revenue', value: `৳ ${(sm?.revenue ?? 0).toLocaleString()}` },
+          { label: 'Order Rate', value: `${sm?.conversionRate ?? 0}%` },
+        ];
+        const tables: { title: string; rows: any[] }[] = [
+          { title: 'By Campaign', rows: meta?.byCampaign || [] },
+          { title: 'By Ad', rows: meta?.byAd || [] },
+          { title: 'By Placement', rows: meta?.byPlacement || [] },
+        ];
+        return (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {cards.map((c) => (
+                <div key={c.label} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{c.label}</p>
+                  <p className="text-xl font-black text-slate-900 mt-1">{c.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {sm && sm.sessions === 0 && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-bold text-amber-800">
+                No Meta ad sessions recorded in this range yet. Tracking starts after the update is deployed, and a
+                visit counts only when the URL carries utm_* / fbclid / ad_id parameters.
+              </div>
+            )}
+
+            {sm && sm.sessions > 0 && sm.campaignCoveragePct < 80 && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-bold text-amber-800">
+                Only {sm.campaignCoveragePct}% of Meta events carry a campaign name. Add these URL Parameters in Ads
+                Manager (ad level): utm_source=facebook&amp;utm_medium=paid_social&amp;utm_campaign={'{{campaign.name}}'}
+                &amp;utm_content={'{{ad.name}}'}&amp;utm_term={'{{adset.name}}'}&amp;campaign_id={'{{campaign.id}}'}
+                &amp;adset_id={'{{adset.id}}'}&amp;ad_id={'{{ad.id}}'}&amp;placement={'{{placement}}'}
+              </div>
+            )}
+
+            <p className="text-[11px] font-bold text-slate-400">
+              {sm?.inAppSessions ?? 0} of {sm?.sessions ?? 0} ad sessions came from the Facebook / Instagram in-app
+              browser. Sessions and views are counted for the visit that landed from the ad; orders use 7-day last-touch
+              attribution. Ads Manager &quot;Link clicks&quot; will normally be higher than sessions here because some people
+              leave before the page loads.
+            </p>
+
+            {tables.map((t) => (
+              <div key={t.title} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-slate-100">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">{t.title}</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400">
+                      <tr>
+                        <th className="px-5 py-3 font-black">Name</th>
+                        <th className="px-3 py-3 font-black text-right">Sessions</th>
+                        <th className="px-3 py-3 font-black text-right">Views</th>
+                        <th className="px-3 py-3 font-black text-right">Product / LP Views</th>
+                        <th className="px-3 py-3 font-black text-right">Clicks</th>
+                        <th className="px-3 py-3 font-black text-right">Orders</th>
+                        <th className="px-3 py-3 font-black text-right">Revenue</th>
+                        <th className="px-5 py-3 font-black text-right">Order Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {t.rows.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="px-5 py-6 text-center text-slate-400 font-bold">No data</td>
+                        </tr>
+                      ) : (
+                        t.rows.map((r: any) => (
+                          <tr key={r.name} className="hover:bg-slate-50">
+                            <td className="px-5 py-3 font-bold text-slate-800 max-w-[260px] truncate" title={r.name}>{r.name}</td>
+                            <td className="px-3 py-3 text-right font-bold">{r.sessions}</td>
+                            <td className="px-3 py-3 text-right">{r.pageviews}</td>
+                            <td className="px-3 py-3 text-right">{r.productViews}</td>
+                            <td className="px-3 py-3 text-right">{r.clicks}</td>
+                            <td className="px-3 py-3 text-right font-bold">{r.orders}</td>
+                            <td className="px-3 py-3 text-right font-bold">৳ {Number(r.revenue || 0).toLocaleString()}</td>
+                            <td className="px-5 py-3 text-right">{r.conversionRate}%</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* ──────────────── TAB 4: PROFIT ANALYTICS ──────────────── */}
       {activeSection === 'profit' && (

@@ -1,15 +1,6 @@
-const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://sslcommerz.com https://*.sslcommerz.com;
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https:;
-    font-src 'self' data:;
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'self';
-    upgrade-insecure-requests;
-`.replace(/\s{2,}/g, ' ').trim();
+// NOTE: Content-Security-Policy is intentionally set ONLY in proxy.ts.
+// Two CSP headers are enforced as an intersection by browsers, which silently
+// blocks Meta Pixel / GA when one of them lacks the Facebook domains.
 
 const nextConfig = {
   reactStrictMode: true,
@@ -92,10 +83,6 @@ const nextConfig = {
       {
         source: '/((?!sitemap.xml|robots.txt).*)',
         headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: cspHeader,
-          },
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',

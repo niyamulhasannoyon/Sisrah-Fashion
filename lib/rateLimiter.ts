@@ -206,11 +206,22 @@ export const reviewLimiter = rateLimiter({
   label: 'Too many review submissions',
 });
 
-/** Analytics ingestion limiter: 60 events per minute per IP (prevents scraping DDOS) */
+/**
+ * Analytics ingestion limiter: 300 events per minute per IP.
+ * Bangladeshi mobile carriers use CGNAT, so many ad visitors share one public IP; a low limit
+ * (previously 60) silently drops real ad traffic.
+ */
 export const analyticsLimiter = rateLimiter({
-  maxRequests: 60,
+  maxRequests: 300,
   windowMs: 60_000,
   label: 'Too many analytics events',
+});
+
+/** Meta Conversions API relay limiter (browser -> server). Same CGNAT reasoning as above. */
+export const metaEventsLimiter = rateLimiter({
+  maxRequests: 300,
+  windowMs: 60_000,
+  label: 'Too many tracking events',
 });
 
 /** AI Chat Assistant: 12 messages per minute per IP */

@@ -1,7 +1,6 @@
 'use client';
 
 import { useCartStore } from '@/store/useCartStore';
-import { trackInitiateCheckout } from '@/lib/analytics/trackEvents';
 import { X, Plus, Minus, Trash2, ShoppingBag, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -252,17 +251,6 @@ export default function CartDrawer() {
               <Link
                 href="/checkout"
                 onClick={() => {
-                  trackInitiateCheckout(
-                    cart.map((item) => ({
-                      id: item._id,
-                      title: item.title,
-                      price: item.price,
-                      quantity: item.quantity,
-                      size: item.selectedSize,
-                      color: item.selectedColor,
-                    })),
-                    getCartTotal()
-                  );
                   toggleCart();
                 }}
                 className="w-full bg-black text-white py-4 text-xs font-black uppercase tracking-[3px] hover:bg-[#A31F24] transition-all rounded-2xl flex items-center justify-center gap-3 shadow-xl hover:shadow-red-900/20 active:scale-[0.98]"

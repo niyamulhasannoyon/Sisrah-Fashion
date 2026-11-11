@@ -5,10 +5,11 @@ import { useCartStore } from '@/store/useCartStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Loader2, ShieldCheck, Truck, CreditCard, Banknote, MapPin, ShoppingCart, Clock, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackInitiateCheckout, trackPurchase } from '@/lib/analytics/trackEvents';
+import { getOrderAttributionPayload } from '@/lib/analytics/attribution';
 
 const districts = [
   'Dhaka', 'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra', 'Brahmanbaria', 'Chandpur', 'Chapainawabganj', 'Chittagong', 'Chuadanga', 'Comilla', "Cox's Bazar", 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jessore', 'Jhalokati', 'Jhenaidah', 'Joypurhat', 'Khagrachari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Maulvibazar', 'Meherpur', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet', 'Tangail', 'Thakurgaon'
@@ -38,18 +39,26 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState('');
   const [showMobileSummary, setShowMobileSummary] = useState(false);
 
+  const initiateCheckoutFired = useRef(false);
+
   useEffect(() => {
     setIsClient(true);
     if (!settings) {
       fetchSettings();
     }
-    if (cart.length > 0) {
-      trackInitiateCheckout(
-        cart.map((item) => ({ id: item._id, title: item.title, price: item.price, quantity: item.quantity })),
-        getCartTotal()
-      );
-    }
   }, [settings, fetchSettings]);
+
+  // InitiateCheckout must fire ONCE per checkout visit. It used to live in the effect above, which
+  // re-ran every time settings loaded, and the cart drawer fired it as well.
+  useEffect(() => {
+    if (initiateCheckoutFired.current || cart.length === 0) return;
+    initiateCheckoutFired.current = true;
+    trackInitiateCheckout(
+      cart.map((item) => ({ id: item._id, title: item.title, price: item.price, quantity: item.quantity })),
+      getCartTotal()
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cart.length]);
 
   useEffect(() => {
     if (user) {
@@ -202,6 +211,7 @@ export default function CheckoutPage() {
         couponCode: appliedCoupon?.code,
         couponDiscount: calculateDiscount(),
         campaignSlug,
+        attribution: getOrderAttributionPayload(),
       };
 
       // Clear campaign attribution after order placement

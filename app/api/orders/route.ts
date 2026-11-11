@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import Coupon from '@/models/Coupon';
@@ -8,6 +8,28 @@ import { generateAndEmailInvoice } from '@/lib/invoice';
 import { sendAdminOrderNotification } from '@/lib/email';
 import { orderLimiter } from '@/lib/rateLimiter';
 import { runIsolatedTask } from '@/lib/backgroundTasks';
+import { detectInAppBrowser } from '@/lib/analytics/attribution';
+import { getRequestClientInfo, sendCapiEvents } from '@/lib/meta/capi';
+
+const clip = (v: unknown, max = 200): string | undefined =>
+  typeof v === 'string' && v.trim() ? v.replace(/<[^>]*>/g, '').trim().slice(0, max) : undefined;
+
+/** Whitelist + clamp the attribution object sent by the browser. */
+function sanitizeAttribution(raw: any, userAgent: string) {
+  const a = raw && typeof raw === 'object' ? raw : {};
+  const firstTouchAt = typeof a.firstTouchAt === 'number' && a.firstTouchAt > 0 ? new Date(a.firstTouchAt) : undefined;
+  return {
+    source: clip(a.source), medium: clip(a.medium), campaign: clip(a.campaign), content: clip(a.content), term: clip(a.term),
+    campaignId: clip(a.campaignId, 100), adsetId: clip(a.adsetId, 100), adId: clip(a.adId, 100),
+    placement: clip(a.placement, 100), fbclid: clip(a.fbclid, 300), landingPage: clip(a.landingPage, 300),
+    isMetaAd: a.isMetaAd === true,
+    firstSource: clip(a.firstSource), firstMedium: clip(a.firstMedium), firstCampaign: clip(a.firstCampaign),
+    firstAdId: clip(a.firstAdId, 100), firstTouchAt,
+    inAppBrowser: detectInAppBrowser(userAgent) || clip(a.inAppBrowser, 30),
+    visitorId: clip(a.visitorId, 100), fbp: clip(a.fbp, 100), fbc: clip(a.fbc, 300),
+    eventSourceUrl: clip(a.eventSourceUrl, 500), userAgent: userAgent.slice(0, 300),
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -102,6 +124,9 @@ export async function POST(req: Request) {
       ? Math.max(0, body.couponDiscount)
       : 0;
 
+    const { ip: clientIp, userAgent } = getRequestClientInfo(req.headers);
+    const attribution = sanitizeAttribution(body.attribution, userAgent);
+
     const newOrder = await Order.create({
       shippingInfo: sanitizedShipping,
       orderItems: sanitizedItems,
@@ -113,7 +138,8 @@ export async function POST(req: Request) {
       couponCode,
       couponDiscount,
       orderId: nextOrderId,
-      campaignSlug
+      campaignSlug,
+      attribution,
     });
 
     // Increment coupon usage count if a coupon was applied
@@ -153,6 +179,46 @@ export async function POST(req: Request) {
       () => sendAdminOrderNotification(newOrder.toObject()),
       { taskName: `Admin Notification for Order #${nextOrderId}`, timeoutMs: 6000 }
     );
+
+    // ── Meta Conversions API: server-side Purchase ──────────────────────────────
+    // event_id matches the browser Pixel's Purchase (purchase_<orderId>) so Meta de-duplicates.
+    // after() keeps the invocation alive until the Graph API call completes (a bare fire-and-forget
+    // fetch can be frozen by Vercel the moment the response is returned).
+    const purchaseItems = Array.isArray(body.orderItems) ? body.orderItems : [];
+    const contentIdOf = (item: any) => String(item?._id || item?.productId || item?.title || '').slice(0, 80);
+    after(async () => {
+      await sendCapiEvents([
+        {
+          eventName: 'Purchase',
+          eventId: `purchase_${nextOrderId}`,
+          eventSourceUrl: attribution.eventSourceUrl,
+          user: {
+            email: sanitizedShipping.email,
+            phone: sanitizedShipping.phone,
+            name: sanitizedShipping.name,
+            city: sanitizedShipping.city,
+            externalId: attribution.visitorId,
+            fbp: attribution.fbp,
+            fbc: attribution.fbc,
+            ip: clientIp,
+            userAgent,
+          },
+          customData: {
+            value: totalAmount,
+            currency: 'BDT',
+            content_type: 'product',
+            content_ids: purchaseItems.map(contentIdOf),
+            contents: purchaseItems.map((item: any, i: number) => ({
+              id: contentIdOf(item),
+              quantity: sanitizedItems[i]?.quantity || 1,
+              item_price: sanitizedItems[i]?.price || 0,
+            })),
+            num_items: sanitizedItems.reduce((n: number, i: any) => n + i.quantity, 0),
+            order_id: String(nextOrderId),
+          },
+        },
+      ]);
+    });
 
     return NextResponse.json({ 
       success: true, 

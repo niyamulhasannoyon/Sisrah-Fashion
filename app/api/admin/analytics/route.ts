@@ -582,6 +582,114 @@ export async function GET(req: Request) {
       }
     };
 
+    // --- G. META ADS TRAFFIC (sessions that landed with UTM / fbclid / ad ids) ---
+    const metaEventMatch = { ...trafficMatch, isMetaAd: true };
+    const metaOrderMatch = { ...orderMatch, 'attribution.isMetaAd': true };
+
+    const aggregateMetaBy = async (eventField: string, orderField: string) => {
+      const [eventRows, orderRows] = await Promise.all([
+        AnalyticsEvent.aggregate([
+          { $match: metaEventMatch },
+          {
+            $group: {
+              _id: { $ifNull: [`$${eventField}`, '(not set)'] },
+              sessions: { $addToSet: '$sessionId' },
+              visitors: { $addToSet: '$visitorId' },
+              pageviews: { $sum: { $cond: [{ $eq: ['$eventType', 'pageview'] }, 1, 0] } },
+              clicks: { $sum: { $cond: [{ $eq: ['$eventType', 'click'] }, 1, 0] } },
+              productViews: {
+                $sum: {
+                  $cond: [
+                    { $and: [{ $eq: ['$eventType', 'pageview'] }, { $regexMatch: { input: '$url', regex: /^\/(product|lp)\// } }] },
+                    1,
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              sessions: { $size: '$sessions' },
+              visitors: { $size: '$visitors' },
+              pageviews: 1,
+              clicks: 1,
+              productViews: 1,
+            },
+          },
+        ]),
+        Order.aggregate([
+          { $match: metaOrderMatch },
+          {
+            $group: {
+              _id: { $ifNull: [`$${orderField}`, '(not set)'] },
+              orders: { $sum: 1 },
+              revenue: { $sum: '$totalAmount' },
+            },
+          },
+        ]),
+      ]);
+
+      const rows = new Map<string, any>();
+      eventRows.forEach((r: any) => {
+        rows.set(r._id, { name: r._id, sessions: r.sessions, visitors: r.visitors, pageviews: r.pageviews, clicks: r.clicks, productViews: r.productViews, orders: 0, revenue: 0 });
+      });
+      orderRows.forEach((r: any) => {
+        const row = rows.get(r._id) || { name: r._id, sessions: 0, visitors: 0, pageviews: 0, clicks: 0, productViews: 0, orders: 0, revenue: 0 };
+        row.orders = r.orders;
+        row.revenue = r.revenue;
+        rows.set(r._id, row);
+      });
+      return Array.from(rows.values())
+        .map((r) => ({ ...r, conversionRate: r.sessions > 0 ? Math.round((r.orders / r.sessions) * 1000) / 10 : 0 }))
+        .sort((a, b) => b.sessions - a.sessions || b.revenue - a.revenue)
+        .slice(0, 50);
+    };
+
+    const [metaByCampaign, metaByAd, metaByPlacement, metaSessionIds, metaInAppSessions, metaTotals, metaOrderTotals] = await Promise.all([
+      aggregateMetaBy('utmCampaign', 'attribution.campaign'),
+      aggregateMetaBy('utmContent', 'attribution.content'),
+      aggregateMetaBy('placement', 'attribution.placement'),
+      AnalyticsEvent.distinct('sessionId', metaEventMatch),
+      AnalyticsEvent.distinct('sessionId', { ...metaEventMatch, inAppBrowser: { $in: ['Facebook', 'Instagram', 'Messenger'] } }),
+      AnalyticsEvent.aggregate([
+        { $match: metaEventMatch },
+        {
+          $group: {
+            _id: null,
+            pageviews: { $sum: { $cond: [{ $eq: ['$eventType', 'pageview'] }, 1, 0] } },
+            clicks: { $sum: { $cond: [{ $eq: ['$eventType', 'click'] }, 1, 0] } },
+            withCampaign: { $sum: { $cond: [{ $ifNull: ['$utmCampaign', false] }, 1, 0] } },
+            total: { $sum: 1 },
+          },
+        },
+      ]),
+      Order.aggregate([
+        { $match: metaOrderMatch },
+        { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$totalAmount' } } },
+      ]),
+    ]);
+
+    const metaAds = {
+      summary: {
+        sessions: metaSessionIds.length,
+        pageviews: metaTotals[0]?.pageviews || 0,
+        clicks: metaTotals[0]?.clicks || 0,
+        orders: metaOrderTotals[0]?.orders || 0,
+        revenue: metaOrderTotals[0]?.revenue || 0,
+        inAppSessions: metaInAppSessions.length,
+        conversionRate:
+          metaSessionIds.length > 0
+            ? Math.round(((metaOrderTotals[0]?.orders || 0) / metaSessionIds.length) * 1000) / 10
+            : 0,
+        // Share of Meta events that carry a campaign name. Low = Ads Manager URL parameters are missing.
+        campaignCoveragePct: metaTotals[0]?.total ? Math.round((metaTotals[0].withCampaign / metaTotals[0].total) * 100) : 0,
+      },
+      byCampaign: metaByCampaign,
+      byAd: metaByAd,
+      byPlacement: metaByPlacement,
+    };
+
     return NextResponse.json({
       success: true,
       stats: {
@@ -619,7 +727,8 @@ export async function GET(req: Request) {
         returningCustomersRevenue
       },
       trend: trendData,
-      sessions: sessionProfiles
+      sessions: sessionProfiles,
+      metaAds
     });
 
   } catch (error) {

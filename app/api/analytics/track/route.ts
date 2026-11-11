@@ -3,8 +3,29 @@ import { createHash } from 'crypto';
 import dbConnect from '@/lib/dbConnect';
 import AnalyticsEvent from '@/models/AnalyticsEvent';
 import { analyticsLimiter } from '@/lib/rateLimiter';
+import { detectInAppBrowser } from '@/lib/analytics/attribution';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 15;
+
+const clip = (v: unknown, max = 200): string | undefined =>
+  typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : undefined;
+
+/** Country / city from Vercel's edge geo headers (works inside in-app browsers, no 3rd-party call). */
+function geoFromHeaders(req: Request) {
+  let country = '';
+  const code = req.headers.get('x-vercel-ip-country');
+  if (code) {
+    try {
+      country = new Intl.DisplayNames(['en'], { type: 'region' }).of(code.toUpperCase()) || code;
+    } catch {
+      country = code;
+    }
+  }
+  let city = req.headers.get('x-vercel-ip-city') || '';
+  try { city = decodeURIComponent(city); } catch {}
+  return { country, city };
+}
 
 /**
  * Anonymizes an IP address for privacy compliance (GDPR).
@@ -73,6 +94,7 @@ export async function POST(req: Request) {
       clickTarget,
       clickText,
       userId,
+      visitorId,
     } = body;
 
     if (!eventType || !url || !sessionId) {
@@ -86,13 +108,15 @@ export async function POST(req: Request) {
       req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
       req.headers.get('x-real-ip') ||
       '';
-    const rawIp = clientIp || serverIp || '127.0.0.1';
+    const rawIp = serverIp || clientIp || '127.0.0.1';
     const finalIp = anonymizeIp(rawIp);
 
     const userAgent = req.headers.get('user-agent') || '';
     const parsedUA = parseUA(userAgent);
+    const inApp = detectInAppBrowser(userAgent) || clip(body.inAppBrowser, 30) || '';
+    const geo = geoFromHeaders(req);
 
-    // 2. Bulkhead Isolation with Strict Fast-Fail Timeout (1,500ms max)
+    // 2. Bulkhead Isolation with Strict Fast-Fail Timeout (5s max)
     // Analytics must NEVER block the system or hold DB connections if under load
     const savePromise = (async () => {
       await dbConnect();
@@ -101,20 +125,36 @@ export async function POST(req: Request) {
         url,
         referrer,
         ip: finalIp,
-        country: country || 'Local / Dev',
-        city: city || 'Local / Dev',
-        browser: parsedUA.browser,
+        country: geo.country || clip(country, 80) || 'Local / Dev',
+        city: geo.city || clip(city, 80) || 'Local / Dev',
+        browser: inApp ? `${inApp} In-App` : parsedUA.browser,
         os: parsedUA.os,
         device: parsedUA.device,
         clickTarget,
         clickText,
         userId: userId || null,
         sessionId,
+        visitorId: clip(visitorId, 100),
+        utmSource: clip(body.utmSource),
+        utmMedium: clip(body.utmMedium),
+        utmCampaign: clip(body.utmCampaign),
+        utmContent: clip(body.utmContent),
+        utmTerm: clip(body.utmTerm),
+        campaignId: clip(body.campaignId, 100),
+        adsetId: clip(body.adsetId, 100),
+        adId: clip(body.adId, 100),
+        placement: clip(body.placement, 100),
+        fbclid: clip(body.fbclid, 300),
+        fbp: clip(body.fbp, 100),
+        fbc: clip(body.fbc, 300),
+        landingPage: clip(body.landingPage, 300),
+        isMetaAd: body.isMetaAd === true,
+        inAppBrowser: inApp,
       });
     })();
 
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Analytics DB write timeout')), 1500)
+      setTimeout(() => reject(new Error('Analytics DB write timeout')), 5000)
     );
 
     const event = await Promise.race([savePromise, timeoutPromise]);

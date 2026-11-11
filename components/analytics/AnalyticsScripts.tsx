@@ -30,7 +30,12 @@ export default function AnalyticsScripts({ facebookPixelId, googleAnalyticsId }:
                 s.parentNode.insertBefore(t,s)}(window, document,'script',
                 'https://connect.facebook.net/en_US/fbevents.js');
                 fbq('init', '${pixelId}');
-                fbq('track', 'PageView');
+                // Initial PageView carries an eventID so the server-side (CAPI) twin de-duplicates.
+                window.__sidPvId = window.__sidPvId || ('pv_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10));
+                fbq('track', 'PageView', {}, { eventID: window.__sidPvId });
+                // Replay events that were fired before the Pixel finished loading (in order, after init).
+                (window.__fbqBuffer || []).forEach(function (a) { try { fbq.apply(null, a); } catch (e) {} });
+                window.__fbqBuffer = [];
               `,
             }}
           />
@@ -61,8 +66,9 @@ export default function AnalyticsScripts({ facebookPixelId, googleAnalyticsId }:
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
+                // page_view is sent by AnalyticsTracker (initial + SPA navigation) to avoid duplicates
                 gtag('config', '${gaId}', {
-                  page_path: window.location.pathname,
+                  send_page_view: false,
                 });
               `,
             }}

@@ -4,14 +4,15 @@ import { jwtVerify } from 'jose';
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://sslcommerz.com https://*.sslcommerz.com https://connect.facebook.net https://www.googletagmanager.com;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://sslcommerz.com https://*.sslcommerz.com https://connect.facebook.net https://*.facebook.net https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' blob: data: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com https://www.facebook.com;
+    img-src 'self' blob: data: https:;
     font-src 'self' data: https://fonts.gstatic.com;
-    connect-src 'self' https://res.cloudinary.com https://*.sslcommerz.com https://www.google-analytics.com https://stats.g.doubleclick.net;
+    connect-src 'self' https://res.cloudinary.com https://*.sslcommerz.com https://www.facebook.com https://*.facebook.com https://connect.facebook.net https://*.facebook.net https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.doubleclick.net;
+    frame-src 'self' https://*.sslcommerz.com https://www.facebook.com https://web.facebook.com https://www.googletagmanager.com https://*.doubleclick.net;
     object-src 'none';
     base-uri 'self';
-    form-action 'self';
+    form-action 'self' https://*.sslcommerz.com https://www.facebook.com;
     frame-ancestors 'self';
     upgrade-insecure-requests;
 `.replace(/\s{2,}/g, ' ').trim();
